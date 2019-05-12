@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    
+    <groupId>org.marker</groupId>
+    <artifactId>wechat-starter</artifactId>
+    <version>1.0.0</version>
+
+    <parent>
+        <groupId>pers.binaryhunter</groupId>
+        <artifactId>framework-starter-parent</artifactId>
+        <version>2.1.2</version>
+    </parent>
+
+    <dependencies>
+        <dependency>
+            <groupId>commons-io</groupId>
+            <artifactId>commons-io</artifactId>
+            <version>2.4</version>
+        </dependency>
+        <dependency>
+            <groupId>com.alibaba</groupId>
+            <artifactId>fastjson</artifactId>
+            <version>1.1.41</version>
+        </dependency>
+        <dependency>
+            <groupId>org.projectlombok</groupId>
+            <artifactId>lombok</artifactId>
+            <version>1.16.20</version>
+            <scope>compile</scope>
+        </dependency>
+    </dependencies>
+
+    <!--
+    <distributionManagement>
+        <repository>
+            <id>releases</id>
+            <name>nexus_releases</name>
+            <url>http://10.0.71.111:8081/repository/maven-releases</url>
+            <uniqueVersion>true</uniqueVersion>
+        </repository>
+        <snapshotRepository>
+            <id>snapshots</id>
+            <name>nexus_group</name>
+            <url>http://10.0.71.111:8081/repository/maven_group</url>
+        </snapshotRepository>
+    </distributionManagement>
+    -->
+</project>

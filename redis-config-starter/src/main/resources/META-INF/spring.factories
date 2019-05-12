@@ -1,0 +1,4 @@
+# Auto Configure
+org.springframework.boot.autoconfigure.EnableAutoConfiguration=\
+pers.binaryhunter.db.redis.MyRedisAutoConfiguration,\
+pers.binaryhunter.db.redis.MyRedisCacheConfiguration
