@@ -9,6 +9,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import pers.binaryhunter.framework.bean.dto.paging.Page;
+import pers.binaryhunter.framework.bean.po.PO;
 import pers.binaryhunter.framework.bean.vo.paging.PageResult;
 import pers.binaryhunter.framework.dao.GenericDAO;
 import pers.binaryhunter.framework.service.GenericService;
@@ -32,12 +33,12 @@ public class GenericServiceImpl<B, K> extends GenericAbstractServiceImpl<B, K> i
     protected GenericDAO<B, K> dao;
 
     @Override
-    public K getSequence() {
+    public Long getSequence() {
         return dao.getSequence();
     }
 
     @Override
-    public K getSequences(int step) {
+    public Long getSequences(int step) {
         return dao.getSequences(step);
     }
     
@@ -120,6 +121,13 @@ public class GenericServiceImpl<B, K> extends GenericAbstractServiceImpl<B, K> i
     @Override
     @Transactional(propagation = Propagation.REQUIRED, rollbackFor = Exception.class)
     public void addBatch(List<B> beans){
+        if(beans.get(0) instanceof PO){
+            Long id = getSequences(beans.size());
+            for (B bean : beans) {
+                ((PO) bean).setId(id++);
+            }
+        }
+
         int times = (int) (Math.ceil(beans.size() * 1.0 / COUNT_BATCH));
         for(int i = 0; i < times; i ++ ) {
             dao.createBatch(beans.subList(COUNT_BATCH * i, Math.min(COUNT_BATCH * (i + 1), beans.size())));

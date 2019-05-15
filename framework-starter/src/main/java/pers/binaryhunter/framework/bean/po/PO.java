@@ -15,14 +15,24 @@ public class PO {
 	 * 可用
 	 */
 	public static final int STATUS_ENABLE = 1;
+
+	private Long id;
 	
 	private Integer status;
-	
+
 	private Date createTime;
 	
 	private Date updateTime;
 
-	public Integer getStatus() {
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
+
+    public Integer getStatus() {
 		return status;
 	}
 

@@ -65,14 +65,14 @@ public interface GenericDAO<B,K> {
      * @return
      * Create by Liyw -- 2014-5-6
      */
-    public K getSequence();
+    public Long getSequence();
 
     /**
      * 获取序列
      * @return
      * Create by Liyw -- 2014-5-6
      */
-    public K getSequences(int step);
+    public Long getSequences(int step);
 
     /**
      * 条件查询

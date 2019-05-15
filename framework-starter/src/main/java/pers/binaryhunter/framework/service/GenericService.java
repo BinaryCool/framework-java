@@ -20,14 +20,14 @@ public interface GenericService<B,K> {
      * 获取ID
      * @return ID
      */
-    public K getSequence();
+    public Long getSequence();
 
     /**
      * 获取ID
      * @param step 步长
      * @return ID
      */
-    public K getSequences(int step);
+    public Long getSequences(int step);
     /**
      * 分页查询
      * @param params 参数
