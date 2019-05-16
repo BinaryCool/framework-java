@@ -8,6 +8,7 @@ import javax.annotation.PostConstruct;
 import javax.annotation.Resource;
 import java.lang.reflect.Field;
 import java.lang.reflect.ParameterizedType;
+import java.util.Calendar;
 
 /**
  * Created by BinaryHunter on 2018/3/17.
@@ -31,7 +32,25 @@ public class GenericAbstractServiceImpl<B, K> {
 
             Object obj = context.getBean(daoName);
 
-            Field baseDaoNameField = this.getClass().getSuperclass().getDeclaredField(GENERIC_DAO_NAME);
+            //多继承下, 查找对应的积累
+            Field baseDaoNameField = null;
+            Class clazz = this.getClass();
+            while (true) {
+                if(null == clazz || null == clazz.getSuperclass() || clazz.getSuperclass().getName().equals("java.lang.Object")) {
+                    break;
+                }
+
+                if (clazz.getSuperclass().getName().equals("pers.binaryhunter.framework.service.logic.GenericAbstractServiceImpl")) {
+                    baseDaoNameField = clazz.getDeclaredField(GENERIC_DAO_NAME);
+                    break;
+                }
+
+                clazz = clazz.getSuperclass();
+            }
+
+            if(null == baseDaoNameField) {
+                baseDaoNameField = this.getClass().getSuperclass().getDeclaredField(GENERIC_DAO_NAME);
+            }
             baseDaoNameField.set(this, obj);
         } catch (Exception ex) {
             log.error("Notice! there's error in generic service configuration!", ex);
