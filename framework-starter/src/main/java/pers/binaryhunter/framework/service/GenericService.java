@@ -87,10 +87,19 @@ public interface GenericService<B,K> {
      */
     public void add(B bean);
     /**
+     * @see pers.binaryhunter.framework.service.GenericService#addBatchAutoId(List)
      * 批量新增
      * @param beans 实体列表
      */
+    @Deprecated
     public void addBatch(List<B> beans);
+
+    /**
+     * @since 2.1.3
+     * 批量新增(自动注入ID)
+     * @param beans
+     */
+    void addBatchAutoId(List<B> beans);
     /**
      * 通过编号获取
      * @param id 编号

@@ -118,9 +118,23 @@ public class GenericServiceImpl<B, K> extends GenericAbstractServiceImpl<B, K> i
         dao.create(bean);
     }
 
+    /**
+     * @see pers.binaryhunter.framework.service.logic.GenericServiceImpl#addBatchAutoId(List)
+     * @param beans 实体列表
+     */
     @Override
     @Transactional(propagation = Propagation.REQUIRED, rollbackFor = Exception.class)
+    @Deprecated
     public void addBatch(List<B> beans){
+        int times = (int) (Math.ceil(beans.size() * 1.0 / COUNT_BATCH));
+        for(int i = 0; i < times; i ++ ) {
+            dao.createBatch(beans.subList(COUNT_BATCH * i, Math.min(COUNT_BATCH * (i + 1), beans.size())));
+        }
+    }
+
+    @Override
+    @Transactional(propagation = Propagation.REQUIRED, rollbackFor = Exception.class)
+    public void addBatchAutoId(List<B> beans){
         if(beans.get(0) instanceof PO){
             Long id = getSequences(beans.size());
             for (B bean : beans) {
