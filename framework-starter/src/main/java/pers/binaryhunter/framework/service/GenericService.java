@@ -37,12 +37,29 @@ public interface GenericService<B,K> {
      */
     public PageResult<B> pageByArgs(Map<String, Object> params, Page page);
     /**
+     * 分页查询
+     * @param params 参数
+     * @param page 分页参数
+     * @param enable 如果需要查出已删除数据, 把enable置为false
+     * @return 分页结果
+     * By Yuwen on 2017年6月22日
+     */
+    public PageResult<B> pageByArgs(Map<String, Object> params, Page page, boolean enable);
+    /**
      * 查询
      * @param params 参数
      * @return 查询结果
      * By Yuwen on 2017年6月22日
      */
     public List<B> queryByArgs(Map<String, Object> params);
+    /**
+     * 查询
+     * @param params 参数
+     * @param enable 如果需要查出已删除数据, 把enable置为false
+     * @return 查询结果
+     * By Yuwen on 2017年6月22日
+     */
+    public List<B> queryByArgs(Map<String, Object> params, boolean enable);
     /**
      * 通过id删除
      * @param id id
@@ -114,4 +131,13 @@ public interface GenericService<B,K> {
      * By Yuwen on 2017年6月22日
      */
     public long countByArgs(Map<String, Object> params);
+
+    /**
+     * 获取数量
+     * @param params 参数
+     * @param enable 如果需要查出已删除数据, 把enable置为false
+     * @return 数量
+     * By Yuwen on 2017年6月22日
+     */
+    public long countByArgs(Map<String, Object> params, boolean enable);
 }

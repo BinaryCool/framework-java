@@ -4,8 +4,6 @@
  */
 package pers.binaryhunter.framework.service.logic;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import pers.binaryhunter.framework.bean.dto.paging.Page;
@@ -26,8 +24,6 @@ import java.util.Map;
  * @author Liyw -- 2014-5-22
  */
 public class GenericServiceImpl<B, K> extends GenericAbstractServiceImpl<B, K> implements GenericService<B, K> {
-    private static final Logger log = LoggerFactory.getLogger(GenericServiceImpl.class);
-
     private static final int COUNT_BATCH = 1000;
 
     protected GenericDAO<B, K> dao;
@@ -41,11 +37,16 @@ public class GenericServiceImpl<B, K> extends GenericAbstractServiceImpl<B, K> i
     public Long getSequences(int step) {
         return dao.getSequences(step);
     }
-    
+
     @Override
     public PageResult<B> pageByArgs(Map<String, Object> params, Page page) {
-        PageResult<B> pageResult = new PageResult<>();
+        return this.pageByArgs(params, page, true);
+    }
 
+    @Override
+    public PageResult<B> pageByArgs(Map<String, Object> params, Page page, boolean enable) {
+        PageResult<B> pageResult = new PageResult<>();
+        this.doStatusParams(params, enable);
         Long count = dao.countByArgs(params);
         if(null != count) {
             page.setTotalCount(count);
@@ -72,6 +73,12 @@ public class GenericServiceImpl<B, K> extends GenericAbstractServiceImpl<B, K> i
 
     @Override
     public List<B> queryByArgs(Map<String, Object> params) {
+        return queryByArgs(params, true);
+    }
+
+    @Override
+    public List<B> queryByArgs(Map<String, Object> params, boolean enable) {
+        doStatusParams(params, enable);
         return dao.queryByArgs(params);
     }
 
@@ -155,6 +162,30 @@ public class GenericServiceImpl<B, K> extends GenericAbstractServiceImpl<B, K> i
 
     @Override
     public long countByArgs(Map<String, Object> params) {
+        return this.countByArgs(params, true);
+    }
+
+    @Override
+    public long countByArgs(Map<String, Object> params, boolean enable) {
+        this.doStatusParams(params, enable);
         return dao.countByArgs(params);
+    }
+
+    /**
+     * 处理status状态参数
+     * @param params 参数
+     * @param enable 是否只需要查出正常数据 (不包括已删除数据)
+     * @return 参数
+     */
+    protected Map<String, Object> doStatusParams(Map<String, Object> params, boolean enable) {
+        if(enable) {
+            if(null != params) {
+                params = new HashMap<>();
+            }
+            if(!params.containsKey("status")) {
+                params.put("status", PO.STATUS_ENABLE);
+            }
+        }
+        return params;
     }
 }
