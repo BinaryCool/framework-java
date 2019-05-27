@@ -23,6 +23,14 @@ public class GenericController {
 	protected static final int CODE_ERROR = 1;
 	protected static final String MSG_ERROR = "未知错误";
 
+    /**
+     * 把返回空对象
+     * @return json 串
+     */
+    protected ResponseBean toResponse() {
+        return toResponse("", CODE_SUCC);
+    }
+
 	/**
 	 * 把返回对象进行封装
 	 * @param ex 错误对象

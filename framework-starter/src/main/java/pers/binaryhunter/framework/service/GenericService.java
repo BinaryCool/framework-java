@@ -47,6 +47,11 @@ public interface GenericService<B,K> {
     public PageResult<B> pageByArgs(Map<String, Object> params, Page page, boolean enable);
     /**
      * 查询
+     * @return 查询结果
+     */
+    List<B> queryByArgs();
+    /**
+     * 查询
      * @param params 参数
      * @return 查询结果
      * By Yuwen on 2017年6月22日

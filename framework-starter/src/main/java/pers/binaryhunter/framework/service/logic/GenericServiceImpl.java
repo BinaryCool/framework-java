@@ -46,7 +46,7 @@ public class GenericServiceImpl<B, K> extends GenericAbstractServiceImpl<B, K> i
     @Override
     public PageResult<B> pageByArgs(Map<String, Object> params, Page page, boolean enable) {
         PageResult<B> pageResult = new PageResult<>();
-        this.doStatusParams(params, enable);
+        params = this.doStatusParams(params, enable);
         Long count = dao.countByArgs(params);
         if(null != count) {
             page.setTotalCount(count);
@@ -72,13 +72,18 @@ public class GenericServiceImpl<B, K> extends GenericAbstractServiceImpl<B, K> i
     }
 
     @Override
+    public List<B> queryByArgs() {
+        return queryByArgs(null);
+    }
+
+    @Override
     public List<B> queryByArgs(Map<String, Object> params) {
         return queryByArgs(params, true);
     }
 
     @Override
     public List<B> queryByArgs(Map<String, Object> params, boolean enable) {
-        doStatusParams(params, enable);
+        params = doStatusParams(params, enable);
         return dao.queryByArgs(params);
     }
 
@@ -167,7 +172,7 @@ public class GenericServiceImpl<B, K> extends GenericAbstractServiceImpl<B, K> i
 
     @Override
     public long countByArgs(Map<String, Object> params, boolean enable) {
-        this.doStatusParams(params, enable);
+        params = this.doStatusParams(params, enable);
         return dao.countByArgs(params);
     }
 
@@ -179,7 +184,7 @@ public class GenericServiceImpl<B, K> extends GenericAbstractServiceImpl<B, K> i
      */
     protected Map<String, Object> doStatusParams(Map<String, Object> params, boolean enable) {
         if(enable) {
-            if(null != params) {
+            if(null == params) {
                 params = new HashMap<>();
             }
             if(!params.containsKey("status")) {
