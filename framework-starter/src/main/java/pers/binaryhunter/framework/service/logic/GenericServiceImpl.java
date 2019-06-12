@@ -73,12 +73,14 @@ public class GenericServiceImpl<B, K> extends GenericAbstractServiceImpl<B, K> i
 
     @Override
     public List<B> queryByArgs() {
-        return queryByArgs(null);
+        Map<String, Object> params = doStatusParams(null, true);
+        return dao.queryByArgs(params);
     }
 
     @Override
     public List<B> queryByArgs(Map<String, Object> params) {
-        return queryByArgs(params, true);
+        params = doStatusParams(params, true);
+        return dao.queryByArgs(params);
     }
 
     @Override
