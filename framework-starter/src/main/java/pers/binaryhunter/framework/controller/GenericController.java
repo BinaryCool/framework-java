@@ -12,23 +12,12 @@ import pers.binaryhunter.framework.exception.SessionOutException;
  */
 public class GenericController {
 	private static final Logger logger = LoggerFactory.getLogger(GenericController.class);
-	/**
-	 * 正常返回
-	 */
-	protected static final int CODE_SUCC = 0;
-	/**
-	 * 错误返回
-	 */
-    //0:成功, 1:未知错误, 2:会话过去, 3:业务异常
-	protected static final int CODE_ERROR = 1;
-	protected static final String MSG_ERROR = "未知错误";
-
     /**
      * 把返回空对象
      * @return json 串
      */
     protected ResponseBean toResponse() {
-        return toResponse("", CODE_SUCC);
+        return toResponse("", ResponseBean.CodeEnum.SUCC.getCode());
     }
 
 	/**
@@ -38,18 +27,18 @@ public class GenericController {
 	 */
 	protected ResponseBean toResponse(Exception ex) {
         if(null == ex) {
-            return toResponse("", CODE_SUCC);    
+            return toResponse("", ResponseBean.CodeEnum.SUCC.getCode());
         }
         
-		int code = CODE_ERROR;
+		int code = ResponseBean.CodeEnum.ERR_UNKOWN.getCode();
 		String msg = ex.getMessage();
 		if(ex instanceof BusinessException) {
 			code = ((BusinessException) ex).getCode();
 		} else if(ex instanceof SessionOutException) {
 			code = ((SessionOutException) ex).getCode();
 		} else {
-			msg = MSG_ERROR + ": " + msg;
-			logger.error(MSG_ERROR, ex);
+			msg = ResponseBean.CodeEnum.ERR_UNKOWN.getMsg() + ": " + msg;
+			logger.error("", ex);
 		}
 		return toResponse(msg, code);
 	}
@@ -60,7 +49,7 @@ public class GenericController {
 	 * @return json 串
 	 */
 	protected ResponseBean toResponse(Object bean) {
-		return toResponse(bean, CODE_SUCC);
+		return toResponse(bean, ResponseBean.CodeEnum.SUCC.getCode());
 	}
 	
 	/**
