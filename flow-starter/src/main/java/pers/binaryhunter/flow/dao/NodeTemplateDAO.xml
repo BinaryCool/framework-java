@@ -1,0 +1,339 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+	PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+	"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="pers.binaryhunter.flow.dao.NodeTemplateDAO">
+	<sql id="getSequenceSql">
+		<![CDATA[
+			NEXTVALS('f_node_template', 1)
+		]]>
+	</sql>
+	
+	<sql id="whereClause">
+        <if test="null != preId and '' != preId and null != actionKey and '' != actionKey">
+            <![CDATA[
+				and t.id in (
+				  SELECT id_next FROM f_node_template_ref where id_curr = #{preId} and action_key = #{actionKey} and status = 1
+				)
+			]]>
+        </if>
+		<if test="null != id and '' != id">
+			<![CDATA[
+				and t.id = #{id}
+			]]>
+		</if>
+		<if test="null != action and '' != action">
+			<![CDATA[
+				and t.action = #{action}
+			]]>
+		</if>
+		<if test="null != idPre and '' != idPre">
+			<![CDATA[
+				and t.id_pre = #{idPre}
+			]]>
+		</if>
+		<if test="null != idFlow and '' != idFlow">
+			<![CDATA[
+				and t.id_flow = #{idFlow}
+			]]>
+		</if>
+		<if test="null != roles and '' != roles">
+			<![CDATA[
+				and t.roles = #{roles}
+			]]>
+		</if>
+		<if test="null != cascade and '' != cascade">
+			<![CDATA[
+				and t.cascade = #{cascade}
+			]]>
+		</if>
+		<if test="null != nodeDesc and '' != nodeDesc">
+			<![CDATA[
+				and t.node_desc = #{nodeDesc}
+			]]>
+		</if>
+		<if test="null != status and '' != status">
+			<![CDATA[
+				and t.status = #{status}
+			]]>
+		</if>
+		<if test="null != idIn and '' != idIn">
+			<![CDATA[
+				and t.id in (${idIn})
+			]]>
+		</if>
+	</sql>
+	
+	<sql id="basicColumn">
+		<trim suffixOverrides=",">
+		<![CDATA[
+			id,action,id_pre,id_flow,roles,`cascade`,node_desc,
+		]]>
+		</trim>
+	</sql>
+	
+	<sql id="selectColumn">
+		<trim suffixOverrides=",">
+		<![CDATA[
+			t.id as id,t.action as action,t.id_pre as idPre,t.id_flow as idFlow,t.roles as roles,t.cascade as `cascade`,t.node_desc as nodeDesc,t.create_time as createTime,t.update_time as updateTime,t.status as status
+		]]>
+		</trim>
+	</sql>
+	
+	<!-- 获取唯一标识序列 -->
+	<select id="getSequence" resultType="long">
+		select <include refid="getSequenceSql"></include>
+	</select>
+
+	<!-- 获取唯一标识序列 -->
+    <select id="getSequences" resultType="long">
+        select NEXTVALS('f_node_template', #{0})
+    </select>
+
+	<!-- 新增 -->
+	<insert id="create" parameterType="pers.binaryhunter.flow.bean.po.NodeTemplate">
+		<selectKey keyProperty="id" order="BEFORE" resultType="long">
+			select <include refid="getSequenceSql"></include>
+		</selectKey>
+		<![CDATA[
+			insert into f_node_template ( 
+		]]>
+		<include refid="basicColumn"></include>
+		<![CDATA[	
+			 ) values (
+		]]>
+		<trim suffixOverrides=",">
+		<![CDATA[
+			#{id},#{action},#{idPre},#{idFlow},#{roles},#{cascade},#{nodeDesc},	
+		]]>
+		</trim>
+		<![CDATA[
+			 ) 
+		]]>
+	</insert>
+	
+	<!-- 批量新增 -->
+	<insert id="createBatch" parameterType="java.util.List">
+		<![CDATA[
+			insert into f_node_template (  
+		]]>
+		<include refid="basicColumn"></include>
+		<![CDATA[	
+			 ) values 
+		]]>
+	    <foreach collection="list" item="item" open="(" close=")" separator="), ("> 
+	        <include refid="getSequenceSql"></include>
+			<trim suffixOverrides=",">
+			<![CDATA[
+				,#{item.action},#{item.idPre},#{item.idFlow},#{item.roles},#{item.cascade},#{item.nodeDesc},	
+			]]>
+			</trim>
+	    </foreach>
+	</insert>
+
+	<!-- 修改 -->
+	<update id="update" parameterType="pers.binaryhunter.flow.bean.po.NodeTemplate">
+		<![CDATA[
+			update f_node_template set
+		]]>	
+		<trim suffixOverrides=",">
+		<![CDATA[
+			action=#{action},
+			id_pre=#{idPre},
+			id_flow=#{idFlow},
+			roles=#{roles},
+			`cascade`=#{cascade},
+			node_desc=#{nodeDesc},
+			update_time=CURRENT_TIMESTAMP,
+		]]>
+		</trim>
+		<![CDATA[
+			where id = #{id}
+		]]>
+	</update>
+		
+	<!-- 修改 -->
+	<update id="updateNotNull" parameterType="pers.binaryhunter.flow.bean.po.NodeTemplate">
+		<![CDATA[
+			update f_node_template
+		]]>
+		<set>
+			<trim suffixOverrides=",">
+				<if test="null != action">
+					action=#{action},
+				</if>
+				<if test="null != idPre">
+					id_pre=#{idPre},
+				</if>
+				<if test="null != idFlow">
+					id_flow=#{idFlow},
+				</if>
+				<if test="null != roles">
+					roles=#{roles},
+				</if>
+				<if test="null != cascade">
+					`cascade`=#{cascade},
+				</if>
+				<if test="null != nodeDesc">
+					node_desc=#{nodeDesc},
+				</if>
+					update_time=CURRENT_TIMESTAMP,
+				<if test="null != status">
+					status=#{status},
+				</if>
+			</trim>
+		</set>
+		<![CDATA[
+			where id = #{id}
+		]]>
+	</update>
+	
+	<!-- 更改(多个) -->
+	<update id="updateBatch" parameterType="java.util.List">
+		<foreach collection="list" item="item" separator=";"> 
+			<![CDATA[
+				update f_node_template
+			]]>
+			<set>
+				<trim suffixOverrides=",">
+					<if test="null != item.action">	
+						action=#{item.action},
+					</if>	
+					<if test="null != item.idPre">	
+						id_pre=#{item.idPre},
+					</if>	
+					<if test="null != item.idFlow">	
+						id_flow=#{item.idFlow},
+					</if>	
+					<if test="null != item.roles">	
+						roles=#{item.roles},
+					</if>	
+					<if test="null != item.cascade">	
+						`cascade`=#{item.cascade},
+					</if>	
+					<if test="null != item.nodeDesc">	
+						node_desc=#{item.nodeDesc},
+					</if>	
+						update_time=CURRENT_TIMESTAMP,
+					<if test="null != item.status">	
+						status=#{item.status},
+					</if>	
+				</trim>
+			</set>
+			<![CDATA[
+				where id = #{item.id}
+			]]>
+		</foreach>
+	</update>
+	
+	<!-- 更新 (通过参数) -->
+	<update id="updateByArgs">
+		<![CDATA[
+			update f_node_template t
+		]]>
+		<set>
+		<![CDATA[
+			${setSql}
+		]]>	
+		</set>
+		<where>
+		<include refid="whereClause"></include>
+		</where>
+	</update>
+	
+	<!-- 删除 -->
+	<delete id="deleteById">
+		<![CDATA[
+			delete from f_node_template 
+			where id = #{id}
+		]]>
+	</delete>
+	
+	<!-- 删除 (通过参数) -->
+	<delete id="deleteByArgs" parameterType="map">
+		<![CDATA[
+			delete t from f_node_template t
+		]]>
+		<where>
+		<include refid="whereClause"></include>
+		</where>
+	</delete>
+	
+	<!-- 通过编号获取 -->
+	<select id="getById" resultType="pers.binaryhunter.flow.bean.po.NodeTemplate">
+		<![CDATA[
+			select 
+		]]>
+		<include refid="selectColumn"></include>
+		<![CDATA[
+			from f_node_template t  
+			where t.id = #{id}
+		]]>
+	</select>
+
+	<sql id="orderClause">
+        <if test="null != orderField and '' != orderField">
+            <![CDATA[
+				 order by t.${orderField}
+			]]>
+            <if test="null != orderDirection and '' != orderDirection">
+                <![CDATA[
+					 ${orderDirection}
+				]]>
+            </if>
+        </if>
+        <if test="null == orderField or '' == orderField">
+            <![CDATA[
+			 order by t.id desc 
+		    ]]>
+        </if>   
+    </sql>
+	
+	<!-- 获取全部 -->
+	<select id="queryByArgs" parameterType="java.util.Map" resultType="pers.binaryhunter.flow.bean.po.NodeTemplate">
+		<![CDATA[
+			select
+		]]>
+		<include refid="selectColumn"></include>
+		<![CDATA[	 
+			from f_node_template t  
+		]]>
+		<where>
+		<include refid="whereClause"></include>
+		</where>
+		<include refid="orderClause"></include>
+        <if test="null != limit">
+            <![CDATA[
+			  limit #{limit}  
+		    ]]>
+        </if>
+	</select>
+	
+	<!-- 分页 -->
+	<select id="pageByArgs" parameterType="java.util.Map" resultType="pers.binaryhunter.flow.bean.po.NodeTemplate">
+		<![CDATA[
+			select 
+		]]>
+		<include refid="selectColumn"></include>
+		<![CDATA[	 
+			from f_node_template t  
+		]]>
+		<where>
+		<include refid="whereClause"></include>
+		</where>
+		<include refid="orderClause"></include>
+		<![CDATA[
+			limit #{start},#{limit}  
+		]]>
+	</select>
+	
+	<!-- 获取数目 -->
+	<select id="countByArgs" parameterType="java.util.Map" resultType="long">
+		<![CDATA[
+			select count(1) from f_node_template t  
+		]]>
+		<where>
+		<include refid="whereClause"></include>
+		</where>
+	</select>
+</mapper>

@@ -16,6 +16,7 @@
     <modules>
         <module>framework-starter</module>
         <module>db-config-starter</module>
+        <module>flow-starter</module>
         <module>redis-config-starter</module>
         <module>wechat-starter</module>
     </modules>
