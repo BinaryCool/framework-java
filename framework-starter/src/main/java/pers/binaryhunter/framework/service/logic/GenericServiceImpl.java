@@ -50,7 +50,7 @@ public class GenericServiceImpl<B, K> extends GenericAbstractServiceImpl<B, K> i
         Long count = dao.countByArgs(params);
         if(null != count) {
             page.setTotalCount(count);
-            if(count > 0l) {
+            if(count > 0L) {
                 if(page.getPageNum() > page.getPageCount()) { //如果当前页面大于总页面
                     page.setPageNum(1);
                 }
@@ -73,12 +73,14 @@ public class GenericServiceImpl<B, K> extends GenericAbstractServiceImpl<B, K> i
 
     @Override
     public List<B> queryByArgs() {
-        return queryByArgs(null);
+        Map<String, Object> params = doStatusParams(null, true);
+        return dao.queryByArgs(params);
     }
 
     @Override
     public List<B> queryByArgs(Map<String, Object> params) {
-        return queryByArgs(params, true);
+        params = doStatusParams(params, true);
+        return dao.queryByArgs(params);
     }
 
     @Override

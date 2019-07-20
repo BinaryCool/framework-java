@@ -32,20 +32,4 @@
             <scope>compile</scope>
         </dependency>
     </dependencies>
-
-    <!--
-    <distributionManagement>
-        <repository>
-            <id>releases</id>
-            <name>nexus_releases</name>
-            <url>http://10.0.71.111:8081/repository/maven-releases</url>
-            <uniqueVersion>true</uniqueVersion>
-        </repository>
-        <snapshotRepository>
-            <id>snapshots</id>
-            <name>nexus_group</name>
-            <url>http://10.0.71.111:8081/repository/maven_group</url>
-        </snapshotRepository>
-    </distributionManagement>
-    -->
 </project>

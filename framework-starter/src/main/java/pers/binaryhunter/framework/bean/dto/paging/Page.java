@@ -24,7 +24,7 @@ public class Page {
 	/**
 	 * 总数量
 	 */
-	private Long totalCount = 0l;
+	private Long totalCount = 0L;
 	/**
 	 * 总页数
 	 */

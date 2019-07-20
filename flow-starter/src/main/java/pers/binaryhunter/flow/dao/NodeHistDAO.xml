@@ -1,0 +1,415 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+	PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+	"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="pers.binaryhunter.flow.dao.NodeHistDAO">
+	<sql id="getSequenceSql">
+		<![CDATA[
+			NEXTVALS('f_node_hist', 1)
+		]]>
+	</sql>
+	
+	<sql id="whereClause">
+		<if test="null != id and '' != id">
+			<![CDATA[
+				and t.id = #{id}
+			]]>
+		</if>
+		<if test="null != action and '' != action">
+			<![CDATA[
+				and t.action = #{action}
+			]]>
+		</if>
+		<if test="null != roles and '' != roles">
+			<![CDATA[
+				and t.roles = #{roles}
+			]]>
+		</if>
+		<if test="null != cascade and '' != cascade">
+			<![CDATA[
+				and t.cascade = #{cascade}
+			]]>
+		</if>
+		<if test="null != dealNote and '' != dealNote">
+			<![CDATA[
+				and t.deal_note = #{dealNote}
+			]]>
+		</if>
+		<if test="null != dealRole and '' != dealRole">
+			<![CDATA[
+				and t.deal_role = #{dealRole}
+			]]>
+		</if>
+		<if test="null != dealUserId and '' != dealUserId">
+			<![CDATA[
+				and t.deal_user_id = #{dealUserId}
+			]]>
+		</if>
+		<if test="null != dealUserName and '' != dealUserName">
+			<![CDATA[
+				and t.deal_user_name = #{dealUserName}
+			]]>
+		</if>
+		<if test="null != nodeDesc and '' != nodeDesc">
+			<![CDATA[
+				and t.node_desc = #{nodeDesc}
+			]]>
+		</if>
+		<if test="null != flowCode and '' != flowCode">
+			<![CDATA[
+				and t.flow_code = #{flowCode}
+			]]>
+		</if>
+		<if test="null != templateId and '' != templateId">
+			<![CDATA[
+				and t.template_id = #{templateId}
+			]]>
+		</if>
+		<if test="null != idBill and '' != idBill">
+			<![CDATA[
+				and t.id_bill = #{idBill}
+			]]>
+		</if>
+		<if test="null != status and '' != status">
+			<![CDATA[
+				and t.status = #{status}
+			]]>
+		</if>
+		<if test="null != idIn and '' != idIn">
+			<![CDATA[
+				and t.id in (${idIn})
+			]]>
+		</if>
+	</sql>
+	
+	<sql id="basicColumn">
+		<trim suffixOverrides=",">
+		<![CDATA[
+			id,action,roles,`cascade`,deal_note,deal_role,deal_user_id,deal_user_name,node_desc,flow_code,template_id,id_bill,
+		]]>
+		</trim>
+	</sql>
+	
+	<sql id="selectColumn">
+		<trim suffixOverrides=",">
+		<![CDATA[
+			t.id as id,t.action as action,t.roles as roles,t.cascade as `cascade`,t.deal_note as dealNote,t.deal_role as dealRole,t.deal_user_id as dealUserId,t.deal_user_name as dealUserName,t.node_desc as nodeDesc,t.flow_code as flowCode,t.template_id as templateId,t.id_bill as idBill,t.create_time as createTime,t.update_time as updateTime,t.status as status
+		]]>
+		</trim>
+	</sql>
+	
+	<!-- 获取唯一标识序列 -->
+	<select id="getSequence" resultType="long">
+		select <include refid="getSequenceSql"></include>
+	</select>
+
+	<!-- 获取唯一标识序列 -->
+    <select id="getSequences" resultType="long">
+        select NEXTVALS('f_node_hist', #{0})
+    </select>
+
+	<!-- 新增 -->
+	<insert id="create" parameterType="pers.binaryhunter.flow.bean.po.NodeHist">
+		<selectKey keyProperty="id" order="BEFORE" resultType="long">
+			select <include refid="getSequenceSql"></include>
+		</selectKey>
+		<![CDATA[
+			insert into f_node_hist ( 
+		]]>
+		<include refid="basicColumn"></include>
+		<![CDATA[	
+			 ) values (
+		]]>
+		<trim suffixOverrides=",">
+		<![CDATA[
+			#{id},#{action},#{roles},#{cascade},#{dealNote},#{dealRole},#{dealUserId},#{dealUserName},#{nodeDesc},#{flowCode},#{templateId},#{idBill},	
+		]]>
+		</trim>
+		<![CDATA[
+			 ) 
+		]]>
+	</insert>
+	
+	<!-- 批量新增 -->
+	<insert id="createBatch" parameterType="java.util.List">
+		<![CDATA[
+			insert into f_node_hist (  
+		]]>
+		<include refid="basicColumn"></include>
+		<![CDATA[	
+			 ) values 
+		]]>
+	    <foreach collection="list" item="item" open="(" close=")" separator="), ("> 
+	        <include refid="getSequenceSql"></include>
+			<trim suffixOverrides=",">
+			<![CDATA[
+				,#{item.action},#{item.roles},#{item.cascade},#{item.dealNote},#{item.dealRole},#{item.dealUserId},#{item.dealUserName},#{item.nodeDesc},#{item.flowCode},#{item.templateId},#{item.idBill},	
+			]]>
+			</trim>
+	    </foreach>
+	</insert>
+
+	<!-- 修改 -->
+	<update id="update" parameterType="pers.binaryhunter.flow.bean.po.NodeHist">
+		<![CDATA[
+			update f_node_hist set
+		]]>	
+		<trim suffixOverrides=",">
+		<![CDATA[
+			action=#{action},
+			roles=#{roles},
+			`cascade`=#{cascade},
+			deal_note=#{dealNote},
+			deal_role=#{dealRole},
+			deal_user_id=#{dealUserId},
+			deal_user_name=#{dealUserName},
+			node_desc=#{nodeDesc},
+			flow_code=#{flowCode},
+			template_id=#{templateId},
+			id_bill=#{idBill},
+			update_time=CURRENT_TIMESTAMP,
+		]]>
+		</trim>
+		<![CDATA[
+			where id = #{id}
+		]]>
+	</update>
+		
+	<!-- 修改 -->
+	<update id="updateNotNull" parameterType="pers.binaryhunter.flow.bean.po.NodeHist">
+		<![CDATA[
+			update f_node_hist
+		]]>
+		<set>
+			<trim suffixOverrides=",">
+				<if test="null != action">
+					action=#{action},
+				</if>
+				<if test="null != roles">
+					roles=#{roles},
+				</if>
+				<if test="null != cascade">
+					`cascade`=#{cascade},
+				</if>
+				<if test="null != dealNote">
+					deal_note=#{dealNote},
+				</if>
+				<if test="null != dealRole">
+					deal_role=#{dealRole},
+				</if>
+				<if test="null != dealUserId">
+					deal_user_id=#{dealUserId},
+				</if>
+				<if test="null != dealUserName">
+					deal_user_name=#{dealUserName},
+				</if>
+				<if test="null != nodeDesc">
+					node_desc=#{nodeDesc},
+				</if>
+				<if test="null != flowCode">
+					flow_code=#{flowCode},
+				</if>
+				<if test="null != templateId">
+					template_id=#{templateId},
+				</if>
+				<if test="null != idBill">
+					id_bill=#{idBill},
+				</if>
+					update_time=CURRENT_TIMESTAMP,
+				<if test="null != status">
+					status=#{status},
+				</if>
+			</trim>
+		</set>
+		<![CDATA[
+			where id = #{id}
+		]]>
+	</update>
+	
+	<!-- 更改(多个) -->
+	<update id="updateBatch" parameterType="java.util.List">
+		<foreach collection="list" item="item" separator=";"> 
+			<![CDATA[
+				update f_node_hist
+			]]>
+			<set>
+				<trim suffixOverrides=",">
+					<if test="null != item.action">	
+						action=#{item.action},
+					</if>	
+					<if test="null != item.roles">	
+						roles=#{item.roles},
+					</if>	
+					<if test="null != item.cascade">	
+						`cascade`=#{item.cascade},
+					</if>	
+					<if test="null != item.dealNote">	
+						deal_note=#{item.dealNote},
+					</if>	
+					<if test="null != item.dealRole">	
+						deal_role=#{item.dealRole},
+					</if>	
+					<if test="null != item.dealUserId">	
+						deal_user_id=#{item.dealUserId},
+					</if>	
+					<if test="null != item.dealUserName">	
+						deal_user_name=#{item.dealUserName},
+					</if>	
+					<if test="null != item.nodeDesc">	
+						node_desc=#{item.nodeDesc},
+					</if>	
+					<if test="null != item.flowCode">	
+						flow_code=#{item.flowCode},
+					</if>	
+					<if test="null != item.templateId">	
+						template_id=#{item.templateId},
+					</if>	
+					<if test="null != item.idBill">	
+						id_bill=#{item.idBill},
+					</if>	
+						update_time=CURRENT_TIMESTAMP,
+					<if test="null != item.status">	
+						status=#{item.status},
+					</if>	
+				</trim>
+			</set>
+			<![CDATA[
+				where id = #{item.id}
+			]]>
+		</foreach>
+	</update>
+	
+	<!-- 更新 (通过参数) -->
+	<update id="updateByArgs">
+		<![CDATA[
+			update f_node_hist t
+		]]>
+		<set>
+		<![CDATA[
+			${setSql}
+		]]>	
+		</set>
+		<where>
+		<include refid="whereClause"></include>
+		</where>
+	</update>
+	
+	<!-- 删除 -->
+	<delete id="deleteById">
+		<![CDATA[
+			delete from f_node_hist 
+			where id = #{id}
+		]]>
+	</delete>
+	
+	<!-- 删除 (通过参数) -->
+	<delete id="deleteByArgs" parameterType="map">
+		<![CDATA[
+			delete t from f_node_hist t
+		]]>
+		<where>
+		<include refid="whereClause"></include>
+		</where>
+	</delete>
+	
+	<!-- 通过编号获取 -->
+	<select id="getById" resultType="pers.binaryhunter.flow.bean.po.NodeHist">
+		<![CDATA[
+			select 
+		]]>
+		<include refid="selectColumn"></include>
+		<![CDATA[
+			from f_node_hist t  
+			where t.id = #{id}
+		]]>
+	</select>
+
+	<sql id="orderClause">
+        <if test="null != orderField and '' != orderField">
+            <![CDATA[
+				 order by t.${orderField}
+			]]>
+            <if test="null != orderDirection and '' != orderDirection">
+                <![CDATA[
+					 ${orderDirection}
+				]]>
+            </if>
+        </if>
+        <if test="null == orderField or '' == orderField">
+            <![CDATA[
+			 order by t.id desc 
+		    ]]>
+        </if>   
+    </sql>
+	
+	<!-- 获取全部 -->
+	<select id="queryByArgs" parameterType="java.util.Map" resultType="pers.binaryhunter.flow.bean.po.NodeHist">
+		<![CDATA[
+			select
+		]]>
+		<include refid="selectColumn"></include>
+		<![CDATA[	 
+			from f_node_hist t  
+		]]>
+		<where>
+		<include refid="whereClause"></include>
+		</where>
+		<include refid="orderClause"></include>
+        <if test="null != limit">
+            <![CDATA[
+			  limit #{limit}  
+		    ]]>
+        </if>
+	</select>
+	
+	<!-- 分页 -->
+	<select id="pageByArgs" parameterType="java.util.Map" resultType="pers.binaryhunter.flow.bean.po.NodeHist">
+		<![CDATA[
+			select 
+		]]>
+		<include refid="selectColumn"></include>
+		<![CDATA[	 
+			from f_node_hist t  
+		]]>
+		<where>
+		<include refid="whereClause"></include>
+		</where>
+		<include refid="orderClause"></include>
+		<![CDATA[
+			limit #{start},#{limit}  
+		]]>
+	</select>
+	
+	<!-- 获取数目 -->
+	<select id="countByArgs" parameterType="java.util.Map" resultType="long">
+		<![CDATA[
+			select count(1) from f_node_hist t  
+		]]>
+		<where>
+		<include refid="whereClause"></include>
+		</where>
+	</select>
+    
+    <!-- 查询已完结的单据ID -->
+    <select id="pageFinished" parameterType="java.util.Map" resultType="long">
+        <![CDATA[
+			select distinct t.id_bill from f_node_hist t
+            left join f_node_curr c on t.id_bill = c.id_bill
+            where c.id_bill is null
+            and t.flow_code = #{flowCode}
+		]]>
+        <![CDATA[
+			limit #{start},#{limit}  
+		]]>
+    </select>
+
+    <!-- 查询已完结的单据ID数量 -->
+    <select id="countFinished" parameterType="java.util.Map" resultType="long">
+        <![CDATA[
+			select count(distinct t.id_bill) from f_node_hist t
+            left join f_node_curr c on t.id_bill = c.id_bill
+            where c.id_bill is null
+            and t.flow_code = #{flowCode}
+		]]>
+    </select>
+</mapper>

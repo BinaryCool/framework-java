@@ -16,6 +16,7 @@
     <modules>
         <module>framework-starter</module>
         <module>db-config-starter</module>
+        <module>flow-starter</module>
         <module>redis-config-starter</module>
         <module>wechat-starter</module>
     </modules>
@@ -63,4 +64,18 @@
             </plugin>
         </plugins>
     </build>
+
+    <distributionManagement>
+        <repository>
+            <id>releases</id>
+            <name>nexus_releases</name>
+            <url>http://mvn.yonghui.cn/nexus/content/repositories/releases</url>
+            <uniqueVersion>true</uniqueVersion>
+        </repository>
+        <snapshotRepository>
+            <id>snapshots</id>
+            <name>nexus_group</name>
+            <url>http://mvn.yonghui.cn/nexus/content/repositories/snapshots</url>
+        </snapshotRepository>
+    </distributionManagement>
 </project>

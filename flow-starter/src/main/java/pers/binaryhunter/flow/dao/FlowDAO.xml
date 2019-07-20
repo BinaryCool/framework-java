@@ -1,0 +1,296 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+	PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+	"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="pers.binaryhunter.flow.dao.FlowDAO">
+	<sql id="getSequenceSql">
+		<![CDATA[
+			NEXTVALS('f_flow', 1)
+		]]>
+	</sql>
+	
+	<sql id="whereClause">
+		<if test="null != id and '' != id">
+			<![CDATA[
+				and t.id = #{id}
+			]]>
+		</if>
+		<if test="null != code and '' != code">
+			<![CDATA[
+				and t.code = #{code}
+			]]>
+		</if>
+		<if test="null != name and '' != name">
+			<![CDATA[
+				and t.name = #{name}
+			]]>
+		</if>
+		<if test="null != idTemplateEntry and '' != idTemplateEntry">
+			<![CDATA[
+				and t.id_template_entry = #{idTemplateEntry}
+			]]>
+		</if>
+		<if test="null != status and '' != status">
+			<![CDATA[
+				and t.status = #{status}
+			]]>
+		</if>
+		<if test="null != idIn and '' != idIn">
+			<![CDATA[
+				and t.id in (${idIn})
+			]]>
+		</if>
+	</sql>
+	
+	<sql id="basicColumn">
+		<trim suffixOverrides=",">
+		<![CDATA[
+			id,code,name,id_template_entry,
+		]]>
+		</trim>
+	</sql>
+	
+	<sql id="selectColumn">
+		<trim suffixOverrides=",">
+		<![CDATA[
+			t.id as id,t.code as code,t.name as name,t.id_template_entry as idTemplateEntry,t.create_time as createTime,t.update_time as updateTime,t.status as status
+		]]>
+		</trim>
+	</sql>
+	
+	<!-- 获取唯一标识序列 -->
+	<select id="getSequence" resultType="long">
+		select <include refid="getSequenceSql"></include>
+	</select>
+
+	<!-- 获取唯一标识序列 -->
+    <select id="getSequences" resultType="long">
+        select NEXTVALS('f_flow', #{0})
+    </select>
+
+	<!-- 新增 -->
+	<insert id="create" parameterType="pers.binaryhunter.flow.bean.po.Flow">
+		<selectKey keyProperty="id" order="BEFORE" resultType="long">
+			select <include refid="getSequenceSql"></include>
+		</selectKey>
+		<![CDATA[
+			insert into f_flow ( 
+		]]>
+		<include refid="basicColumn"></include>
+		<![CDATA[	
+			 ) values (
+		]]>
+		<trim suffixOverrides=",">
+		<![CDATA[
+			#{id},#{code},#{name},#{idTemplateEntry},	
+		]]>
+		</trim>
+		<![CDATA[
+			 ) 
+		]]>
+	</insert>
+	
+	<!-- 批量新增 -->
+	<insert id="createBatch" parameterType="java.util.List">
+		<![CDATA[
+			insert into f_flow (  
+		]]>
+		<include refid="basicColumn"></include>
+		<![CDATA[	
+			 ) values 
+		]]>
+	    <foreach collection="list" item="item" open="(" close=")" separator="), ("> 
+	        <include refid="getSequenceSql"></include>
+			<trim suffixOverrides=",">
+			<![CDATA[
+				,#{item.code},#{item.name},#{item.idTemplateEntry},	
+			]]>
+			</trim>
+	    </foreach>
+	</insert>
+
+	<!-- 修改 -->
+	<update id="update" parameterType="pers.binaryhunter.flow.bean.po.Flow">
+		<![CDATA[
+			update f_flow set
+		]]>	
+		<trim suffixOverrides=",">
+		<![CDATA[
+			code=#{code},
+			name=#{name},
+			id_template_entry=#{idTemplateEntry},
+			update_time=CURRENT_TIMESTAMP,
+		]]>
+		</trim>
+		<![CDATA[
+			where id = #{id}
+		]]>
+	</update>
+		
+	<!-- 修改 -->
+	<update id="updateNotNull" parameterType="pers.binaryhunter.flow.bean.po.Flow">
+		<![CDATA[
+			update f_flow
+		]]>
+		<set>
+			<trim suffixOverrides=",">
+				<if test="null != code">
+					code=#{code},
+				</if>
+				<if test="null != name">
+					name=#{name},
+				</if>
+				<if test="null != idTemplateEntry">
+					id_template_entry=#{idTemplateEntry},
+				</if>
+					update_time=CURRENT_TIMESTAMP,
+				<if test="null != status">
+					status=#{status},
+				</if>
+			</trim>
+		</set>
+		<![CDATA[
+			where id = #{id}
+		]]>
+	</update>
+	
+	<!-- 更改(多个) -->
+	<update id="updateBatch" parameterType="java.util.List">
+		<foreach collection="list" item="item" separator=";"> 
+			<![CDATA[
+				update f_flow
+			]]>
+			<set>
+				<trim suffixOverrides=",">
+					<if test="null != item.code">	
+						code=#{item.code},
+					</if>	
+					<if test="null != item.name">	
+						name=#{item.name},
+					</if>	
+					<if test="null != item.idTemplateEntry">	
+						id_template_entry=#{item.idTemplateEntry},
+					</if>	
+						update_time=CURRENT_TIMESTAMP,
+					<if test="null != item.status">	
+						status=#{item.status},
+					</if>	
+				</trim>
+			</set>
+			<![CDATA[
+				where id = #{item.id}
+			]]>
+		</foreach>
+	</update>
+	
+	<!-- 更新 (通过参数) -->
+	<update id="updateByArgs">
+		<![CDATA[
+			update f_flow t
+		]]>
+		<set>
+		<![CDATA[
+			${setSql}
+		]]>	
+		</set>
+		<where>
+		<include refid="whereClause"></include>
+		</where>
+	</update>
+	
+	<!-- 删除 -->
+	<delete id="deleteById">
+		<![CDATA[
+			delete from f_flow 
+			where id = #{id}
+		]]>
+	</delete>
+	
+	<!-- 删除 (通过参数) -->
+	<delete id="deleteByArgs" parameterType="map">
+		<![CDATA[
+			delete t from f_flow t
+		]]>
+		<where>
+		<include refid="whereClause"></include>
+		</where>
+	</delete>
+	
+	<!-- 通过编号获取 -->
+	<select id="getById" resultType="pers.binaryhunter.flow.bean.po.Flow">
+		<![CDATA[
+			select 
+		]]>
+		<include refid="selectColumn"></include>
+		<![CDATA[
+			from f_flow t  
+			where t.id = #{id}
+		]]>
+	</select>
+
+	<sql id="orderClause">
+        <if test="null != orderField and '' != orderField">
+            <![CDATA[
+				 order by t.${orderField}
+			]]>
+            <if test="null != orderDirection and '' != orderDirection">
+                <![CDATA[
+					 ${orderDirection}
+				]]>
+            </if>
+        </if>
+        <if test="null == orderField or '' == orderField">
+            <![CDATA[
+			 order by t.id desc 
+		    ]]>
+        </if>   
+    </sql>
+	
+	<!-- 获取全部 -->
+	<select id="queryByArgs" parameterType="java.util.Map" resultType="pers.binaryhunter.flow.bean.po.Flow">
+		<![CDATA[
+			select
+		]]>
+		<include refid="selectColumn"></include>
+		<![CDATA[	 
+			from f_flow t  
+		]]>
+		<where>
+		<include refid="whereClause"></include>
+		</where>
+		<include refid="orderClause"></include>
+        <if test="null != limit">
+            <![CDATA[
+			  limit #{limit}  
+		    ]]>
+        </if>
+	</select>
+	
+	<!-- 分页 -->
+	<select id="pageByArgs" parameterType="java.util.Map" resultType="pers.binaryhunter.flow.bean.po.Flow">
+		<![CDATA[
+			select 
+		]]>
+		<include refid="selectColumn"></include>
+		<![CDATA[	 
+			from f_flow t  
+		]]>
+		<where>
+		<include refid="whereClause"></include>
+		</where>
+		<include refid="orderClause"></include>
+		<![CDATA[
+			limit #{start},#{limit}  
+		]]>
+	</select>
+	
+	<!-- 获取数目 -->
+	<select id="countByArgs" parameterType="java.util.Map" resultType="long">
+		<![CDATA[
+			select count(1) from f_flow t  
+		]]>
+		<where>
+		<include refid="whereClause"></include>
+		</where>
+	</select>
+</mapper>
