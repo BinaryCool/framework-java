@@ -18,8 +18,9 @@ public class WxSendMsg {
     @Getter
     public enum MsgType {
        TEXT("text"),
-       NEWS("news"), 
-        ;
+       NEWS("news"),
+       IMAGE("image"),
+       ;
         
        private String type;
 
