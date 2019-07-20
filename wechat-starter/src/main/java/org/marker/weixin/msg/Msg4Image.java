@@ -44,12 +44,13 @@ public class Msg4Image extends Msg{
 	public void write(Document document) {
 		Element root = document.createElement(WXXmlElementName.ROOT);
 		head.write(root, document);
-		Element picUrlElement = document.createElement(WXXmlElementName.PIC_URL);
-		picUrlElement.setTextContent(this.picUrl);
-		Element funcFlagElement = document.createElement(WXXmlElementName.FUNC_FLAG);
-		funcFlagElement.setTextContent(this.funcFlag);
-		root.appendChild(picUrlElement);
-		root.appendChild(funcFlagElement);
+
+        Element contentEle = document.createElement(WXXmlElementName.IMAGE);
+        Element mediaEle = document.createElement(WXXmlElementName.MEDIAID);
+        mediaEle.setTextContent(this.mediaId);
+        contentEle.appendChild(mediaEle);
+        root.appendChild(contentEle);
+
 		document.appendChild(root);
 	}
 	

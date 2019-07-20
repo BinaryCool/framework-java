@@ -29,6 +29,7 @@ public interface WXXmlElementName {
 	
 	
 	String PIC_URL = "PicUrl";
+	String IMAGE = "Image";
 	
 	
 	String TITLE = "Title";
