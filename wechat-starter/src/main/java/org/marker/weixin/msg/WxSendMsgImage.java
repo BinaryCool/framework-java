@@ -14,7 +14,7 @@ public class WxSendMsgImage extends WxSendMsg {
     public WxSendMsgImage(String openId, String mediaId) {
         this.image = new Image(mediaId);
         this.setTouser(openId);
-        this.setMsgtype(MsgType.TEXT.getType());
+        this.setMsgtype(MsgType.IMAGE.getType());
     }
 
     @Getter
