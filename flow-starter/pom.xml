@@ -6,7 +6,7 @@
     <groupId>pers.binaryhunter</groupId>
     <artifactId>flow-starter</artifactId>
     <packaging>jar</packaging>
-    <version>1.0.0-SNAPSHOT</version>
+    <version>1.0.1-SNAPSHOT</version>
 
     <parent>
         <groupId>pers.binaryhunter</groupId>
@@ -70,24 +70,6 @@
 
     <build>
         <finalName>flow-starter</finalName>
-        <plugins>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-compiler-plugin</artifactId>
-                <version>3.3</version>
-                <configuration>
-                    <source>${java.version}</source>
-                    <target>${java.version}</target>
-                    <encoding>UTF-8</encoding>
-                    <showDeprecation>true</showDeprecation>
-                    <showWarnings>true</showWarnings>
-
-                    <!-- 跳过单元测试 -->
-                    <skip>true</skip>
-                </configuration>
-            </plugin>
-        </plugins>
-
         <resources>
             <resource>
                 <directory>src/main/resources</directory>
