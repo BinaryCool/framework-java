@@ -6,7 +6,7 @@
     
     <groupId>org.marker</groupId>
     <artifactId>wechat-starter</artifactId>
-    <version>1.0.0</version>
+    <version>1.0.3</version>
 
     <parent>
         <groupId>pers.binaryhunter</groupId>
