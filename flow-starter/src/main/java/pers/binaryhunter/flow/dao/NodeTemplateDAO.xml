@@ -10,10 +10,30 @@
 	</sql>
 	
 	<sql id="whereClause">
-        <if test="null != preId and '' != preId and null != actionKey and '' != actionKey">
+        <if test="null != currCode and '' != currCode">
             <![CDATA[
-				and t.id in (
-				  SELECT id_next FROM f_node_template_ref where id_curr = #{preId} and action_key = #{actionKey} and status = 1
+				and t.cascade_code in (
+				    select next_code from f_node_template_ref
+				    where curr_code = #{currCode}
+		    ]]>
+            <if test="null != flowCode and '' != flowCode">
+                <![CDATA[
+                    and flow_code = #{flowCode}
+                ]]>
+            </if>
+            <choose>
+                <when test="null != actionKey and '' != actionKey">
+                    <![CDATA[
+                    and action_key = #{actionKey}
+                ]]>
+                </when>
+                <otherwise>
+                    <![CDATA[
+                    and (action_key is null or action_key = '')
+                ]]>
+                </otherwise>
+            </choose>
+            <![CDATA[
 				)
 			]]>
         </if>
@@ -27,24 +47,19 @@
 				and t.action = #{action}
 			]]>
 		</if>
-		<if test="null != idPre and '' != idPre">
+		<if test="null != flowCode and '' != flowCode">
 			<![CDATA[
-				and t.id_pre = #{idPre}
+				and t.flow_code = #{flowCode}
 			]]>
 		</if>
-		<if test="null != idFlow and '' != idFlow">
+		<if test="null != cascadeCode and '' != cascadeCode">
 			<![CDATA[
-				and t.id_flow = #{idFlow}
+				and t.cascade_code = #{cascadeCode}
 			]]>
 		</if>
 		<if test="null != roles and '' != roles">
 			<![CDATA[
 				and t.roles = #{roles}
-			]]>
-		</if>
-		<if test="null != cascade and '' != cascade">
-			<![CDATA[
-				and t.cascade = #{cascade}
 			]]>
 		</if>
 		<if test="null != nodeDesc and '' != nodeDesc">
@@ -67,7 +82,7 @@
 	<sql id="basicColumn">
 		<trim suffixOverrides=",">
 		<![CDATA[
-			id,action,id_pre,id_flow,roles,`cascade`,node_desc,
+			id,action,flow_code,cascade_code,roles,node_desc,
 		]]>
 		</trim>
 	</sql>
@@ -75,7 +90,7 @@
 	<sql id="selectColumn">
 		<trim suffixOverrides=",">
 		<![CDATA[
-			t.id as id,t.action as action,t.id_pre as idPre,t.id_flow as idFlow,t.roles as roles,t.cascade as `cascade`,t.node_desc as nodeDesc,t.create_time as createTime,t.update_time as updateTime,t.status as status
+			t.id as id,t.action as action,t.flow_code as flowCode,t.cascade_code as cascadeCode,t.roles as roles,t.node_desc as nodeDesc,t.create_time as createTime,t.update_time as updateTime,t.status as status
 		]]>
 		</trim>
 	</sql>
@@ -104,7 +119,7 @@
 		]]>
 		<trim suffixOverrides=",">
 		<![CDATA[
-			#{id},#{action},#{idPre},#{idFlow},#{roles},#{cascade},#{nodeDesc},	
+			#{id},#{action},#{flowCode},#{cascadeCode},#{roles},#{nodeDesc},	
 		]]>
 		</trim>
 		<![CDATA[
@@ -122,10 +137,9 @@
 			 ) values 
 		]]>
 	    <foreach collection="list" item="item" open="(" close=")" separator="), ("> 
-	        <include refid="getSequenceSql"></include>
 			<trim suffixOverrides=",">
 			<![CDATA[
-				,#{item.action},#{item.idPre},#{item.idFlow},#{item.roles},#{item.cascade},#{item.nodeDesc},	
+				#{item.id},#{item.action},#{item.flowCode},#{item.cascadeCode},#{item.roles},#{item.nodeDesc},	
 			]]>
 			</trim>
 	    </foreach>
@@ -139,10 +153,9 @@
 		<trim suffixOverrides=",">
 		<![CDATA[
 			action=#{action},
-			id_pre=#{idPre},
-			id_flow=#{idFlow},
+			flow_code=#{flowCode},
+			cascade_code=#{cascadeCode},
 			roles=#{roles},
-			`cascade`=#{cascade},
 			node_desc=#{nodeDesc},
 			update_time=CURRENT_TIMESTAMP,
 		]]>
@@ -162,17 +175,14 @@
 				<if test="null != action">
 					action=#{action},
 				</if>
-				<if test="null != idPre">
-					id_pre=#{idPre},
+				<if test="null != flowCode">
+					flow_code=#{flowCode},
 				</if>
-				<if test="null != idFlow">
-					id_flow=#{idFlow},
+				<if test="null != cascadeCode">
+					cascade_code=#{cascadeCode},
 				</if>
 				<if test="null != roles">
 					roles=#{roles},
-				</if>
-				<if test="null != cascade">
-					`cascade`=#{cascade},
 				</if>
 				<if test="null != nodeDesc">
 					node_desc=#{nodeDesc},
@@ -199,17 +209,14 @@
 					<if test="null != item.action">	
 						action=#{item.action},
 					</if>	
-					<if test="null != item.idPre">	
-						id_pre=#{item.idPre},
+					<if test="null != item.flowCode">	
+						flow_code=#{item.flowCode},
 					</if>	
-					<if test="null != item.idFlow">	
-						id_flow=#{item.idFlow},
+					<if test="null != item.cascadeCode">	
+						cascade_code=#{item.cascadeCode},
 					</if>	
 					<if test="null != item.roles">	
 						roles=#{item.roles},
-					</if>	
-					<if test="null != item.cascade">	
-						`cascade`=#{item.cascade},
 					</if>	
 					<if test="null != item.nodeDesc">	
 						node_desc=#{item.nodeDesc},
@@ -274,7 +281,7 @@
 	<sql id="orderClause">
         <if test="null != orderField and '' != orderField">
             <![CDATA[
-				 order by t.${orderField}
+				 order by ${orderField}
 			]]>
             <if test="null != orderDirection and '' != orderDirection">
                 <![CDATA[

@@ -1,10 +1,10 @@
 package pers.binaryhunter.flow.service;
 
-import pers.binaryhunter.framework.bean.dto.paging.Page;
 import pers.binaryhunter.framework.service.GenericService;
 import pers.binaryhunter.flow.bean.po.NodeCurr;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * NodeCurr Service
@@ -12,16 +12,18 @@ import java.util.List;
  */
 public interface NodeCurrService extends GenericService<NodeCurr, Long> {
     /**
-     * 获取处于当前层级的单据ID数量
-     * @param cascade 层级
-     * @return 处于当前层级的单据ID数量
+     * 查询下个处理角色
+     * @param flowCode 流程编码
+     * @param id 单据ID
+     * @return 下次处理角色
      */
-    Long countCascade(String flowCode, Float cascade);
+    List<String> getNextRole(String flowCode, Long id);
 
     /**
-     * 获取处于当前层级的单据ID
-     * @param cascade 层级
-     * @return 处于当前层级的单据ID
+     * 查询下个处理角色
+     * @param flowCode 流程编码
+     * @param idList 单据ID
+     * @return 下个处理角色
      */
-    List<Long> pageCascade(String flowCode, Float cascade, Page page);
+    Map<Long, List<String>> getNextRole(String flowCode, List<Long> idList);
 }

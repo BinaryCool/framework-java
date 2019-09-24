@@ -13,4 +13,5 @@ public class FlowDTO {
     private String dealRole;
     private Long dealUserId;
     private String dealUserName;
+    private String dealUserTel;
 }

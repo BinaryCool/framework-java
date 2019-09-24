@@ -15,4 +15,9 @@ public class NodeCurr extends Node {
 	public NodeCurr(){
 		
 	}
+
+    /**
+     * 处理状态: 0(未完结)|1(已完结)
+     */
+    private java.lang.Integer processStatus;
 }

@@ -1,13 +1,11 @@
 
 package pers.binaryhunter.flow.service.logic;
 
-import org.apache.commons.lang3.StringUtils;
-import pers.binaryhunter.framework.bean.dto.paging.Page;
-import pers.binaryhunter.framework.bean.po.PO;
 import pers.binaryhunter.framework.exception.BusinessException;
 import pers.binaryhunter.framework.service.logic.GenericServiceImpl;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -22,6 +20,7 @@ import javax.annotation.Resource;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 /**
  * 表：Flow Service Impl
@@ -30,9 +29,6 @@ import java.util.Map;
 @Slf4j
 @Service
 public class FlowServiceImpl extends GenericServiceImpl<Flow, Long> implements FlowService {
-    private static final String PASS = "pass";
-    private static final String REJECT = "reject";
-    
     @Resource
     private NodeCurrService nodeCurrService;
     @Resource
@@ -43,136 +39,142 @@ public class FlowServiceImpl extends GenericServiceImpl<Flow, Long> implements F
     @Override
     @Transactional(rollbackFor = Exception.class)
     public Node start(String flowCode, Long id, FlowDTO dto) {
-        if(StringUtils.isEmpty(flowCode) || null == id || 0 >=id || null == dto) {
+        if(StringUtils.isEmpty(flowCode) || null == id || 0 >= id || null == dto) {
             throw new BusinessException();
         }
 
-        NodeTemplate didTemp = getCurrTemplate(flowCode);
+        NodeTemplate didTemp = getEntryTemplate(flowCode);
         NodeHist nodeHist = genNodeHist(flowCode, id, didTemp, dto);
         nodeHistService.add(nodeHist);
         
-        NodeTemplate currTemp = getNextTemplate(didTemp.getId(), PASS);
-        if(null == currTemp) {
-            throw new BusinessException("找不到下游流程: " + didTemp.getId());    
+        List<NodeTemplate> currTempList = nodeTemplateService.getNextTemplate(flowCode, didTemp.getCascadeCode());
+        if(CollectionUtils.isEmpty(currTempList)) {
+            throw new BusinessException("流程出错, 找不到当前节点: " + flowCode + "," + didTemp.getCascadeCode());
         }
         
-        NodeCurr nodeCurr = genNodeCurr(flowCode, id, currTemp);
-        nodeCurrService.add(nodeCurr);
+        List<NodeCurr> nodeCurrList = genNodeCurr(flowCode, id, currTempList);
+        nodeCurrService.addBatchAutoId(nodeCurrList);
 
         return nodeHist;
     }
     
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public Node pass(String flowCode, Long id, FlowDTO dto) {
-        return this.pass(flowCode, id, dto, PASS);
+    public Node pass(Node nodeCurr, FlowDTO dto) {
+        return this.pass(nodeCurr, dto, null);
     }
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public Node pass(String flowCode, Long id, FlowDTO dto, String actionType) {
-        if(StringUtils.isEmpty(flowCode) || null == id || 0 >=id || null == dto
-            || StringUtils.isEmpty(actionType)) {
+    public Node pass(Node nodeCurr, FlowDTO dto, String actionType) {
+        if(null == nodeCurr || null == dto) {
             throw new BusinessException();
         }
 
-        NodeCurr nodeCurr = getCurr(flowCode, id);
-        if(null == nodeCurr) {
-            log.warn("Pass: node curr is null");
-            throw new BusinessException("该流程已经结束");
+        if(StringUtils.isEmpty(nodeCurr.getFlowCode()) || null == nodeCurr.getIdBill() || 0 >= nodeCurr.getIdBill() || StringUtils.isEmpty(nodeCurr.getCascadeCode())) {
+            throw new BusinessException("节点参数错误");
         }
-        
+
         NodeHist node = new NodeHist();
         BeanUtils.copyProperties(nodeCurr, node);
         node.setDealNote(dto.getDealNote());
         node.setDealRole(dto.getDealRole());
         node.setDealUserId(dto.getDealUserId());
         node.setDealUserName(dto.getDealUserName());
+        node.setDealUserTel(dto.getDealUserTel());
         nodeHistService.add(node);
 
         Map<String, Object> params = new HashMap<>();
-        params.put("flowCode", flowCode);
-        params.put("idBill", id);
+        params.put("flowCode", nodeCurr.getFlowCode());
+        params.put("cascadeCode", nodeCurr.getCascadeCode());
+        params.put("idBill", nodeCurr.getIdBill());
         nodeCurrService.deleteByArgs(params);
         
-        NodeTemplate currTemp = getNextTemplate(node.getTemplateId(), actionType);
-        if(null != currTemp) {
-            NodeCurr nodeCurrNew = genNodeCurr(flowCode, id, currTemp);
-            nodeCurrService.add(nodeCurrNew);
+        List<NodeTemplate> currTempList = nodeTemplateService.getNextTemplate(nodeCurr.getFlowCode(), nodeCurr.getCascadeCode(), actionType);
+        if(CollectionUtils.isNotEmpty(currTempList)) {
+            List<NodeCurr> nodeCurrList = genNodeCurr(nodeCurr.getFlowCode(), nodeCurr.getIdBill(), currTempList);
+            nodeCurrService.addBatchAutoId(nodeCurrList);
         }
 
         return nodeCurr;
     }
 
     @Override
-    public Long countCascade(String flowCode, Float cascade) {
-        return nodeCurrService.countCascade(flowCode, cascade);
-    }
-    
-    @Override
-    public List<Long> pageCascade(String flowCode, Float cascade, Page page) {
-        return nodeCurrService.pageCascade(flowCode, cascade, page);
+    public List<Node> queryHist(String flowCode, Long id) {
+        if(StringUtils.isEmpty(flowCode) || null == id || 0 >= id) {
+            throw new BusinessException();
+        }
+        return nodeHistService.queryHist(flowCode, id);
     }
 
     @Override
-    public Long countFinished(String flowCode) {
-        return nodeHistService.countFinished(flowCode);
+    public Map<Long, List<Node>> queryHist(String flowCode, List<Long> idList) {
+        if(StringUtils.isEmpty(flowCode) || CollectionUtils.isEmpty(idList)) {
+            throw new BusinessException();
+        }
+        return nodeHistService.queryHist(flowCode, idList);
     }
-    
+
     @Override
-    public List<Long> pageFinished(String flowCode, Page page) {
-        return nodeHistService.pageFinished(flowCode, page);
+    public List<String> getNextRole(String flowCode, Long id) {
+        if(StringUtils.isEmpty(flowCode) || null == id || 0 >= id) {
+            throw new BusinessException();
+        }
+        return nodeCurrService.getNextRole(flowCode, id);
     }
-    
-    private NodeCurr getCurr(String flowCode, Long id) {
+
+    @Override
+    public Map<Long, List<String>> getNextRole(String flowCode, List<Long> idList) {
+        if(StringUtils.isEmpty(flowCode) || CollectionUtils.isEmpty(idList)) {
+            throw new BusinessException();
+        }
+        return nodeCurrService.getNextRole(flowCode, idList);
+    }
+
+    @Override
+    public List<Node> getCurr(String flowCode, Long id) {
         Map<String, Object> params = new HashMap<>();
         params.put("flowCode", flowCode);
         params.put("idBill", id);
         List<NodeCurr> list = nodeCurrService.queryByArgs(params);
-        if(CollectionUtils.isNotEmpty(list)) {
-            return list.get(0);
+        if(CollectionUtils.isEmpty(list)) {
+            throw new BusinessException("流程已结束: " + flowCode);
         }
-        
-        return null;
+        return list.stream().map(nodeCurr -> {
+            Node node = new Node();
+            BeanUtils.copyProperties(nodeCurr, node);
+            return node;
+        }).collect(Collectors.toList());
     }
-    
-    private NodeTemplate getCurrTemplate(String flowCode) {
+
+    /**
+     * 获取当前节点模板
+     */
+    private NodeTemplate getEntryTemplate(String flowCode) {
         Map<String, Object> params = new HashMap<>();
         params.put("code", flowCode);
-        params.put("status", PO.STATUS_ENABLE);
         List<Flow> list = super.queryByArgs(params);
         if(CollectionUtils.isEmpty(list)) {
             throw new BusinessException("找不到流程: " + flowCode);
         }
-        Long templateId = list.get(0).getIdTemplateEntry();
-        NodeTemplate template = nodeTemplateService.getById(templateId);
-        if(null == template) {
-            throw new BusinessException("找不到模板: " + templateId);
-        }
+        String cascadeCode = list.get(0).getCascadeCodeEntry(); //入口模板
+        NodeTemplate template = nodeTemplateService.getCurrTemplate(flowCode, cascadeCode);
         return template;
     }
 
-    private NodeTemplate getNextTemplate(Long preId, String actionKey) {
-        Map<String, Object> params = new HashMap<>();
-        params.put("preId", preId);
-        params.put("actionKey", actionKey);
-        params.put("status", PO.STATUS_ENABLE);
-        List<NodeTemplate> list = nodeTemplateService.queryByArgs(params);
-        if(CollectionUtils.isEmpty(list)) {
-            return null;
-        }
-        return list.get(0);
-    }
-    
+    /**
+     * 生成历史节点
+     */
     private NodeHist genNodeHist(String flowCode, Long id, NodeTemplate temp, FlowDTO dto) {
         NodeHist node = new NodeHist();
         node.setAction(temp.getAction());
         node.setRoles(temp.getRoles());
-        node.setCascade(temp.getCascade());
+        node.setCascadeCode(temp.getCascadeCode());
         node.setDealNote(dto.getDealNote());
         node.setDealRole(dto.getDealRole());
         node.setDealUserId(dto.getDealUserId());
         node.setDealUserName(dto.getDealUserName());
+        node.setDealUserTel(dto.getDealUserTel());
         node.setNodeDesc(temp.getNodeDesc());
         node.setFlowCode(flowCode);
         node.setTemplateId(temp.getId());
@@ -180,15 +182,20 @@ public class FlowServiceImpl extends GenericServiceImpl<Flow, Long> implements F
         return node;
     }
 
-    private NodeCurr genNodeCurr(String flowCode, Long id, NodeTemplate temp) {
-        NodeCurr node = new NodeCurr();
-        node.setAction(temp.getAction());
-        node.setRoles(temp.getRoles());
-        node.setCascade(temp.getCascade());
-        node.setNodeDesc(temp.getNodeDesc());
-        node.setFlowCode(flowCode);
-        node.setTemplateId(temp.getId());
-        node.setIdBill(id);
-        return node;
+    /**
+     * 生成新节点
+     */
+    private List<NodeCurr> genNodeCurr(String flowCode, Long id, List<NodeTemplate> list) {
+        return list.stream().map(temp -> {
+            NodeCurr node = new NodeCurr();
+            node.setAction(temp.getAction());
+            node.setRoles(temp.getRoles());
+            node.setCascadeCode(temp.getCascadeCode());
+            node.setNodeDesc(temp.getNodeDesc());
+            node.setFlowCode(flowCode);
+            node.setTemplateId(temp.getId());
+            node.setIdBill(id);
+            return node;
+        }).collect(Collectors.toList());
     }
 }

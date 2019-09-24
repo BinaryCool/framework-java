@@ -1,12 +1,11 @@
 package pers.binaryhunter.flow.bean.po;
 
-import pers.binaryhunter.framework.bean.po.PO;
 import lombok.Getter;
 import lombok.Setter;
-
+import pers.binaryhunter.framework.bean.po.PO;
 /**
  * Flow PO
- * @author BinaryHunter
+ * @author Liyw
  */
 @Getter
 @Setter
@@ -24,15 +23,15 @@ public class Flow extends PO {
 	private Long id;
 	/**
 	 * 编码
-	 */
+	 */	
 	private String code;
 	/**
 	 * 名称
-	 */
+	 */	
 	private String name;
 	/**
-	 * 模板入库ID
-	 */
-	private Long idTemplateEntry;
+	 * 入口层级
+	 */	
+	private String cascadeCodeEntry;
 	//属性 end
 }

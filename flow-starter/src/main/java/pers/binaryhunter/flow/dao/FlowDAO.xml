@@ -25,9 +25,9 @@
 				and t.name = #{name}
 			]]>
 		</if>
-		<if test="null != idTemplateEntry and '' != idTemplateEntry">
+		<if test="null != cascadeCodeEntry and '' != cascadeCodeEntry">
 			<![CDATA[
-				and t.id_template_entry = #{idTemplateEntry}
+				and t.cascade_code_entry = #{cascadeCodeEntry}
 			]]>
 		</if>
 		<if test="null != status and '' != status">
@@ -45,7 +45,7 @@
 	<sql id="basicColumn">
 		<trim suffixOverrides=",">
 		<![CDATA[
-			id,code,name,id_template_entry,
+			id,code,name,cascade_code_entry,
 		]]>
 		</trim>
 	</sql>
@@ -53,7 +53,7 @@
 	<sql id="selectColumn">
 		<trim suffixOverrides=",">
 		<![CDATA[
-			t.id as id,t.code as code,t.name as name,t.id_template_entry as idTemplateEntry,t.create_time as createTime,t.update_time as updateTime,t.status as status
+			t.id as id,t.code as code,t.name as name,t.cascade_code_entry as cascadeCodeEntry,t.create_time as createTime,t.update_time as updateTime,t.status as status
 		]]>
 		</trim>
 	</sql>
@@ -82,7 +82,7 @@
 		]]>
 		<trim suffixOverrides=",">
 		<![CDATA[
-			#{id},#{code},#{name},#{idTemplateEntry},	
+			#{id},#{code},#{name},#{cascadeCodeEntry},	
 		]]>
 		</trim>
 		<![CDATA[
@@ -100,10 +100,9 @@
 			 ) values 
 		]]>
 	    <foreach collection="list" item="item" open="(" close=")" separator="), ("> 
-	        <include refid="getSequenceSql"></include>
 			<trim suffixOverrides=",">
 			<![CDATA[
-				,#{item.code},#{item.name},#{item.idTemplateEntry},	
+				#{item.id},#{item.code},#{item.name},#{item.cascadeCodeEntry},	
 			]]>
 			</trim>
 	    </foreach>
@@ -118,7 +117,7 @@
 		<![CDATA[
 			code=#{code},
 			name=#{name},
-			id_template_entry=#{idTemplateEntry},
+			cascade_code_entry=#{cascadeCodeEntry},
 			update_time=CURRENT_TIMESTAMP,
 		]]>
 		</trim>
@@ -140,8 +139,8 @@
 				<if test="null != name">
 					name=#{name},
 				</if>
-				<if test="null != idTemplateEntry">
-					id_template_entry=#{idTemplateEntry},
+				<if test="null != cascadeCodeEntry">
+					cascade_code_entry=#{cascadeCodeEntry},
 				</if>
 					update_time=CURRENT_TIMESTAMP,
 				<if test="null != status">
@@ -168,8 +167,8 @@
 					<if test="null != item.name">	
 						name=#{item.name},
 					</if>	
-					<if test="null != item.idTemplateEntry">	
-						id_template_entry=#{item.idTemplateEntry},
+					<if test="null != item.cascadeCodeEntry">	
+						cascade_code_entry=#{item.cascadeCodeEntry},
 					</if>	
 						update_time=CURRENT_TIMESTAMP,
 					<if test="null != item.status">	
@@ -231,7 +230,7 @@
 	<sql id="orderClause">
         <if test="null != orderField and '' != orderField">
             <![CDATA[
-				 order by t.${orderField}
+				 order by ${orderField}
 			]]>
             <if test="null != orderDirection and '' != orderDirection">
                 <![CDATA[

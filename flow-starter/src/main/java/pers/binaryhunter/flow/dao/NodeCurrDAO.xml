@@ -15,6 +15,16 @@
 				and t.id = #{id}
 			]]>
 		</if>
+		<if test="null != flowCode and '' != flowCode">
+			<![CDATA[
+				and t.flow_code = #{flowCode}
+			]]>
+		</if>
+		<if test="null != cascadeCode and '' != cascadeCode">
+			<![CDATA[
+				and t.cascade_code = #{cascadeCode}
+			]]>
+		</if>
 		<if test="null != action and '' != action">
 			<![CDATA[
 				and t.action = #{action}
@@ -23,11 +33,6 @@
 		<if test="null != roles and '' != roles">
 			<![CDATA[
 				and t.roles = #{roles}
-			]]>
-		</if>
-		<if test="null != cascade and '' != cascade">
-			<![CDATA[
-				and t.cascade = #{cascade}
 			]]>
 		</if>
 		<if test="null != dealNote and '' != dealNote">
@@ -50,6 +55,11 @@
 				and t.deal_user_name = #{dealUserName}
 			]]>
 		</if>
+		<if test="null != dealUserTel and '' != dealUserTel">
+			<![CDATA[
+				and t.deal_user_tel = #{dealUserTel}
+			]]>
+		</if>
 		<if test="null != idBill and '' != idBill">
 			<![CDATA[
 				and t.id_bill = #{idBill}
@@ -60,14 +70,14 @@
 				and t.node_desc = #{nodeDesc}
 			]]>
 		</if>
-		<if test="null != flowCode and '' != flowCode">
-			<![CDATA[
-				and t.flow_code = #{flowCode}
-			]]>
-		</if>
 		<if test="null != templateId and '' != templateId">
 			<![CDATA[
 				and t.template_id = #{templateId}
+			]]>
+		</if>
+		<if test="null != processStatus and '' != processStatus">
+			<![CDATA[
+				and t.process_status = #{processStatus}
 			]]>
 		</if>
 		<if test="null != status and '' != status">
@@ -85,7 +95,7 @@
 	<sql id="basicColumn">
 		<trim suffixOverrides=",">
 		<![CDATA[
-			id,action,roles,`cascade`,deal_note,deal_role,deal_user_id,deal_user_name,id_bill,node_desc,flow_code,template_id,
+			id,flow_code,cascade_code,action,roles,deal_note,deal_role,deal_user_id,deal_user_name,deal_user_tel,id_bill,node_desc,template_id,process_status,
 		]]>
 		</trim>
 	</sql>
@@ -93,7 +103,7 @@
 	<sql id="selectColumn">
 		<trim suffixOverrides=",">
 		<![CDATA[
-			t.id as id,t.action as action,t.roles as roles,t.cascade as `cascade`,t.deal_note as dealNote,t.deal_role as dealRole,t.deal_user_id as dealUserId,t.deal_user_name as dealUserName,t.id_bill as idBill,t.node_desc as nodeDesc,t.flow_code as flowCode,t.template_id as templateId,t.create_time as createTime,t.update_time as updateTime,t.status as status
+			t.id as id,t.flow_code as flowCode,t.cascade_code as cascadeCode,t.action as action,t.roles as roles,t.deal_note as dealNote,t.deal_role as dealRole,t.deal_user_id as dealUserId,t.deal_user_name as dealUserName,t.deal_user_tel as dealUserTel,t.id_bill as idBill,t.node_desc as nodeDesc,t.template_id as templateId,t.process_status as processStatus,t.create_time as createTime,t.update_time as updateTime,t.status as status
 		]]>
 		</trim>
 	</sql>
@@ -122,7 +132,7 @@
 		]]>
 		<trim suffixOverrides=",">
 		<![CDATA[
-			#{id},#{action},#{roles},#{cascade},#{dealNote},#{dealRole},#{dealUserId},#{dealUserName},#{idBill},#{nodeDesc},#{flowCode},#{templateId},	
+			#{id},#{flowCode},#{cascadeCode},#{action},#{roles},#{dealNote},#{dealRole},#{dealUserId},#{dealUserName},#{dealUserTel},#{idBill},#{nodeDesc},#{templateId},#{processStatus},	
 		]]>
 		</trim>
 		<![CDATA[
@@ -140,10 +150,9 @@
 			 ) values 
 		]]>
 	    <foreach collection="list" item="item" open="(" close=")" separator="), ("> 
-	        <include refid="getSequenceSql"></include>
 			<trim suffixOverrides=",">
 			<![CDATA[
-				,#{item.action},#{item.roles},#{item.cascade},#{item.dealNote},#{item.dealRole},#{item.dealUserId},#{item.dealUserName},#{item.idBill},#{item.nodeDesc},#{item.flowCode},#{item.templateId},	
+				#{item.id},#{item.flowCode},#{item.cascadeCode},#{item.action},#{item.roles},#{item.dealNote},#{item.dealRole},#{item.dealUserId},#{item.dealUserName},#{item.dealUserTel},#{item.idBill},#{item.nodeDesc},#{item.templateId},#{item.processStatus},	
 			]]>
 			</trim>
 	    </foreach>
@@ -156,17 +165,19 @@
 		]]>	
 		<trim suffixOverrides=",">
 		<![CDATA[
+			flow_code=#{flowCode},
+			cascade_code=#{cascadeCode},
 			action=#{action},
 			roles=#{roles},
-			`cascade`=#{cascade},
 			deal_note=#{dealNote},
 			deal_role=#{dealRole},
 			deal_user_id=#{dealUserId},
 			deal_user_name=#{dealUserName},
+			deal_user_tel=#{dealUserTel},
 			id_bill=#{idBill},
 			node_desc=#{nodeDesc},
-			flow_code=#{flowCode},
 			template_id=#{templateId},
+			process_status=#{processStatus},
 			update_time=CURRENT_TIMESTAMP,
 		]]>
 		</trim>
@@ -182,14 +193,17 @@
 		]]>
 		<set>
 			<trim suffixOverrides=",">
+				<if test="null != flowCode">
+					flow_code=#{flowCode},
+				</if>
+				<if test="null != cascadeCode">
+					cascade_code=#{cascadeCode},
+				</if>
 				<if test="null != action">
 					action=#{action},
 				</if>
 				<if test="null != roles">
 					roles=#{roles},
-				</if>
-				<if test="null != cascade">
-					`cascade`=#{cascade},
 				</if>
 				<if test="null != dealNote">
 					deal_note=#{dealNote},
@@ -203,17 +217,20 @@
 				<if test="null != dealUserName">
 					deal_user_name=#{dealUserName},
 				</if>
+				<if test="null != dealUserTel">
+					deal_user_tel=#{dealUserTel},
+				</if>
 				<if test="null != idBill">
 					id_bill=#{idBill},
 				</if>
 				<if test="null != nodeDesc">
 					node_desc=#{nodeDesc},
 				</if>
-				<if test="null != flowCode">
-					flow_code=#{flowCode},
-				</if>
 				<if test="null != templateId">
 					template_id=#{templateId},
+				</if>
+				<if test="null != processStatus">
+					process_status=#{processStatus},
 				</if>
 					update_time=CURRENT_TIMESTAMP,
 				<if test="null != status">
@@ -234,14 +251,17 @@
 			]]>
 			<set>
 				<trim suffixOverrides=",">
+					<if test="null != item.flowCode">	
+						flow_code=#{item.flowCode},
+					</if>	
+					<if test="null != item.cascadeCode">	
+						cascade_code=#{item.cascadeCode},
+					</if>	
 					<if test="null != item.action">	
 						action=#{item.action},
 					</if>	
 					<if test="null != item.roles">	
 						roles=#{item.roles},
-					</if>	
-					<if test="null != item.cascade">	
-						`cascade`=#{item.cascade},
 					</if>	
 					<if test="null != item.dealNote">	
 						deal_note=#{item.dealNote},
@@ -255,17 +275,20 @@
 					<if test="null != item.dealUserName">	
 						deal_user_name=#{item.dealUserName},
 					</if>	
+					<if test="null != item.dealUserTel">	
+						deal_user_tel=#{item.dealUserTel},
+					</if>	
 					<if test="null != item.idBill">	
 						id_bill=#{item.idBill},
 					</if>	
 					<if test="null != item.nodeDesc">	
 						node_desc=#{item.nodeDesc},
 					</if>	
-					<if test="null != item.flowCode">	
-						flow_code=#{item.flowCode},
-					</if>	
 					<if test="null != item.templateId">	
 						template_id=#{item.templateId},
+					</if>	
+					<if test="null != item.processStatus">	
+						process_status=#{item.processStatus},
 					</if>	
 						update_time=CURRENT_TIMESTAMP,
 					<if test="null != item.status">	
@@ -327,7 +350,7 @@
 	<sql id="orderClause">
         <if test="null != orderField and '' != orderField">
             <![CDATA[
-				 order by t.${orderField}
+				 order by ${orderField}
 			]]>
             <if test="null != orderDirection and '' != orderDirection">
                 <![CDATA[
@@ -389,25 +412,4 @@
 		<include refid="whereClause"></include>
 		</where>
 	</select>
-
-    <!-- 获取处于当前层级的单据ID -->
-    <select id="pageCascade" parameterType="java.util.Map" resultType="long">
-        <![CDATA[
-			select id_bill from f_node_curr t
-            where t.`cascade` = #{cascade}
-            and t.flow_code = #{flowCode}
-		]]>
-        <![CDATA[
-			limit #{start},#{limit}  
-		]]>
-    </select>
-
-    <!-- 获取处于当前层级的单据ID数量 -->
-    <select id="countCascade" parameterType="java.util.Map" resultType="long">
-        <![CDATA[
-			select count(1) from f_node_curr t
-            where t.`cascade` = #{cascade}
-            and t.flow_code = #{flowCode}
-		]]>
-    </select>
 </mapper>

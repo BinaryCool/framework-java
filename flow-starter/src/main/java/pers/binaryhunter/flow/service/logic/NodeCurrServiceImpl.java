@@ -1,17 +1,16 @@
 
 package pers.binaryhunter.flow.service.logic;
 
-import pers.binaryhunter.framework.bean.dto.paging.Page;
-import pers.binaryhunter.framework.service.logic.GenericServiceImpl;
-import pers.binaryhunter.framework.utils.MapConverter;
+import com.binaryhunter.framework.service.logic.GenericServiceImpl;
+import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.lang.StringUtils;
 import org.springframework.stereotype.Service;
 import pers.binaryhunter.flow.bean.po.NodeCurr;
-import pers.binaryhunter.flow.dao.NodeCurrDAO;
 import pers.binaryhunter.flow.service.NodeCurrService;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  * NodeCurr Service Impl
@@ -21,19 +20,54 @@ import java.util.Map;
 public class NodeCurrServiceImpl extends GenericServiceImpl<NodeCurr, Long> implements NodeCurrService {
     
     @Override
-    public Long countCascade(String flowCode, Float cascade) {
+    public List<String> getNextRole(String flowCode, Long id) {
         Map<String, Object> params = new HashMap<>();
         params.put("flowCode", flowCode);
-        params.put("cascade", cascade);
-        return ((NodeCurrDAO) dao).countCascade(params);
+        params.put("idBill", id);
+        List<NodeCurr> list = super.queryByArgs(params);
+        if(CollectionUtils.isEmpty(list)) {
+            return null;
+        }
+
+        Set<String> roleSet = getRoleSet(list);
+        return roleSet.stream().collect(Collectors.toList());
     }
-    
+
     @Override
-    public List<Long> pageCascade(String flowCode, Float cascade, Page page) {
+    public Map<Long, List<String>> getNextRole(String flowCode, List<Long> idList) {
         Map<String, Object> params = new HashMap<>();
         params.put("flowCode", flowCode);
-        params.put("cascade", cascade);
-        MapConverter.convertPage(params, page);
-        return ((NodeCurrDAO) dao).pageCascade(params);
+        params.put("idBillIn", StringUtils.join(idList, ","));
+        List<NodeCurr> list = super.queryByArgs(params);
+        if(CollectionUtils.isEmpty(list)) {
+            return null;
+        }
+
+        Map<Long, List<String>> roleMap = new HashMap<>();
+        Set<Long> idSet = list.stream().map(item -> item.getIdBill()).collect(Collectors.toSet());
+        idSet.stream().forEach(id -> {
+            List<NodeCurr> listTmp = list.stream().filter(node -> node.getIdBill().equals(id)).collect(Collectors.toList());
+            if(CollectionUtils.isNotEmpty(listTmp)) {
+                Set<String> roleSet = getRoleSet(listTmp);
+                roleMap.put(id, roleSet.stream().collect(Collectors.toList()));
+            }
+        });
+        return roleMap;
+    }
+
+    private Set<String> getRoleSet(List<NodeCurr> list) {
+        if(CollectionUtils.isEmpty(list)) {
+            return new HashSet<>();
+        }
+        Set<String> roleSet = new HashSet<>();
+        list.stream().forEach(item -> {
+            String role = item.getRoles();
+            if (StringUtils.isNotEmpty(role)) {
+                Stream.of(role.split(",")).forEach(r -> {
+                    roleSet.add(r);
+                });
+            }
+        });
+        return roleSet;
     }
 }

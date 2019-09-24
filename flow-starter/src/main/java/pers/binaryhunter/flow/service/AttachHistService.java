@@ -1,6 +1,6 @@
 package pers.binaryhunter.flow.service;
 
-import pers.binaryhunter.framework.service.GenericService;
+import com.binaryhunter.framework.service.GenericService;
 import pers.binaryhunter.flow.bean.po.AttachHist;
 
 /**

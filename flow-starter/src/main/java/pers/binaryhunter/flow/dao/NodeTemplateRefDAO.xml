@@ -15,19 +15,29 @@
 				and t.id = #{id}
 			]]>
 		</if>
-		<if test="null != idCurr and '' != idCurr">
+		<if test="null != flowCode and '' != flowCode">
 			<![CDATA[
-				and t.id_curr = #{idCurr}
+				and t.flow_code = #{flowCode}
 			]]>
 		</if>
-		<if test="null != idNext and '' != idNext">
+		<if test="null != currCode and '' != currCode">
 			<![CDATA[
-				and t.id_next = #{idNext}
+				and t.curr_code = #{currCode}
+			]]>
+		</if>
+		<if test="null != nextCode and '' != nextCode">
+			<![CDATA[
+				and t.next_code = #{nextCode}
 			]]>
 		</if>
 		<if test="null != actionKey and '' != actionKey">
 			<![CDATA[
 				and t.action_key = #{actionKey}
+			]]>
+		</if>
+		<if test="null != calc and '' != calc">
+			<![CDATA[
+				and t.calc = #{calc}
 			]]>
 		</if>
 		<if test="null != status and '' != status">
@@ -45,7 +55,7 @@
 	<sql id="basicColumn">
 		<trim suffixOverrides=",">
 		<![CDATA[
-			id,id_curr,id_next,action_key,
+			id,flow_code,curr_code,next_code,action_key,calc,
 		]]>
 		</trim>
 	</sql>
@@ -53,7 +63,7 @@
 	<sql id="selectColumn">
 		<trim suffixOverrides=",">
 		<![CDATA[
-			t.id as id,t.id_curr as idCurr,t.id_next as idNext,t.action_key as actionKey,t.create_time as createTime,t.update_time as updateTime,t.status as status
+			t.id as id,t.flow_code as flowCode,t.curr_code as currCode,t.next_code as nextCode,t.action_key as actionKey,t.calc as calc,t.create_time as createTime,t.update_time as updateTime,t.status as status
 		]]>
 		</trim>
 	</sql>
@@ -82,7 +92,7 @@
 		]]>
 		<trim suffixOverrides=",">
 		<![CDATA[
-			#{id},#{idCurr},#{idNext},#{actionKey},	
+			#{id},#{flowCode},#{currCode},#{nextCode},#{actionKey},#{calc},	
 		]]>
 		</trim>
 		<![CDATA[
@@ -100,10 +110,9 @@
 			 ) values 
 		]]>
 	    <foreach collection="list" item="item" open="(" close=")" separator="), ("> 
-	        <include refid="getSequenceSql"></include>
 			<trim suffixOverrides=",">
 			<![CDATA[
-				,#{item.idCurr},#{item.idNext},#{item.actionKey},	
+				#{item.id},#{item.flowCode},#{item.currCode},#{item.nextCode},#{item.actionKey},#{item.calc},	
 			]]>
 			</trim>
 	    </foreach>
@@ -116,9 +125,11 @@
 		]]>	
 		<trim suffixOverrides=",">
 		<![CDATA[
-			id_curr=#{idCurr},
-			id_next=#{idNext},
+			flow_code=#{flowCode},
+			curr_code=#{currCode},
+			next_code=#{nextCode},
 			action_key=#{actionKey},
+			calc=#{calc},
 			update_time=CURRENT_TIMESTAMP,
 		]]>
 		</trim>
@@ -134,14 +145,20 @@
 		]]>
 		<set>
 			<trim suffixOverrides=",">
-				<if test="null != idCurr">
-					id_curr=#{idCurr},
+				<if test="null != flowCode">
+					flow_code=#{flowCode},
 				</if>
-				<if test="null != idNext">
-					id_next=#{idNext},
+				<if test="null != currCode">
+					curr_code=#{currCode},
+				</if>
+				<if test="null != nextCode">
+					next_code=#{nextCode},
 				</if>
 				<if test="null != actionKey">
 					action_key=#{actionKey},
+				</if>
+				<if test="null != calc">
+					calc=#{calc},
 				</if>
 					update_time=CURRENT_TIMESTAMP,
 				<if test="null != status">
@@ -162,14 +179,20 @@
 			]]>
 			<set>
 				<trim suffixOverrides=",">
-					<if test="null != item.idCurr">	
-						id_curr=#{item.idCurr},
+					<if test="null != item.flowCode">	
+						flow_code=#{item.flowCode},
 					</if>	
-					<if test="null != item.idNext">	
-						id_next=#{item.idNext},
+					<if test="null != item.currCode">	
+						curr_code=#{item.currCode},
+					</if>	
+					<if test="null != item.nextCode">	
+						next_code=#{item.nextCode},
 					</if>	
 					<if test="null != item.actionKey">	
 						action_key=#{item.actionKey},
+					</if>	
+					<if test="null != item.calc">	
+						calc=#{item.calc},
 					</if>	
 						update_time=CURRENT_TIMESTAMP,
 					<if test="null != item.status">	
@@ -231,7 +254,7 @@
 	<sql id="orderClause">
         <if test="null != orderField and '' != orderField">
             <![CDATA[
-				 order by t.${orderField}
+				 order by ${orderField}
 			]]>
             <if test="null != orderDirection and '' != orderDirection">
                 <![CDATA[
