@@ -1,7 +1,7 @@
 package pers.binaryhunter.flow.service;
 
-import com.binaryhunter.framework.service.GenericService;
 import pers.binaryhunter.flow.bean.po.AttachHist;
+import pers.binaryhunter.framework.service.GenericService;
 
 /**
  * 表：AttachHist Service

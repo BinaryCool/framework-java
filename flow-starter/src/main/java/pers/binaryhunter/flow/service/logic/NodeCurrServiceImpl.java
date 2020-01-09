@@ -1,12 +1,12 @@
 
 package pers.binaryhunter.flow.service.logic;
 
-import com.binaryhunter.framework.service.logic.GenericServiceImpl;
 import org.apache.commons.collections.CollectionUtils;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 import pers.binaryhunter.flow.bean.po.NodeCurr;
 import pers.binaryhunter.flow.service.NodeCurrService;
+import pers.binaryhunter.framework.service.logic.GenericServiceImpl;
 
 import java.util.*;
 import java.util.stream.Collectors;

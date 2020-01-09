@@ -37,7 +37,7 @@ public class GenericController {
 		} else if(ex instanceof SessionOutException) {
 			code = ((SessionOutException) ex).getCode();
 		} else {
-			msg = ResponseBean.CodeEnum.ERR_UNKOWN.getMsg() + ": " + msg;
+			msg = ResponseBean.CodeEnum.ERR_UNKOWN.getMsg();
 			logger.error("", ex);
 		}
 		return toResponse(msg, code);
