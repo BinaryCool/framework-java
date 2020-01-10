@@ -20,14 +20,14 @@ public interface GenericService<B,K> {
      * 获取ID
      * @return ID
      */
-    public Long getSequence();
+    Long getSequence();
 
     /**
      * 获取ID
      * @param step 步长
      * @return ID
      */
-    public Long getSequences(int step);
+    Long getSequences(int step);
     /**
      * 分页查询
      * @param params 参数
@@ -35,7 +35,7 @@ public interface GenericService<B,K> {
      * @return 分页结果
      * By Yuwen on 2017年6月22日
      */
-    public PageResult<B> pageByArgs(Map<String, Object> params, Page page);
+    PageResult<B> pageByArgs(Map<String, Object> params, Page page);
     /**
      * 分页查询
      * @param params 参数
@@ -44,7 +44,7 @@ public interface GenericService<B,K> {
      * @return 分页结果
      * By Yuwen on 2017年6月22日
      */
-    public PageResult<B> pageByArgs(Map<String, Object> params, Page page, boolean enable);
+    PageResult<B> pageByArgs(Map<String, Object> params, Page page, boolean enable);
     /**
      * 查询
      * @return 查询结果
@@ -56,7 +56,7 @@ public interface GenericService<B,K> {
      * @return 查询结果
      * By Yuwen on 2017年6月22日
      */
-    public List<B> queryByArgs(Map<String, Object> params);
+    List<B> queryByArgs(Map<String, Object> params);
     /**
      * 查询
      * @param params 参数
@@ -64,56 +64,65 @@ public interface GenericService<B,K> {
      * @return 查询结果
      * By Yuwen on 2017年6月22日
      */
-    public List<B> queryByArgs(Map<String, Object> params, boolean enable);
+    List<B> queryByArgs(Map<String, Object> params, boolean enable);
     /**
      * 通过id删除
      * @param id id
      * By Yuwen on 2017年6月22日
      */
-    public void deleteById(K id);
+    void deleteById(K id);
 
     /**
      * 通过参数删除
      * @param params 参数
      */
-    public void deleteByArgs(Map<String, Object> params);
+    void deleteByArgs(Map<String, Object> params);
     /**
      * 更新
      * @param bean 实体
      * By Yuwen on 2017年6月22日
      */
-    public void update(B bean);
+    void update(B bean);
     /**
      * 更新 (为空的不更新)
      * @param bean 实体
      * By Yuwen on 2017年6月22日
      */
-    public void updateNotNull(B bean);
+    void updateNotNull(B bean);
 
     /**
      * 批量更新
      * @param beans 列表
      */
-    public void updateBatch(List<B> beans);
+    void updateBatch(List<B> beans);
 
     /**
      * 更新(根据参数)
      * @param setSql setSql
      * @param params 参数
+     * 有SQL注入分析, 谨慎使用
+     * @see pers.binaryhunter.framework.service.GenericService#updateByArgs(Map, Map)
      */
-    public void updateByArgs(String setSql, Map<String, Object> params);
+    void updateByArgs(String setSql, Map<String, Object> params);
+
+    /**
+     * 更新(根据参数)
+     * @param setMap setMap
+     * @param params 参数
+     */
+    void updateByArgs(Map<String, Object> setMap, Map<String, Object> params);
     /**
      * 新增
      * @param bean 实体
      * By Yuwen on 2017年6月22日
      */
     public void add(B bean);
+
     /**
      * @see pers.binaryhunter.framework.service.GenericService#addBatchAutoId(List)
      * 批量新增
      * @param beans 实体列表
      */
-    @Deprecated
     public void addBatch(List<B> beans);
 
     /**

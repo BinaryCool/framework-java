@@ -4,19 +4,19 @@
  */
 package pers.binaryhunter.framework.service.logic;
 
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import pers.binaryhunter.framework.bean.dto.paging.Page;
 import pers.binaryhunter.framework.bean.po.PO;
 import pers.binaryhunter.framework.bean.vo.paging.PageResult;
 import pers.binaryhunter.framework.dao.GenericDAO;
+import pers.binaryhunter.framework.exception.BusinessException;
 import pers.binaryhunter.framework.service.GenericService;
 import pers.binaryhunter.framework.utils.MapConverter;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
+import java.util.stream.Stream;
 
 
 /**
@@ -120,11 +120,52 @@ public class GenericServiceImpl<B, K> extends GenericAbstractServiceImpl<B, K> i
 
     @Override
     public void updateByArgs(String setSql, Map<String, Object> params) {
+        if(StringUtils.isBlank(setSql)) {
+            throw new BusinessException();
+        }
+
         if(null == params) {
             params = new HashMap<>();
         }
+
         params.put("setSql", setSql);
         dao.updateByArgs(params);
+    }
+
+    @Override
+    public void updateByArgs(Map<String, Object> setMap, Map<String, Object> params) {
+        if(null == setMap || 0 >= setMap.size()) {
+            throw new BusinessException();
+        }
+
+        if(null == params) {
+            params = new HashMap<>();
+        }
+
+        StringBuffer setSql = new StringBuffer();
+        int index = 0;
+        for(Map.Entry<String, Object> entry : setMap.entrySet()) {
+            String key = entry.getKey();
+            Object value = entry.getValue();
+            if(StringUtils.isBlank(key) || null == value) {
+                continue;
+            }
+            if(0 < index) {
+                setSql.append(", ");
+            }
+            setSql.append(key).append(" = '").append(replaceUpdate4SqlInjection(value.toString())).append("'");
+            index ++;
+        }
+
+        this.updateByArgs(setSql.toString(), params);
+    }
+
+    private String replaceUpdate4SqlInjection(String value) {
+        if(StringUtils.isBlank(value)) {
+            return value;
+        }
+
+        return value.replaceAll("'|\\\"", "");
     }
 
     @Override
