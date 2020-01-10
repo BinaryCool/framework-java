@@ -146,13 +146,18 @@ public class GenericServiceImpl<B, K> extends GenericAbstractServiceImpl<B, K> i
         for(int index = 0; index < setArr.length / 2; index ++) {
             Object key = setArr[index * 2];
             Object value = setArr[index * 2 + 1];
-            if(null == key || null == value || StringUtils.isBlank(key.toString())) {
+            if(null == key || StringUtils.isBlank(key.toString())) {
                 continue;
             }
             if(0 < index) {
                 setSql.append(", ");
             }
-            setSql.append(key.toString()).append(" = '").append(replaceUpdate4SqlInjection(value.toString())).append("'");
+            setSql.append(key.toString()).append(" = ");
+            if (null != value) {
+                setSql.append("'").append(replaceUpdate4SqlInjection(value.toString())).append("'");
+            } else {
+                setSql.append("null");
+            }
             index ++;
         }
 
