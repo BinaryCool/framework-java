@@ -133,8 +133,8 @@ public class GenericServiceImpl<B, K> extends GenericAbstractServiceImpl<B, K> i
     }
 
     @Override
-    public void updateByArgs(Map<String, Object> setMap, Map<String, Object> params) {
-        if(null == setMap || 0 >= setMap.size()) {
+    public void updateByArgs(Map<String, Object> params, Object... setArr) {
+        if(null == setArr || 0 >= setArr.length || 1 == setArr.length % 2){
             throw new BusinessException();
         }
 
@@ -143,17 +143,16 @@ public class GenericServiceImpl<B, K> extends GenericAbstractServiceImpl<B, K> i
         }
 
         StringBuffer setSql = new StringBuffer();
-        int index = 0;
-        for(Map.Entry<String, Object> entry : setMap.entrySet()) {
-            String key = entry.getKey();
-            Object value = entry.getValue();
-            if(StringUtils.isBlank(key) || null == value) {
+        for(int index = 0; index < setArr.length / 2; index ++) {
+            Object key = setArr[index * 2];
+            Object value = setArr[index * 2 + 1];
+            if(null == key || null == value || StringUtils.isBlank(key.toString())) {
                 continue;
             }
             if(0 < index) {
                 setSql.append(", ");
             }
-            setSql.append(key).append(" = '").append(replaceUpdate4SqlInjection(value.toString())).append("'");
+            setSql.append(key.toString()).append(" = '").append(replaceUpdate4SqlInjection(value.toString())).append("'");
             index ++;
         }
 

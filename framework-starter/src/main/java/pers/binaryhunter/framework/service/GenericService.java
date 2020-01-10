@@ -101,16 +101,16 @@ public interface GenericService<B,K> {
      * @param setSql setSql
      * @param params 参数
      * 有SQL注入分析, 谨慎使用
-     * @see pers.binaryhunter.framework.service.GenericService#updateByArgs(Map, Map)
+     * @see pers.binaryhunter.framework.service.GenericService#updateByArgs(Map, Object...)
      */
     void updateByArgs(String setSql, Map<String, Object> params);
 
     /**
      * 更新(根据参数)
-     * @param setMap setMap
      * @param params 参数
+     * @param setArr setArr
      */
-    void updateByArgs(Map<String, Object> setMap, Map<String, Object> params);
+    void updateByArgs(Map<String, Object> params, Object... setArr);
     /**
      * 新增
      * @param bean 实体
