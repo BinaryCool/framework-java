@@ -158,7 +158,6 @@ public class GenericServiceImpl<B, K> extends GenericAbstractServiceImpl<B, K> i
             } else {
                 setSql.append("null");
             }
-            index ++;
         }
 
         this.updateByArgs(setSql.toString(), params);
