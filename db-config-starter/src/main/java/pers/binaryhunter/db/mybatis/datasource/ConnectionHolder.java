@@ -24,7 +24,7 @@ public class ConnectionHolder {
 	public final static ThreadLocal<Map<String, Connection>> CONNECTION_CONTEXT = new NamedThreadLocal<Map<String, Connection>>(
 			"connection map"){
 		protected Map<String,Connection> initialValue() {
-			return new HashMap<String,Connection>();
+			return new HashMap<>();
 		};
 	};
 	

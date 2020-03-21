@@ -46,6 +46,11 @@ public interface GenericService<B,K> {
      */
     PageResult<B> pageByArgs(Map<String, Object> params, Page page, boolean enable);
     /**
+     * 查询第一个
+     * @return 查询结果
+     */
+    B queryFirst(Object... args);
+    /**
      * 查询
      * @return 查询结果
      */

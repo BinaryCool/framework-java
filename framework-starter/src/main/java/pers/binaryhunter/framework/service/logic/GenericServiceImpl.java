@@ -4,6 +4,7 @@
  */
 package pers.binaryhunter.framework.service.logic;
 
+import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
@@ -69,6 +70,23 @@ public class GenericServiceImpl<B, K> extends GenericAbstractServiceImpl<B, K> i
         pageResult.setPage(page);
 
         return pageResult;
+    }
+
+    public B queryFirst(Object... args) {
+        Map<String, Object> params = new HashMap<>();
+        if(ArrayUtils.isNotEmpty(args)) {
+            for(int i = 0; i < args.length; i += 2) {
+                if(null != args[i] && (i +1) < args.length && null != args[i]) {
+                    params.put(args[i].toString(), args[i + 1]);
+                }
+            }
+        }
+        params.put("limit", 1);
+        List<B> list = this.queryByArgs(params);
+        if(null == list || 0 >= list.size()) {
+            return null;
+        }
+        return list.get(0);
     }
 
     @Override

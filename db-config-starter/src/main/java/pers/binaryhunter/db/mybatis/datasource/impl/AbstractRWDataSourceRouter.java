@@ -66,7 +66,7 @@ public abstract class AbstractRWDataSourceRouter implements DataSourceRouter, In
 		if (this.readDataSources == null || this.readDataSources.size() == 0) {
 			throw new IllegalArgumentException("Property 'resolvedReadDataSources' is required");
 		}
-		resolvedReadDataSources = new ArrayList<DataSource>(readDataSources.size());
+		resolvedReadDataSources = new ArrayList<>(readDataSources.size());
 		for (Object item : readDataSources) {
 			resolvedReadDataSources.add(resolveSpecifiedDataSource(item));
 		}

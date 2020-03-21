@@ -117,7 +117,7 @@ public class DataSourceProxy implements DataSource {
 	 * @see ConnectionProxy#getTargetConnection()
 	 */
 	@Override
-	public Connection getConnection() throws SQLException {
+	public Connection getConnection() {
 		return (Connection) Proxy.newProxyInstance(ConnectionProxy.class.getClassLoader(),
 				new Class<?>[] { ConnectionProxy.class }, new LazyConnectionInvocationHandler());
 	}
@@ -137,7 +137,7 @@ public class DataSourceProxy implements DataSource {
 	 * @see ConnectionProxy#getTargetConnection()
 	 */
 	@Override
-	public Connection getConnection(String username, String password) throws SQLException {
+	public Connection getConnection(String username, String password) {
 		return (Connection) Proxy.newProxyInstance(ConnectionProxy.class.getClassLoader(),
 				new Class<?>[] { ConnectionProxy.class }, new LazyConnectionInvocationHandler(username, password));
 	}

@@ -19,7 +19,7 @@ public class UserDataSourceRouter implements DataSourceRouter, InitializingBean 
 	/**
 	 * 应用启动时配置一组读写分离数据组，根据不同的用户路由到不同的数据组上。后期不在修改，属于不变模式，不考虑线程安全问题
 	 */
-	private Map<String, AbstractRWDataSourceRouter> userDataSource = new HashMap<String, AbstractRWDataSourceRouter>();
+	private Map<String, AbstractRWDataSourceRouter> userDataSource;
 	
 	public UserDataSourceRouter(Map<String, AbstractRWDataSourceRouter> userDataSource) {
 		this.userDataSource = userDataSource;
@@ -29,7 +29,7 @@ public class UserDataSourceRouter implements DataSourceRouter, InitializingBean 
 	public DataSource getTargetDataSource() {
         String currentDataSourceName = DataSourceHolder.CURRENT_DATASOURCE.get();
         if(StringUtils.isEmpty(currentDataSourceName)) {
-            currentDataSourceName = DataSourceHolder.FOODSAFETY;
+            currentDataSourceName = DataSourceHolder.DEFAULT;
         }
         logger.debug("Current data source name " + currentDataSourceName);
 		AbstractRWDataSourceRouter currentDataSource = userDataSource.get(currentDataSourceName);
@@ -37,7 +37,7 @@ public class UserDataSourceRouter implements DataSourceRouter, InitializingBean 
 	}
 
     @Override
-    public void afterPropertiesSet() throws Exception {
+    public void afterPropertiesSet() {
         for(Map.Entry<String, AbstractRWDataSourceRouter> entry : userDataSource.entrySet()) {
             entry.getValue().afterPropertiesSet();
         }

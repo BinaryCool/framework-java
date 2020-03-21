@@ -3,8 +3,8 @@ package pers.binaryhunter.db.mybatis.datasource;
 import org.springframework.core.NamedThreadLocal;
 
 public class DataSourceHolder {
-    public static final String FOODSAFETY = "foodsafety";
-    public static final String B2B = "b2b";
+    public static final String DEFAULT = "default";
+    // public static final String B2B = "b2b";
     
 	/**
 	 * 当前数据组
