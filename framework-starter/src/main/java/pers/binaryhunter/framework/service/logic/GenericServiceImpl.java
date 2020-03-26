@@ -72,6 +72,12 @@ public class GenericServiceImpl<B, K> extends GenericAbstractServiceImpl<B, K> i
         return pageResult;
     }
 
+    public List<B> queryByField(String fieldSQL, Map<String, Object> params) {
+        params = doStatusParams(params, true);
+        params.put("fieldSQL", fieldSQL);
+        return dao.queryByField(params);
+    }
+
     public B queryFirst(Object... args) {
         Map<String, Object> params = new HashMap<>();
         if(ArrayUtils.isNotEmpty(args)) {

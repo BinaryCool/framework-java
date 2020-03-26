@@ -75,6 +75,10 @@ public interface GenericDAO<B,K> {
     public Long getSequences(int step);
 
     /**
+     * 查找
+     */
+    List<B> queryByField(Map<String, Object> params);
+    /**
      * 条件查询
      * @param params 条件
      * @return 对象列表

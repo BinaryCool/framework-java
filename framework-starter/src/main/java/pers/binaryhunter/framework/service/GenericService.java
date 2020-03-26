@@ -45,6 +45,11 @@ public interface GenericService<B,K> {
      * By Yuwen on 2017年6月22日
      */
     PageResult<B> pageByArgs(Map<String, Object> params, Page page, boolean enable);
+
+    /**
+     * 查询
+     */
+    List<B> queryByField(String fieldSQL, Map<String, Object> params);
     /**
      * 查询第一个
      * @return 查询结果
