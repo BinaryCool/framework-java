@@ -47,6 +47,10 @@ public interface GenericService<B,K> {
     PageResult<B> pageByArgs(Map<String, Object> params, Page page, boolean enable);
 
     /**
+     * 查询第一个
+     */
+    B queryFirstByField(String fieldSQL, Object... args);
+    /**
      * 查询
      */
     List<B> queryByField(String fieldSQL, Map<String, Object> params);

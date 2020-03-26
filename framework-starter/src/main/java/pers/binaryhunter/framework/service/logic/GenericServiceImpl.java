@@ -72,13 +72,7 @@ public class GenericServiceImpl<B, K> extends GenericAbstractServiceImpl<B, K> i
         return pageResult;
     }
 
-    public List<B> queryByField(String fieldSQL, Map<String, Object> params) {
-        params = doStatusParams(params, true);
-        params.put("fieldSQL", fieldSQL);
-        return dao.queryByField(params);
-    }
-
-    public B queryFirst(Object... args) {
+    private Map<String, Object> arr2Map(Object... args) {
         Map<String, Object> params = new HashMap<>();
         if(ArrayUtils.isNotEmpty(args)) {
             for(int i = 0; i < args.length; i += 2) {
@@ -87,6 +81,27 @@ public class GenericServiceImpl<B, K> extends GenericAbstractServiceImpl<B, K> i
                 }
             }
         }
+        return params;
+    }
+
+    public B queryFirstByField(String fieldSQL, Object... args) {
+        Map<String, Object> params = this.arr2Map(args);
+        params.put("limit", 1);
+        List<B> list = this.queryByField(fieldSQL, params);
+        if(null == list || 0 >= list.size()) {
+            return null;
+        }
+        return list.get(0);
+    }
+
+    public List<B> queryByField(String fieldSQL, Map<String, Object> params) {
+        params = doStatusParams(params, true);
+        params.put("fieldSQL", fieldSQL);
+        return dao.queryByField(params);
+    }
+
+    public B queryFirst(Object... args) {
+        Map<String, Object> params = this.arr2Map(args);
         params.put("limit", 1);
         List<B> list = this.queryByArgs(params);
         if(null == list || 0 >= list.size()) {
