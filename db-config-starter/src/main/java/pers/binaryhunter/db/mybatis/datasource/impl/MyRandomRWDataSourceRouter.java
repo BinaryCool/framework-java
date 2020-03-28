@@ -15,6 +15,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 public class MyRandomRWDataSourceRouter extends AbstractRWDataSourceRouter {
     private static final Logger log = LoggerFactory.getLogger(MyRandomRWDataSourceRouter.class);
 
+    private boolean first = true;
     private AtomicInteger totalWeight = new AtomicInteger(0);
 	private Random random = new Random();
     private AtomicInteger count = new AtomicInteger(0);
@@ -22,16 +23,19 @@ public class MyRandomRWDataSourceRouter extends AbstractRWDataSourceRouter {
 	@Override
 	protected DataSource loadBalance() {
 	    List<DataSource> list = getResolvedReadDataSources();
-	    synchronized (log) {
-            if (0 >= totalWeight.get()) {
-                for (DataSource ds : list) {
-                    MyDataSource mds = (MyDataSource) ds;
-                    if (0 >= mds.getWeight()) {
-                        mds.setWeight(1);
-                    }
+	    if(first) {
+	        first = false;
+            synchronized (log) {
+                if (0 >= totalWeight.get()) {
+                    for (DataSource ds : list) {
+                        MyDataSource mds = (MyDataSource) ds;
+                        if (0 >= mds.getWeight()) {
+                            mds.setWeight(1);
+                        }
 
-                    mds.setMin(totalWeight.incrementAndGet());
-                    mds.setMax(totalWeight.addAndGet(mds.getWeight()));
+                        mds.setMin(totalWeight.incrementAndGet());
+                        mds.setMax(totalWeight.addAndGet(mds.getWeight()));
+                    }
                 }
             }
         }
