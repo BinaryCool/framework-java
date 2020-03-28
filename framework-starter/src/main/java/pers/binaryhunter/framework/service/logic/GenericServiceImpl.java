@@ -16,8 +16,10 @@ import pers.binaryhunter.framework.exception.BusinessException;
 import pers.binaryhunter.framework.service.GenericService;
 import pers.binaryhunter.framework.utils.MapConverter;
 
-import java.util.*;
-import java.util.stream.Stream;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 
 /**
@@ -220,7 +222,7 @@ public class GenericServiceImpl<B, K> extends GenericAbstractServiceImpl<B, K> i
      * @param beans 实体列表
      */
     @Override
-    @Transactional(propagation = Propagation.REQUIRED, rollbackFor = Exception.class)
+    @Transactional(propagation = Propagation.REQUIRES_NEW, rollbackFor = Exception.class)
     @Deprecated
     public void addBatch(List<B> beans){
         int times = (int) (Math.ceil(beans.size() * 1.0 / COUNT_BATCH));
@@ -230,7 +232,7 @@ public class GenericServiceImpl<B, K> extends GenericAbstractServiceImpl<B, K> i
     }
 
     @Override
-    @Transactional(propagation = Propagation.REQUIRED, rollbackFor = Exception.class)
+    @Transactional(propagation = Propagation.REQUIRES_NEW, rollbackFor = Exception.class)
     public void addBatchAutoId(List<B> beans){
         if(beans.get(0) instanceof PO){
             Long id = getSequences(beans.size());
