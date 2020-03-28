@@ -12,6 +12,7 @@ import pers.binaryhunter.db.mybatis.datasource.DataSourceRouter;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.jdbc.datasource.lookup.DataSourceLookup;
 import org.springframework.jdbc.datasource.lookup.JndiDataSourceLookup;
+import pers.binaryhunter.db.mybatis.datasource.MyDataSource;
 
 public abstract class AbstractRWDataSourceRouter implements DataSourceRouter, InitializingBean {
     private static final Logger logger = LoggerFactory.getLogger(AbstractRWDataSourceRouter.class);

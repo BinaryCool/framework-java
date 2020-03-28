@@ -23,6 +23,9 @@ import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
 import pers.binaryhunter.db.mybatis.datasource.DataSourceProxy;
 import pers.binaryhunter.db.mybatis.datasource.DataSourceRouter;
+import pers.binaryhunter.db.mybatis.datasource.MyDataSource;
+import pers.binaryhunter.db.mybatis.datasource.impl.AbstractRWDataSourceRouter;
+import pers.binaryhunter.db.mybatis.datasource.impl.MyRandomRWDataSourceRouter;
 import pers.binaryhunter.db.mybatis.datasource.impl.RoundRobinRWDataSourceRouter;
 import pers.binaryhunter.db.mybatis.pulgin.RWPlugin;
 
@@ -48,7 +51,7 @@ public class MybatisAutoConfiguration {
 	@Autowired(required = false)
 	private DatabaseIdProvider databaseIdProvider;
 	
-	private List<DruidDataSource> readDataSources = new ArrayList<>();
+	private List<MyDataSource> readDataSources = new ArrayList<>();
 
 	private DruidDataSource writeDataSource;
 	
@@ -101,7 +104,8 @@ public class MybatisAutoConfiguration {
 	@Bean
 	@ConditionalOnMissingBean
 	public DataSourceRouter readRoutingDataSource() {
-        RoundRobinRWDataSourceRouter proxy = new RoundRobinRWDataSourceRouter();
+        //RoundRobinRWDataSourceRouter proxy = new RoundRobinRWDataSourceRouter();
+        AbstractRWDataSourceRouter proxy = new MyRandomRWDataSourceRouter();
 		proxy.setReadDataSources(getReadDataSources());
 		proxy.setWriteDataSource(getWriteDataSource());
 		return proxy;
@@ -115,7 +119,7 @@ public class MybatisAutoConfiguration {
 		return this.writeDataSource;
 	}
 	
-	public List<DruidDataSource> getReadDataSources() {
+	public List<MyDataSource> getReadDataSources() {
 		return readDataSources;
 	}
 
