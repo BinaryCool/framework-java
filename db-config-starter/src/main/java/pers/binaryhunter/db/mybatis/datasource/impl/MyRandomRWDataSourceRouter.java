@@ -6,18 +6,18 @@ import pers.binaryhunter.db.mybatis.datasource.MyDataSource;
 
 import javax.sql.DataSource;
 import java.util.List;
-import java.util.Random;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
- * 简单实现读数据源负载均衡
+ * 基于权重轮询算法
+ * Algorithm is as follows: on each peer selection we increase current_weight of each eligible peer by its weight,
+ * select peer with greatest current_weight and reduce its current_weight by total number of weight points distributed among peers.
  */
 public class MyRandomRWDataSourceRouter extends AbstractRWDataSourceRouter {
     private static final Logger log = LoggerFactory.getLogger(MyRandomRWDataSourceRouter.class);
 
     private boolean first = true;
-    private AtomicInteger totalWeight = new AtomicInteger(0);
-	private Random random = new Random();
+    private int totalWeight = 0;
     private AtomicInteger count = new AtomicInteger(0);
 
 	@Override
@@ -26,30 +26,33 @@ public class MyRandomRWDataSourceRouter extends AbstractRWDataSourceRouter {
 	    if(first) {
 	        first = false;
             synchronized (log) {
-                if (0 >= totalWeight.get()) {
+                if (0 >= totalWeight) {
                     for (DataSource ds : list) {
                         MyDataSource mds = (MyDataSource) ds;
                         if (0 >= mds.getWeight()) {
                             mds.setWeight(1);
                         }
-
-                        mds.setMin(totalWeight.incrementAndGet());
-                        mds.setMax(totalWeight.addAndGet(mds.getWeight()));
+                        totalWeight += mds.getWeight();
                     }
                 }
             }
         }
 
-	    int rmIndex = random.nextInt(totalWeight.get()) + 1;
+	    MyDataSource maxMds = null;
         for(DataSource ds : list) {
             MyDataSource mds = (MyDataSource) ds;
-            if(0 >= mds.getMin() || 0 >= mds.getMax()) {
-                continue;
+            // 每个节点，用它们的当前值加上它们自己的权重。
+            mds.setCurrent(mds.getCurrent() + mds.getWeight());
+
+            if(null == maxMds || maxMds.getCurrent() < mds.getCurrent()) { //发现最大值
+                maxMds = mds;
             }
-            if(mds.getMin() <= rmIndex && mds.getMax() >= rmIndex) {
-                log.debug("Data source route by Weight: rmIndex {}, min {}, max {}, totalWeight {}", rmIndex, mds.getMin(), mds.getMax(), totalWeight.get());
-                return ds;
-            }
+        }
+        //选择当前值最大的节点为选中节点，并把它的当前值减去所有节点的权重总和。
+        if(null != maxMds) {
+            log.debug("Max current {}/{}", maxMds.getCurrent(),  maxMds.getWeight());
+            maxMds.setCurrent(maxMds.getCurrent() - totalWeight);
+            return maxMds;
         }
 
         int index = Math.abs(count.incrementAndGet()) % getReadDsSize();
