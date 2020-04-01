@@ -8,16 +8,21 @@ import org.apache.ibatis.session.SqlSessionFactory;
 import org.mybatis.spring.SqlSessionFactoryBean;
 import org.mybatis.spring.SqlSessionTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Role;
 import org.springframework.core.io.DefaultResourceLoader;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceLoader;
 import org.springframework.jdbc.datasource.DataSourceTransactionManager;
+import org.springframework.transaction.annotation.AnnotationTransactionAttributeSource;
+import org.springframework.transaction.interceptor.TransactionInterceptor;
 import org.springframework.util.Assert;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
@@ -26,7 +31,6 @@ import pers.binaryhunter.db.mybatis.datasource.DataSourceRouter;
 import pers.binaryhunter.db.mybatis.datasource.MyDataSource;
 import pers.binaryhunter.db.mybatis.datasource.impl.AbstractRWDataSourceRouter;
 import pers.binaryhunter.db.mybatis.datasource.impl.MyRandomRWDataSourceRouter;
-import pers.binaryhunter.db.mybatis.datasource.impl.RoundRobinRWDataSourceRouter;
 import pers.binaryhunter.db.mybatis.pulgin.RWPlugin;
 
 import javax.annotation.PostConstruct;
@@ -104,7 +108,6 @@ public class MybatisAutoConfiguration {
 	@Bean
 	@ConditionalOnMissingBean
 	public DataSourceRouter readRoutingDataSource() {
-        //RoundRobinRWDataSourceRouter proxy = new RoundRobinRWDataSourceRouter();
         AbstractRWDataSourceRouter proxy = new MyRandomRWDataSourceRouter();
 		proxy.setReadDataSources(getReadDataSources());
 		proxy.setWriteDataSource(getWriteDataSource());
@@ -129,8 +132,8 @@ public class MybatisAutoConfiguration {
 	}
 
 	@Bean
-	public DataSourceTransactionManager transactionManager(DataSourceProxy DataSource) {
-		return new DataSourceTransactionManager(DataSource);
+	public DataSourceTransactionManager transactionManager(DataSourceProxy dataSource) {
+		return new DataSourceTransactionManager(dataSource);
 	}
 
 	@Bean
