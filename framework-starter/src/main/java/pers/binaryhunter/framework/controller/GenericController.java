@@ -36,7 +36,7 @@ public class GenericController {
         }
 
         int code = ResponseBean.CodeEnum.ERR_UNKOWN.getCode();
-        String msg = ex.getMessage();
+        String msg = ResponseBean.CodeEnum.ERR_UNKOWN.getMsg();
         if (ex instanceof BusinessException) {
             code = ((BusinessException) ex).getCode();
         } else if (ex instanceof SessionOutException) {
