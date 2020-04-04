@@ -36,17 +36,24 @@ public class GenericController {
         }
 
         int code = ResponseBean.CodeEnum.ERR_UNKOWN.getCode();
-        String msg = ResponseBean.CodeEnum.ERR_UNKOWN.getMsg();
+        String msg;
         if (ex instanceof BusinessException) {
             code = ((BusinessException) ex).getCode();
+            msg = ex.getMessage();
         } else if (ex instanceof SessionOutException) {
             code = ((SessionOutException) ex).getCode();
+            msg = ex.getMessage();
         } else if (ex instanceof ClientAbortException) {
             msg = ResponseBean.CodeEnum.ERR_UNKOWN.getMsg();
         } else {
             msg = ResponseBean.CodeEnum.ERR_UNKOWN.getMsg();
             logger.error("", ex);
         }
+
+        if(50 < msg.length()) {
+            msg = msg.substring(0, 50);
+        }
+
         return toResponse(msg, code);
     }
 
