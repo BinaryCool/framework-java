@@ -6,8 +6,6 @@ package pers.binaryhunter.framework.service.logic;
 
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.springframework.transaction.annotation.Propagation;
-import org.springframework.transaction.annotation.Transactional;
 import pers.binaryhunter.framework.bean.dto.paging.Page;
 import pers.binaryhunter.framework.bean.po.PO;
 import pers.binaryhunter.framework.bean.vo.paging.PageResult;
@@ -151,7 +149,6 @@ public class GenericServiceImpl<B, K> extends GenericAbstractServiceImpl<B, K> i
     }
 
     @Override
-    @Transactional(value = "transactionManager", propagation = Propagation.REQUIRED, rollbackFor = Exception.class)
     public void updateBatch(List<B> beans){
         int times = (int) (Math.ceil(beans.size() * 1.0 / COUNT_BATCH));
         for(int i = 0; i < times; i ++ ) {
@@ -222,7 +219,6 @@ public class GenericServiceImpl<B, K> extends GenericAbstractServiceImpl<B, K> i
      * @param beans 实体列表
      */
     @Override
-    @Transactional(value = "transactionManager", propagation = Propagation.REQUIRED, rollbackFor = Exception.class)
     @Deprecated
     public void addBatch(List<B> beans){
         int times = (int) (Math.ceil(beans.size() * 1.0 / COUNT_BATCH));
@@ -232,7 +228,6 @@ public class GenericServiceImpl<B, K> extends GenericAbstractServiceImpl<B, K> i
     }
 
     @Override
-    @Transactional(value = "transactionManager", propagation = Propagation.REQUIRED, rollbackFor = Exception.class)
     public void addBatchAutoId(List<B> beans){
         if(beans.get(0) instanceof PO){
             Long id = getSequences(beans.size());
