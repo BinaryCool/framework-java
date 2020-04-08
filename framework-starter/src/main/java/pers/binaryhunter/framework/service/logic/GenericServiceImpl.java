@@ -151,7 +151,7 @@ public class GenericServiceImpl<B, K> extends GenericAbstractServiceImpl<B, K> i
     }
 
     @Override
-    @Transactional(propagation = Propagation.REQUIRES_NEW, rollbackFor = Exception.class)
+    @Transactional(propagation = Propagation.REQUIRED, rollbackFor = Exception.class)
     public void updateBatch(List<B> beans){
         int times = (int) (Math.ceil(beans.size() * 1.0 / COUNT_BATCH));
         for(int i = 0; i < times; i ++ ) {
@@ -223,7 +223,7 @@ public class GenericServiceImpl<B, K> extends GenericAbstractServiceImpl<B, K> i
      */
     @Override
     @Deprecated
-    @Transactional(propagation = Propagation.REQUIRES_NEW, rollbackFor = Exception.class)
+    @Transactional(propagation = Propagation.REQUIRED, rollbackFor = Exception.class)
     public void addBatch(List<B> beans){
         int times = (int) (Math.ceil(beans.size() * 1.0 / COUNT_BATCH));
         for(int i = 0; i < times; i ++ ) {
@@ -232,7 +232,7 @@ public class GenericServiceImpl<B, K> extends GenericAbstractServiceImpl<B, K> i
     }
 
     @Override
-    @Transactional(propagation = Propagation.REQUIRES_NEW, rollbackFor = Exception.class)
+    @Transactional(propagation = Propagation.REQUIRED, rollbackFor = Exception.class)
     public void addBatchAutoId(List<B> beans){
         if(beans.get(0) instanceof PO){
             Long id = getSequences(beans.size());
