@@ -33,22 +33,24 @@ public abstract class Session {
 	private InputStream is;
 	//输出流
 	private OutputStream os;
-	
-	/** Document构建类 */
-	private static DocumentBuilder builder;
-	private static TransformerFactory tffactory;
-	  
-	static{
-		DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
-		try {
-			builder = factory.newDocumentBuilder();
-		} catch (ParserConfigurationException e) {
-			e.printStackTrace();
-		}
-		//格式化工厂对象
-		tffactory = TransformerFactory.newInstance();
-	}
-	
+
+    private static ThreadLocal<DocumentBuilder> builder = ThreadLocal.withInitial(() -> {
+        try {
+            return DocumentBuilderFactory.newInstance().newDocumentBuilder();
+        } catch (ParserConfigurationException e) {
+            String msg = "DocumentBuilder 对象初始化失败！";
+            log.error(msg, e);
+            throw new IllegalStateException(msg, e);
+        }
+    });
+
+
+    private static TransformerFactory tffactory;
+
+    static{
+        //格式化工厂对象
+        tffactory = TransformerFactory.newInstance();
+    }
 	/**
 	 * Session 
 	 * 
@@ -66,7 +68,7 @@ public abstract class Session {
 		this.os = os;
 		this.is = is;
         
-        Document document = builder.parse(is);
+        Document document = builder.get().parse(is);
         Msg4Head head = new Msg4Head();
         head.read(document);
         String type = head.getMsgType();
@@ -111,7 +113,7 @@ public abstract class Session {
 	 * @param msg 消息对象（支持：文本、音乐、图文）
 	 * */
 	public void callback(Msg msg){
-		Document document = builder.newDocument();
+		Document document = builder.get().newDocument();
 		msg.write(document);
 		try {
 			Transformer transformer = tffactory.newTransformer();
@@ -124,6 +126,7 @@ public abstract class Session {
     /*
      * 把dom文件转换为xml字符串
      */
+    /*
     public static String toStringFromDoc(Document document, Transformer transformer) {
         String result = null;
         if (document == null) {
@@ -148,6 +151,7 @@ public abstract class Session {
 
         return result;
     }
+    */
 	
 	/**
 	 * 关闭
