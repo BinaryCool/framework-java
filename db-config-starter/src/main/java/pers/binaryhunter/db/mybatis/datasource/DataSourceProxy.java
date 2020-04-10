@@ -255,7 +255,7 @@ public class DataSourceProxy implements DataSource {
 				if (method.getName().equals("commit")) {
 					Map<String, Connection> connectionMap = ConnectionHolder.CONNECTION_CONTEXT.get();
 					Connection writeCon = connectionMap.get(ConnectionHolder.WRITE);
-					if (writeCon != null) {
+					if (writeCon != null && !this.autoCommit) {
 						writeCon.commit();
 					}
 					return null;
@@ -346,7 +346,7 @@ public class DataSourceProxy implements DataSource {
 			// Apply kept transaction settings, if any.
 			if (this.readOnly) {
 				try {
-					target.setReadOnly(this.readOnly);
+					target.setReadOnly(true);
 				} catch (Exception ex) {
 					// "read-only not supported" -> ignore, it's just a hint
 					// anyway
