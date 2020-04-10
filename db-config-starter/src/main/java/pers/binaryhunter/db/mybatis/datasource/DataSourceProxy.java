@@ -255,7 +255,7 @@ public class DataSourceProxy implements DataSource {
 				if (method.getName().equals("commit")) {
 					Map<String, Connection> connectionMap = ConnectionHolder.CONNECTION_CONTEXT.get();
 					Connection writeCon = connectionMap.get(ConnectionHolder.WRITE);
-					if (writeCon != null && null != this.autoCommit && !this.autoCommit) {
+					if (writeCon != null && !writeCon.getAutoCommit()) {
 						writeCon.commit();
 					}
 					return null;
