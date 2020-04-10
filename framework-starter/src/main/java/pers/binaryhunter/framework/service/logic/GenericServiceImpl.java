@@ -195,7 +195,11 @@ public class GenericServiceImpl<B, K> extends GenericAbstractServiceImpl<B, K> i
             }
             setSql.append(key.toString()).append(" = ");
             if (null != value) {
-                setSql.append("'").append(replaceUpdate4SqlInjection(value.toString())).append("'");
+                if(value instanceof Boolean) {
+                    setSql.append(value.toString());
+                } else {
+                    setSql.append("'").append(replaceUpdate4SqlInjection(value.toString())).append("'");
+                }
             } else {
                 setSql.append("null");
             }
