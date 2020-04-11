@@ -4,10 +4,8 @@ import org.springframework.core.NamedThreadLocal;
 
 public class DataSourceHolder {
     public static final String DEFAULT = "default";
-    // public static final String B2B = "b2b";
-    
 	/**
 	 * 当前数据组
 	 */
-	public final static ThreadLocal<String> CURRENT_DATASOURCE = new NamedThreadLocal<String>("routingdatasource's key");
+	public final static ThreadLocal<String> CURRENT_DATASOURCE = new NamedThreadLocal<>("routingdatasource's key");
 }

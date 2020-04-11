@@ -1,22 +1,11 @@
 package pers.binaryhunter.db.mybatis.pulgin;
 
-import java.lang.reflect.InvocationHandler;
-import java.lang.reflect.Proxy;
-import java.sql.Connection;
-import java.sql.SQLException;
-import java.util.Properties;
-
-import pers.binaryhunter.db.mybatis.datasource.ConnectionHolder;
 import org.apache.ibatis.executor.statement.RoutingStatementHandler;
 import org.apache.ibatis.executor.statement.StatementHandler;
 import org.apache.ibatis.logging.jdbc.ConnectionLogger;
 import org.apache.ibatis.mapping.MappedStatement;
 import org.apache.ibatis.mapping.SqlCommandType;
-import org.apache.ibatis.plugin.Interceptor;
-import org.apache.ibatis.plugin.Intercepts;
-import org.apache.ibatis.plugin.Invocation;
-import org.apache.ibatis.plugin.Plugin;
-import org.apache.ibatis.plugin.Signature;
+import org.apache.ibatis.plugin.*;
 import org.apache.ibatis.reflection.DefaultReflectorFactory;
 import org.apache.ibatis.reflection.MetaObject;
 import org.apache.ibatis.reflection.factory.DefaultObjectFactory;
@@ -24,6 +13,13 @@ import org.apache.ibatis.reflection.wrapper.DefaultObjectWrapperFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.jdbc.datasource.ConnectionProxy;
+import pers.binaryhunter.db.mybatis.datasource.ConnectionHolder;
+
+import java.lang.reflect.InvocationHandler;
+import java.lang.reflect.Proxy;
+import java.sql.Connection;
+import java.sql.SQLException;
+import java.util.Properties;
 
 /**
  * 数据源读写分离路由
@@ -67,22 +63,20 @@ public class RWPlugin implements Interceptor {
 	}
 	
 	private void routeConnection(String key, Connection conn) {
-		ConnectionHolder.CURRENT_CONNECTION.set(key);
-        
-		// 同一个线程下保证最多只有一个写数据链接和读数据链接
-		if (!ConnectionHolder.CONNECTION_CONTEXT.get().containsKey(key)) {
-			ConnectionProxy conToUse = (ConnectionProxy) conn;
-			conn = conToUse.getTargetConnection();
-			if (ConnectionHolder.READ.equals(key)) {
-				try {
-					conn.setAutoCommit(true); 
-				} catch (SQLException e) {
-					e.printStackTrace();
-				}
-			}
-			ConnectionHolder.CONNECTION_CONTEXT.get().put(key, conn);
-		} else {
-            logger.debug("Connection context already contain key " + key);
+        ConnectionHolder.CURRENT_CONNECTION.set(key);
+
+        // 同一个线程下保证最多只有一个写数据链接和读数据链接
+        if (!ConnectionHolder.CONNECTION_CONTEXT.get().containsKey(key)) {
+            ConnectionProxy conToUse = (ConnectionProxy) conn;
+            conn = conToUse.getTargetConnection();
+            if (ConnectionHolder.READ.equals(key)) {
+                try {
+                    conn.setAutoCommit(true);
+                } catch (SQLException e) {
+                    e.printStackTrace();
+                }
+            }
+            ConnectionHolder.CONNECTION_CONTEXT.get().put(key, conn);
         }
 	}
 

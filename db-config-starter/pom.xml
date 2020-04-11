@@ -6,7 +6,7 @@
     <groupId>pers.binaryhunter</groupId>
     <artifactId>db-config-starter</artifactId>
     <packaging>jar</packaging>
-    <version>2.1.21</version>
+    <version>2.1.24</version>
 
     <parent>
         <groupId>pers.binaryhunter</groupId>

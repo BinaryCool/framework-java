@@ -27,7 +27,7 @@ public class DataSourceProxy implements DataSource {
 
 	private Boolean defaultAutoCommit = Boolean.TRUE;
 
-	private Integer defaultTransactionIsolation = 2;
+	private Integer defaultTransactionIsolation = Connection.TRANSACTION_READ_COMMITTED;
 
 	private DataSourceRouter dataSourceRouter;
 
@@ -245,7 +245,9 @@ public class DataSourceProxy implements DataSource {
 					return null;
 				} else if (method.getName().equals("isClosed")) {
 					return this.closed;
-				} else if (this.closed) {
+				} else if (method.getName().equals("getMetaData")) {
+                    return getTargetConnection(method).getMetaData();
+                } else if (this.closed) {
 					// Connection proxy closed, without ever having fetched a
 					// physical JDBC Connection: throw corresponding
 					// SQLException.
@@ -256,7 +258,11 @@ public class DataSourceProxy implements DataSource {
 					Map<String, Connection> connectionMap = ConnectionHolder.CONNECTION_CONTEXT.get();
 					Connection writeCon = connectionMap.get(ConnectionHolder.WRITE);
 					if (writeCon != null) {
-					    writeCon.commit();
+					    try {
+                            writeCon.commit();
+                        } catch (Exception ex) {
+					        logger.error("", ex);
+                        }
 					}
 					return null;
 				}
@@ -272,8 +278,7 @@ public class DataSourceProxy implements DataSource {
 		            ConnectionHolder.FORCE_WRITE.set(Boolean.FALSE);
 					Map<String, Connection> connectionMap = ConnectionHolder.CONNECTION_CONTEXT.get();
                     
-					Connection readCon = null;
-                    readCon = connectionMap.remove(ConnectionHolder.READ);
+					Connection readCon = connectionMap.remove(ConnectionHolder.READ);
 					if (readCon != null) {
 					    readCon.close();
                     }
