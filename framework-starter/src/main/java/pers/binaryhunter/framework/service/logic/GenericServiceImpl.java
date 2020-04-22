@@ -104,8 +104,18 @@ public class GenericServiceImpl<B, K> extends GenericAbstractServiceImpl<B, K> i
 
     public B queryFirst(Object... args) {
         Map<String, Object> params = this.arr2Map(args);
+        return queryFirst(params);
+    }
+
+    @Override
+    public B queryFirst(Map<String, Object> params) {
+        return queryFirst(params, true);
+    }
+
+    @Override
+    public B queryFirst(Map<String, Object> params, boolean enable) {
         params.put("limit", 1);
-        List<B> list = this.queryByArgs(params);
+        List<B> list = this.queryByArgs(params, enable);
         if(null == list || 0 >= list.size()) {
             return null;
         }

@@ -59,6 +59,19 @@ public interface GenericService<B,K> {
      * @return 查询结果
      */
     B queryFirst(Object... args);
+
+    /**
+     * 查询第一个
+     * @return 查询结果
+     */
+    B queryFirst(Map<String, Object> params);
+
+    /**
+     * 查询第一个
+     * @return 查询结果
+     */
+    B queryFirst(Map<String, Object> params, boolean enable);
+
     /**
      * 查询
      * @return 查询结果
