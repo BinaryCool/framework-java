@@ -34,7 +34,7 @@
             <scope>compile</scope>
         </dependency>
 
-        <!-- 导入druid的jar包，用来配置数据源 -->
+        <!-- 导入druid的jar 包，用来配置数据源 -->
         <dependency>
             <groupId>com.alibaba</groupId>
             <artifactId>druid</artifactId>
