@@ -245,9 +245,7 @@ public class DataSourceProxy implements DataSource {
 					return null;
 				} else if (method.getName().equals("isClosed")) {
 					return this.closed;
-				} else if (method.getName().equals("getMetaData")) {
-                    return getTargetConnection(method).getMetaData();
-                } else if (this.closed) {
+				} else if (this.closed) {
 					// Connection proxy closed, without ever having fetched a
 					// physical JDBC Connection: throw corresponding
 					// SQLException.
@@ -304,13 +302,14 @@ public class DataSourceProxy implements DataSource {
                 String currentConnection = ConnectionHolder.CURRENT_CONNECTION.get();
                 if(StringUtils.isEmpty(currentConnection)) {
                     logger.warn("Current connection is empty");
-                    return null;
+                    currentConnection = ConnectionHolder.WRITE;
                 }
 
                 Map<String, Connection> currentContext = ConnectionHolder.CONNECTION_CONTEXT.get();
                 if(CollectionUtils.isEmpty(currentContext)) {
                     logger.warn("Current context " + currentConnection + " is empty");
-                    return null;
+                    Connection conn = getTargetConnection(method);
+                    currentContext.put(currentConnection, conn);
                 }
 
                 Connection conn = currentContext.get(currentConnection);
