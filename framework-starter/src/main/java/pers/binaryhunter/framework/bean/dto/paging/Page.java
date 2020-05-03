@@ -1,10 +1,13 @@
 package pers.binaryhunter.framework.bean.dto.paging;
 
+import java.io.Serializable;
+
 /**
  * 分页
  * @author Yuwen on 2017年6月22日
  */
-public class Page {
+public class Page implements Serializable {
+    private static final long serialVersionUID = 2L;
 	/**
 	 * 当前页数
 	 */
