@@ -2,13 +2,16 @@ package pers.binaryhunter.framework.bean.vo.paging;
 
 import pers.binaryhunter.framework.bean.dto.paging.Page;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
 /**
  * @author Yuwen on 2017年6月22日
  */
-public class PageResult<B> {
+public class PageResult<B> implements Serializable {
+
+    private static final long serialVersionUID = 1L;
 	/**
 	 * 分页信息
 	 */
