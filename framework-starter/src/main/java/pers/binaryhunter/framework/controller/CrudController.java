@@ -22,84 +22,61 @@ import java.util.Map;
 public class CrudController<B extends PO, S extends GenericService<B, Long>> extends GenericController {
 
     @Resource
-    S service;
+    private S service;
 
     @ResponseBody
     @RequestMapping("/retrieve")
     public Object retrieve(B bean, Page page) {
-        try {
-            Map<String, Object> params = MapConverter.convertByField(bean);
-            params.put("status", PO.STATUS_ENABLE);
-            PageResult<B> pageResult = service.pageByArgs(params, page);
+            PageResult<B> pageResult = service.pageByArgs(null, page);
             return toResponse(pageResult);
-        } catch (Exception e) {
-            return toResponse(e);
-        }
     }
 
     @ResponseBody
     @RequestMapping("/create")
     public Object create(B bean) {
-        try {
-            if (null == bean) {
-                throw new BusinessException();
-            }
-            service.add(bean);
-            bean = service.getById(bean.getId());
-            return toResponse(bean);
-        } catch (Exception e) {
-            return toResponse(e);
+        if (null == bean) {
+            throw new BusinessException();
         }
+        service.add(bean);
+        bean = service.getById(bean.getId());
+        return toResponse(bean);
     }
 
     @ResponseBody
     @RequestMapping("/update")
     public Object update(B bean) {
-        try {
-            if (null == bean.getId() || bean.getId() <= 0) {
-                throw new BusinessException();
-            }
-            service.update(bean);
-            bean = service.getById(bean.getId());
-
-            return toResponse(bean);
-        } catch (Exception e) {
-            return toResponse(e);
+        if (null == bean.getId() || bean.getId() <= 0) {
+            throw new BusinessException();
         }
+        service.update(bean);
+        bean = service.getById(bean.getId());
+
+        return toResponse(bean);
     }
 
     @ResponseBody
     @RequestMapping("/delete")
     public Object delete(Long[] ids) {
-        try {
-            if (null == ids || ids.length <= 0) {
-                throw new BusinessException();
-            }
-
-            Map<String, Object> params = new HashMap<>();
-            params.put("idIn", StringUtils.join(ids, ","));
-
-            service.updateByArgs("t.status = " + PO.STATUS_DISABLE, params);
-
-            return toResponse(ids);
-        } catch (Exception e) {
-            return toResponse(e);
+        if (null == ids || ids.length <= 0) {
+            throw new BusinessException();
         }
+
+        Map<String, Object> params = new HashMap<>();
+        params.put("idIn", StringUtils.join(ids, ","));
+
+        service.updateByArgs("t.status = " + PO.STATUS_DISABLE, params);
+
+        return toResponse(ids);
     }
 
     @ResponseBody
     @RequestMapping("/get")
     public Object get(Long id) {
-        try {
-            if (null == id || id <= 0) {
-                throw new BusinessException();
-            }
-
-            B bean = service.getById(id);
-
-            return toResponse(bean);
-        } catch (Exception e) {
-            return toResponse(e);
+        if (null == id || id <= 0) {
+            throw new BusinessException();
         }
+
+        B bean = service.getById(id);
+        return toResponse(bean);
     }
 }

@@ -1,11 +1,16 @@
 package pers.binaryhunter.framework.controller;
 
+import com.alibaba.fastjson.JSON;
 import org.apache.catalina.connector.ClientAbortException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.web.context.request.RequestContextHolder;
+import org.springframework.web.context.request.ServletRequestAttributes;
 import pers.binaryhunter.framework.bean.vo.ResponseBean;
 import pers.binaryhunter.framework.exception.BusinessException;
 import pers.binaryhunter.framework.exception.SessionOutException;
+
+import javax.servlet.http.HttpServletRequest;
 
 /**
  * 控制器父类
@@ -47,6 +52,8 @@ public class GenericController {
             msg = ResponseBean.CodeEnum.ERR_UNKOWN.getMsg();
         } else {
             msg = ResponseBean.CodeEnum.ERR_UNKOWN.getMsg();
+            HttpServletRequest request = ((ServletRequestAttributes) RequestContextHolder.getRequestAttributes()).getRequest();
+            logger.error(JSON.toJSONString(request.getParameterMap()));
             logger.error("", ex);
         }
 
