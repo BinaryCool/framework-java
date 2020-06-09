@@ -130,7 +130,7 @@ public class MapConverter {
      * 解码UTF8
      * @return
      */
-    public static void decodeByField(Object obj, String[] fieldNames) {
+    public static void decodeByField(Object obj, String... fieldNames) {
         if (ArrayUtils.isEmpty(fieldNames)) {
             return;
         }
