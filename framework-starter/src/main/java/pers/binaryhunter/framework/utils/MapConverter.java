@@ -1,18 +1,25 @@
 package pers.binaryhunter.framework.utils;
 
+import java.io.UnsupportedEncodingException;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
+import java.net.URLDecoder;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.stream.Stream;
 
+import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import pers.binaryhunter.framework.bean.dto.paging.Page;
 
 public class MapConverter {
-	
+	private static final Logger log = LoggerFactory.getLogger(MapConverter.class);
+
 	@SuppressWarnings({ "unchecked", "rawtypes" })
 	private static void convertByField(Class c, Object obj, Map<String, Object> map) {
 		if (c != null) {
@@ -118,5 +125,44 @@ public class MapConverter {
 		
 		return map;
 	}
-	
+
+    /**
+     * 解码UTF8
+     * @return
+     */
+    public static void decodeByField(Object obj, String[] fieldNames) {
+        if (ArrayUtils.isEmpty(fieldNames)) {
+            return;
+        }
+        Class c = obj.getClass();
+        Field[] fileds = c.getDeclaredFields();
+        for (Field f : fileds) {
+            if (Modifier.isStatic(f.getModifiers())) { // 跳过静态属性
+                continue;
+            }
+            String name = f.getName();
+            String shortName = name.substring(0, 1).toUpperCase() + name.substring(1);
+            if(Stream.of(fieldNames).noneMatch(item -> name.equals(item))) {
+                continue;
+            }
+
+            Method method;
+            Method methodSet;
+            try {
+                method = c.getMethod("get" + shortName);
+                if (method == null) {
+                    continue;
+                }
+                Object value = method.invoke(obj);
+                if (value != null && value instanceof String && StringUtils.isNotEmpty((String) value)) {
+                    methodSet = c.getMethod("set" + shortName, String.class);
+                    if(null != methodSet) {
+                        methodSet.invoke(obj, URLDecoder.decode(value.toString(), "UTF-8"));
+                    }
+                }
+            } catch (Exception e) {
+                log.error("", e);
+            }
+        }
+    }
 }
