@@ -2,6 +2,7 @@ package pers.binaryhunter.framework.controller;
 
 import com.alibaba.fastjson.JSON;
 import org.apache.catalina.connector.ClientAbortException;
+import org.apache.tomcat.util.http.fileupload.IOUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.web.context.request.RequestContextHolder;
@@ -11,6 +12,8 @@ import pers.binaryhunter.framework.exception.BusinessException;
 import pers.binaryhunter.framework.exception.SessionOutException;
 
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import java.io.PrintWriter;
 
 /**
  * 控制器父类
@@ -86,5 +89,21 @@ public class GenericController {
         rb.setCode(code);
         rb.setData(bean);
         return rb;
+    }
+
+    /**
+     * 返回html
+     */
+    protected void toResponseHtml(HttpServletResponse response, String html) {
+        PrintWriter pw = null;
+        try {
+            response.setHeader("Content-Disposition", "");
+            response.setContentType("text/html;charset=utf-8");
+            pw = response.getWriter();
+            pw.append(html);
+            pw.flush();
+        } catch (Exception ex) {
+            IOUtils.closeQuietly(pw);
+        }
     }
 }
