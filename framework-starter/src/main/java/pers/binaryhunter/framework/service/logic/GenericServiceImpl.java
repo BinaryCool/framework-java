@@ -6,8 +6,11 @@ package pers.binaryhunter.framework.service.logic;
 
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.CollectionUtils;
 import pers.binaryhunter.framework.bean.dto.paging.Page;
 import pers.binaryhunter.framework.bean.po.PO;
 import pers.binaryhunter.framework.bean.vo.paging.PageResult;
@@ -27,6 +30,7 @@ import java.util.Map;
  * @author Liyw -- 2014-5-22
  */
 public class GenericServiceImpl<B, K> extends GenericAbstractServiceImpl<B, K> implements GenericService<B, K> {
+    private static final Logger log = LoggerFactory.getLogger(GenericServiceImpl.class);
     private static final int COUNT_BATCH = 1000;
 
     protected GenericDAO<B, K> dao;
@@ -147,6 +151,9 @@ public class GenericServiceImpl<B, K> extends GenericAbstractServiceImpl<B, K> i
 
     @Override
     public void deleteByArgs(Map<String, Object> params) {
+        if(isParamsEmpty(params)) {
+            throw new BusinessException();
+        }
         dao.deleteByArgs(params);
     }
 
@@ -163,6 +170,10 @@ public class GenericServiceImpl<B, K> extends GenericAbstractServiceImpl<B, K> i
     @Override
     @Transactional(propagation = Propagation.REQUIRES_NEW, rollbackFor = Exception.class)
     public void updateBatch(List<B> beans){
+        if(CollectionUtils.isEmpty(beans)) {
+            log.warn("List is empty while update batch");
+            return;
+        }
         int times = (int) (Math.ceil(beans.size() * 1.0 / COUNT_BATCH));
         for(int i = 0; i < times; i ++ ) {
             dao.updateBatch(beans.subList(COUNT_BATCH * i, Math.min(COUNT_BATCH * (i + 1), beans.size())));
@@ -175,8 +186,8 @@ public class GenericServiceImpl<B, K> extends GenericAbstractServiceImpl<B, K> i
             throw new BusinessException();
         }
 
-        if(null == params) {
-            params = new HashMap<>();
+        if(isParamsEmpty(params)) {
+            throw new BusinessException();
         }
 
         params.put("setSql", setSql);
@@ -189,8 +200,8 @@ public class GenericServiceImpl<B, K> extends GenericAbstractServiceImpl<B, K> i
             throw new BusinessException();
         }
 
-        if(null == params) {
-            params = new HashMap<>();
+        if(isParamsEmpty(params)) {
+            throw new BusinessException();
         }
 
         StringBuffer setSql = new StringBuffer();
@@ -239,6 +250,11 @@ public class GenericServiceImpl<B, K> extends GenericAbstractServiceImpl<B, K> i
     @Deprecated
     @Transactional(propagation = Propagation.REQUIRES_NEW, rollbackFor = Exception.class)
     public void addBatch(List<B> beans){
+        if(CollectionUtils.isEmpty(beans)) {
+            log.warn("List is empty while add batch");
+            return;
+        }
+
         int times = (int) (Math.ceil(beans.size() * 1.0 / COUNT_BATCH));
         for(int i = 0; i < times; i ++ ) {
             dao.createBatch(beans.subList(COUNT_BATCH * i, Math.min(COUNT_BATCH * (i + 1), beans.size())));
@@ -248,6 +264,11 @@ public class GenericServiceImpl<B, K> extends GenericAbstractServiceImpl<B, K> i
     @Override
     @Transactional(propagation = Propagation.REQUIRES_NEW, rollbackFor = Exception.class)
     public void addBatchAutoId(List<B> beans){
+        if(CollectionUtils.isEmpty(beans)) {
+            log.warn("List is empty while add batch(auto id)");
+            return;
+        }
+
         if(beans.get(0) instanceof PO){
             Long id = getSequences(beans.size());
             for (B bean : beans) {
@@ -293,5 +314,19 @@ public class GenericServiceImpl<B, K> extends GenericAbstractServiceImpl<B, K> i
             }
         }
         return params;
+    }
+
+    protected boolean isParamsEmpty(Map<String, Object> params) {
+        if(CollectionUtils.isEmpty(params)) {
+            return true;
+        }
+        boolean empty = true;
+        for(Map.Entry<String, Object> param : params.entrySet()) {
+            if(null != param.getKey() && !"".equals(param.getKey()) && null != param.getValue()) {
+                empty = false;
+                break;
+            }
+        }
+        return empty;
     }
 }
