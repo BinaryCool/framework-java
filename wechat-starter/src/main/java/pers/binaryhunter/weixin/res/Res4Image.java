@@ -15,7 +15,7 @@ public class Res4Image extends Res4{
     private ResContent4Image image;
     
     public String getMsgtype() {
-        return "Res4Text";
+        return "image";
     }
     
 }
