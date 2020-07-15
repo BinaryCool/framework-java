@@ -8,11 +8,7 @@ import lombok.Setter;
  */
 @Getter
 @Setter
-public class Res4Text {
-    /**
-     * OPENID
-     */
-    private String touser;
+public class Res4Text extends Res4 {
     /**
      * content
      */

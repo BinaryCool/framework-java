@@ -8,14 +8,9 @@ import lombok.Setter;
  */
 @Getter
 @Setter
-public class Res4Image extends Res4{
+public class Res4 {
     /**
-     * content
+     * OPENID
      */
-    private ResContent4Image image;
-    
-    public String getMsgtype() {
-        return "Res4Text";
-    }
-    
+    private String touser;
 }
