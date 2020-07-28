@@ -8,8 +8,12 @@ import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.jdbc.datasource.DataSourceTransactionManager;
+import org.springframework.transaction.TransactionDefinition;
+import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.support.DefaultTransactionDefinition;
 import org.springframework.util.CollectionUtils;
 import pers.binaryhunter.framework.bean.dto.paging.Page;
 import pers.binaryhunter.framework.bean.po.PO;
@@ -19,6 +23,7 @@ import pers.binaryhunter.framework.exception.BusinessException;
 import pers.binaryhunter.framework.service.GenericService;
 import pers.binaryhunter.framework.utils.MapConverter;
 
+import javax.annotation.Resource;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -34,15 +39,53 @@ public class GenericServiceImpl<B, K> extends GenericAbstractServiceImpl<B, K> i
     private static final int COUNT_BATCH = 1000;
 
     protected GenericDAO<B, K> dao;
+    @Resource
+    private DataSourceTransactionManager transactionManager;
 
     @Override
     public Long getSequence() {
-        return dao.getSequence();
+        //获得事务状态
+        TransactionStatus transactionStatus = null;
+        try {
+            //获取事务定义
+            DefaultTransactionDefinition def = new DefaultTransactionDefinition();
+            //设置事务隔离级别，开启新事务
+            def.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRED);
+            transactionStatus = transactionManager.getTransaction(def);
+
+            return dao.getSequence();
+        } catch (Exception e) {
+            transactionManager.rollback(transactionStatus);
+            throw e;
+        } finally {
+            if (transactionStatus != null && transactionStatus.isNewTransaction()
+                    && !transactionStatus.isCompleted()) {
+                transactionManager.commit(transactionStatus);
+            }
+        }
     }
 
     @Override
     public Long getSequences(int step) {
-        return dao.getSequences(step);
+        //获得事务状态
+        TransactionStatus transactionStatus = null;
+        try {
+            //获取事务定义
+            DefaultTransactionDefinition def = new DefaultTransactionDefinition();
+            //设置事务隔离级别，开启新事务
+            def.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRED);
+            transactionStatus = transactionManager.getTransaction(def);
+
+            return dao.getSequences(step);
+        } catch (Exception e) {
+            transactionManager.rollback(transactionStatus);
+            throw e;
+        } finally {
+            if (transactionStatus != null && transactionStatus.isNewTransaction()
+                    && !transactionStatus.isCompleted()) {
+                transactionManager.commit(transactionStatus);
+            }
+        }
     }
 
     @Override
