@@ -11,8 +11,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.jdbc.datasource.DataSourceTransactionManager;
 import org.springframework.transaction.TransactionDefinition;
 import org.springframework.transaction.TransactionStatus;
-import org.springframework.transaction.annotation.Propagation;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.support.DefaultTransactionDefinition;
 import org.springframework.util.CollectionUtils;
 import pers.binaryhunter.framework.bean.dto.paging.Page;
@@ -211,15 +209,32 @@ public class GenericServiceImpl<B, K> extends GenericAbstractServiceImpl<B, K> i
     }
 
     @Override
-    @Transactional(propagation = Propagation.REQUIRES_NEW, rollbackFor = Exception.class)
     public void updateBatch(List<B> beans){
         if(CollectionUtils.isEmpty(beans)) {
             log.warn("List is empty while update batch");
             return;
         }
         int times = (int) (Math.ceil(beans.size() * 1.0 / COUNT_BATCH));
-        for(int i = 0; i < times; i ++ ) {
-            dao.updateBatch(beans.subList(COUNT_BATCH * i, Math.min(COUNT_BATCH * (i + 1), beans.size())));
+        //获得事务状态
+        TransactionStatus transactionStatus = null;
+        try {
+            //获取事务定义
+            DefaultTransactionDefinition def = new DefaultTransactionDefinition();
+            //设置事务隔离级别，开启新事务
+            def.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRED);
+            transactionStatus = transactionManager.getTransaction(def);
+
+            for(int i = 0; i < times; i ++ ) {
+                dao.updateBatch(beans.subList(COUNT_BATCH * i, Math.min(COUNT_BATCH * (i + 1), beans.size())));
+            }
+        } catch (Exception e) {
+            transactionManager.rollback(transactionStatus);
+            throw e;
+        } finally {
+            if (transactionStatus != null && transactionStatus.isNewTransaction()
+                    && !transactionStatus.isCompleted()) {
+                transactionManager.commit(transactionStatus);
+            }
         }
     }
 
@@ -291,21 +306,16 @@ public class GenericServiceImpl<B, K> extends GenericAbstractServiceImpl<B, K> i
      */
     @Override
     @Deprecated
-    @Transactional(propagation = Propagation.REQUIRES_NEW, rollbackFor = Exception.class)
     public void addBatch(List<B> beans){
         if(CollectionUtils.isEmpty(beans)) {
             log.warn("List is empty while add batch");
             return;
         }
 
-        int times = (int) (Math.ceil(beans.size() * 1.0 / COUNT_BATCH));
-        for(int i = 0; i < times; i ++ ) {
-            dao.createBatch(beans.subList(COUNT_BATCH * i, Math.min(COUNT_BATCH * (i + 1), beans.size())));
-        }
+        this.doAddBatch(beans);
     }
 
     @Override
-    @Transactional(propagation = Propagation.REQUIRES_NEW, rollbackFor = Exception.class)
     public void addBatchAutoId(List<B> beans){
         if(CollectionUtils.isEmpty(beans)) {
             log.warn("List is empty while add batch(auto id)");
@@ -319,9 +329,31 @@ public class GenericServiceImpl<B, K> extends GenericAbstractServiceImpl<B, K> i
             }
         }
 
+        this.doAddBatch(beans);
+    }
+
+    private void doAddBatch(List<B> beans) {
         int times = (int) (Math.ceil(beans.size() * 1.0 / COUNT_BATCH));
-        for(int i = 0; i < times; i ++ ) {
-            dao.createBatch(beans.subList(COUNT_BATCH * i, Math.min(COUNT_BATCH * (i + 1), beans.size())));
+        //获得事务状态
+        TransactionStatus transactionStatus = null;
+        try {
+            //获取事务定义
+            DefaultTransactionDefinition def = new DefaultTransactionDefinition();
+            //设置事务隔离级别，开启新事务
+            def.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRED);
+            transactionStatus = transactionManager.getTransaction(def);
+
+            for(int i = 0; i < times; i ++ ) {
+                dao.createBatch(beans.subList(COUNT_BATCH * i, Math.min(COUNT_BATCH * (i + 1), beans.size())));
+            }
+        } catch (Exception e) {
+            transactionManager.rollback(transactionStatus);
+            throw e;
+        } finally {
+            if (transactionStatus != null && transactionStatus.isNewTransaction()
+                    && !transactionStatus.isCompleted()) {
+                transactionManager.commit(transactionStatus);
+            }
         }
     }
 
