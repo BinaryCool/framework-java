@@ -190,4 +190,55 @@ public class GenericController {
 
         return (PO) service.getById(id);
     }
+
+    /**
+     * 分页查询
+     * @param service service
+     * @param bean 参数
+     * @param page 分页
+     * @return 分页结果
+     */
+    protected ResponseBean retrieveResponse(GenericService service, Object bean, Page page) {
+        return toResponse(retrieve(service, bean, page));
+    }
+
+    /**
+     * 新增
+     * @param service service
+     * @param bean 参数
+     * @return 返回对象
+     */
+    protected ResponseBean createResponse(GenericService service, PO bean) {
+        return toResponse(create(service, bean));
+    }
+
+    /**
+     * 修改
+     * @param service service
+     * @param bean 参数
+     * @return 返回对象
+     */
+    protected ResponseBean updateResponse(GenericService service, PO bean) {
+        return toResponse(update(service, bean));
+    }
+
+    /**
+     * 删除
+     * @param service service
+     * @param ids 删除的ID
+     * @return 返回删除的ID
+     */
+    protected ResponseBean deleteResponse(GenericService service, Long[] ids) {
+        return toResponse(delete(service, ids));
+    }
+
+    /**
+     * 通过ID获取
+     * @param service service
+     * @param id ID
+     * @return 返回对象
+     */
+    protected ResponseBean getResponse(GenericService service, Long id) {
+        return toResponse(get(service, id));
+    }
 }
