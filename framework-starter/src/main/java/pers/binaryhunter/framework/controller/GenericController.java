@@ -123,8 +123,9 @@ public class GenericController {
      * @param page 分页
      * @return 分页结果
      */
-    protected PageResult retrieve(GenericService service, Object bean, Page page) {
+    protected PageResult retrieve(GenericService service, Object bean, Page page, Object... args) {
         Map<String, Object> params = MapConverter.convertByField(bean);
+        MapConverter.arr2Map(args);
         return service.pageByArgs(params, page);
     }
 
@@ -198,8 +199,8 @@ public class GenericController {
      * @param page 分页
      * @return 分页结果
      */
-    protected ResponseBean retrieveResponse(GenericService service, Object bean, Page page) {
-        return toResponse(retrieve(service, bean, page));
+    protected ResponseBean retrieveResponse(GenericService service, Object bean, Page page, Object... args) {
+        return toResponse(retrieve(service, bean, page, args));
     }
 
     /**

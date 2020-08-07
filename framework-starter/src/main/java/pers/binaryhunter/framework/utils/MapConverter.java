@@ -46,16 +46,8 @@ public class MapConverter {
 							map.put(name, value);
 						}
 					}
-				} catch (SecurityException e) {
-					e.printStackTrace();
-				} catch (NoSuchMethodException e) {
-					e.printStackTrace();
-				} catch (IllegalArgumentException e) {
-					e.printStackTrace();
-				} catch (IllegalAccessException e) {
-					e.printStackTrace();
-				} catch (InvocationTargetException e) {
-					e.printStackTrace();
+				} catch (Exception e) {
+					log.error("", e);
 				}
 			}
 		}
@@ -164,5 +156,31 @@ public class MapConverter {
                 log.error("", e);
             }
         }
+    }
+
+    /**
+     * 将数组转换为
+     */
+    public static Map<String, Object> arr2Map(Object... args) {
+        return arr2Map(null, args);
+    }
+
+    /**
+     * 将数组转换为
+     */
+    public static Map<String, Object> arr2Map(Map<String, Object> params, Object... args) {
+        if (null == params) {
+            params = new HashMap<>();
+        }
+
+        if(ArrayUtils.isNotEmpty(args)) {
+            for(int i = 0; i < args.length; i += 2) {
+                if(null != args[i] && (i +1) < args.length && null != args[i]) {
+                    params.put(args[i].toString(), args[i + 1]);
+                }
+            }
+        }
+
+        return params;
     }
 }

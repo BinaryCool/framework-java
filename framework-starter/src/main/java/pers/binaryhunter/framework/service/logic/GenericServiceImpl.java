@@ -4,7 +4,6 @@
  */
 package pers.binaryhunter.framework.service.logic;
 
-import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -119,20 +118,8 @@ public class GenericServiceImpl<B, K> extends GenericAbstractServiceImpl<B, K> i
         return pageResult;
     }
 
-    private Map<String, Object> arr2Map(Object... args) {
-        Map<String, Object> params = new HashMap<>();
-        if(ArrayUtils.isNotEmpty(args)) {
-            for(int i = 0; i < args.length; i += 2) {
-                if(null != args[i] && (i +1) < args.length && null != args[i]) {
-                    params.put(args[i].toString(), args[i + 1]);
-                }
-            }
-        }
-        return params;
-    }
-
     public B queryFirstByField(String fieldSQL, Object... args) {
-        Map<String, Object> params = this.arr2Map(args);
+        Map<String, Object> params = MapConverter.arr2Map(args);
         params.put("limit", 1);
         List<B> list = this.queryByField(fieldSQL, params);
         if(null == list || 0 >= list.size()) {
@@ -148,7 +135,7 @@ public class GenericServiceImpl<B, K> extends GenericAbstractServiceImpl<B, K> i
     }
 
     public B queryFirst(Object... args) {
-        Map<String, Object> params = this.arr2Map(args);
+        Map<String, Object> params = MapConverter.arr2Map(args);
         return queryFirst(params);
     }
 

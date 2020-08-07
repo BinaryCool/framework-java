@@ -11,7 +11,6 @@ import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandl
 import java.lang.reflect.Method;
 
 public class APIVersionHandlerMapping extends RequestMappingHandlerMapping {
-    //private static final Logger log = LoggerFactory.getLogger(GenericController.class);
 
     @Override
     protected boolean isHandler(Class<?> beanType) {
