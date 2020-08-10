@@ -98,7 +98,7 @@ public class MyRedisAutoConfiguration {
 
 
     @Bean
-    public RedisTemplate redisTemplate(JedisConnectionFactory jedisConnectionFactory) throws Exception {
+    public RedisTemplate redisTemplate(JedisConnectionFactory jedisConnectionFactory) {
         RedisTemplate template = new RedisTemplate();
         
         template.setConnectionFactory(jedisConnectionFactory);
@@ -111,7 +111,7 @@ public class MyRedisAutoConfiguration {
     }
 
     @Bean
-    public StringRedisTemplate stringRedisTemplate(JedisConnectionFactory jedisConnectionFactory) throws Exception {
+    public StringRedisTemplate stringRedisTemplate(JedisConnectionFactory jedisConnectionFactory) {
         StringRedisTemplate template = new StringRedisTemplate();
 
         template.setConnectionFactory(jedisConnectionFactory);
