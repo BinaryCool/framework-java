@@ -147,6 +147,22 @@ public class GenericController {
     }
 
     /**
+     * 新增
+     * @param service service
+     * @param bean 参数
+     * @return 返回对象
+     */
+    protected PO createDB(GenericService service, PO bean) {
+        if(null == bean) {
+            throw new BusinessException();
+        }
+        service.add(bean);
+
+        bean = (PO) service.getById(bean.getId());
+        return bean;
+    }
+
+    /**
      * 修改
      * @param service service
      * @param bean 参数
@@ -211,6 +227,16 @@ public class GenericController {
      */
     protected ResponseBean createResponse(GenericService service, PO bean) {
         return toResponse(create(service, bean));
+    }
+
+    /**
+     * 新增
+     * @param service service
+     * @param bean 参数
+     * @return 返回对象
+     */
+    protected ResponseBean createResponseDB(GenericService service, PO bean) {
+        return toResponse(createDB(service, bean));
     }
 
     /**
