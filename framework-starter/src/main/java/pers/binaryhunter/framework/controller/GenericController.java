@@ -22,6 +22,7 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.PrintWriter;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -130,6 +131,16 @@ public class GenericController {
     }
 
     /**
+     * 查询
+     * @param service service
+     * @return 分页结果
+     */
+    protected List select(GenericService service, Object... args) {
+        Map<String, Object> params = MapConverter.arr2Map(args);
+        return service.queryByArgs(params);
+    }
+
+    /**
      * 新增
      * @param service service
      * @param bean 参数
@@ -217,6 +228,15 @@ public class GenericController {
      */
     protected ResponseBean retrieveResponse(GenericService service, Object bean, Page page, Object... args) {
         return toResponse(retrieve(service, bean, page, args));
+    }
+
+    /**
+     * 分页查询
+     * @param service service
+     * @return 分页结果
+     */
+    protected ResponseBean selectResponse(GenericService service, Object... args) {
+        return toResponse(select(service, args));
     }
 
     /**
