@@ -189,6 +189,21 @@ public class GenericController {
     }
 
     /**
+     * 修改
+     * @param service service
+     * @param bean 参数
+     * @return 返回对象
+     */
+    protected PO updateAll(GenericService service, PO bean) {
+        if(null ==  bean.getId() || bean.getId() <= 0) {
+            throw new BusinessException();
+        }
+        service.update(bean);
+        bean = (PO) service.getById(bean.getId());
+        return bean;
+    }
+
+    /**
      * 删除
      * @param service service
      * @param ids 删除的ID
@@ -267,6 +282,16 @@ public class GenericController {
      */
     protected ResponseBean updateResponse(GenericService service, PO bean) {
         return toResponse(update(service, bean));
+    }
+
+    /**
+     * 修改
+     * @param service service
+     * @param bean 参数
+     * @return 返回对象
+     */
+    protected ResponseBean updateAllResponse(GenericService service, PO bean) {
+        return toResponse(updateAll(service, bean));
     }
 
     /**
