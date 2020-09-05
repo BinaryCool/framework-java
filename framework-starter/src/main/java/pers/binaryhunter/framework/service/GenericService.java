@@ -20,6 +20,7 @@ public interface GenericService<B,K> {
      * 获取ID
      * @return ID
      */
+    @Deprecated
     Long getSequence();
 
     /**
@@ -27,6 +28,7 @@ public interface GenericService<B,K> {
      * @param step 步长
      * @return ID
      */
+    @Deprecated
     Long getSequences(int step);
     /**
      * 分页查询
@@ -143,20 +145,20 @@ public interface GenericService<B,K> {
      * @param bean 实体
      * By Yuwen on 2017年6月22日
      */
-    public void add(B bean);
+    void add(B bean);
 
     /**
-     * @see pers.binaryhunter.framework.service.GenericService#addBatchAutoId(List)
      * 批量新增
      * @param beans 实体列表
      */
-    public void addBatch(List<B> beans);
+    void addBatch(List<B> beans);
 
     /**
      * @since 2.1.3
      * 批量新增(自动注入ID)
      * @param beans
      */
+    @Deprecated
     void addBatchAutoId(List<B> beans);
     /**
      * 通过编号获取
@@ -164,14 +166,14 @@ public interface GenericService<B,K> {
      * @return 实体
      * By Yuwen on 2017年6月22日
      */
-    public B getById(K id);
+    B getById(K id);
     /**
      * 获取数量
      * @param params 参数
      * @return 数量
      * By Yuwen on 2017年6月22日
      */
-    public long countByArgs(Map<String, Object> params);
+    long countByArgs(Map<String, Object> params);
 
     /**
      * 获取数量
@@ -180,5 +182,5 @@ public interface GenericService<B,K> {
      * @return 数量
      * By Yuwen on 2017年6月22日
      */
-    public long countByArgs(Map<String, Object> params, boolean enable);
+    long countByArgs(Map<String, Object> params, boolean enable);
 }
