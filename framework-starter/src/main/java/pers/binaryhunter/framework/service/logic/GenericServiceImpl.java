@@ -40,6 +40,7 @@ public class GenericServiceImpl<B, K> extends GenericAbstractServiceImpl<B, K> i
     private DataSourceTransactionManager transactionManager;
 
     @Override
+    @Deprecated
     public Long getSequence() {
         //获得事务状态
         TransactionStatus transactionStatus = null;
@@ -63,6 +64,7 @@ public class GenericServiceImpl<B, K> extends GenericAbstractServiceImpl<B, K> i
     }
 
     @Override
+    @Deprecated
     public Long getSequences(int step) {
         //获得事务状态
         TransactionStatus transactionStatus = null;
@@ -118,25 +120,27 @@ public class GenericServiceImpl<B, K> extends GenericAbstractServiceImpl<B, K> i
         return pageResult;
     }
 
-    public B queryFirstByField(String fieldSQL, Object... args) {
-        Map<String, Object> params = MapConverter.arr2Map(args);
-        params.put("limit", 1);
-        List<B> list = this.queryByField(fieldSQL, params);
-        if(null == list || 0 >= list.size()) {
-            return null;
-        }
-        return list.get(0);
+    @Override
+    public PageResult<B> pageByArgs(Page page, Object... params) {
+        return pageByArgs(MapConverter.arr2Map(params), page);
     }
 
+    @Override
     public List<B> queryByField(String fieldSQL, Map<String, Object> params) {
         params = doStatusParams(params, true);
         params.put("fieldSQL", fieldSQL);
         return dao.queryByField(params);
     }
 
-    public B queryFirst(Object... args) {
-        Map<String, Object> params = MapConverter.arr2Map(args);
-        return queryFirst(params);
+    @Override
+    public B queryFirstByField(String fieldSQL, Object... params) {
+        Map<String, Object> paramsMap = MapConverter.arr2Map(params);
+        paramsMap.put("limit", 1);
+        List<B> list = this.queryByField(fieldSQL, paramsMap);
+        if(null == list || 0 >= list.size()) {
+            return null;
+        }
+        return list.get(0);
     }
 
     @Override
@@ -155,9 +159,8 @@ public class GenericServiceImpl<B, K> extends GenericAbstractServiceImpl<B, K> i
     }
 
     @Override
-    public List<B> queryByArgs() {
-        Map<String, Object> params = doStatusParams(null, true);
-        return dao.queryByArgs(params);
+    public B queryFirst(Object... params) {
+        return queryFirst(MapConverter.arr2Map(params));
     }
 
     @Override
@@ -173,6 +176,11 @@ public class GenericServiceImpl<B, K> extends GenericAbstractServiceImpl<B, K> i
     }
 
     @Override
+    public List<B> queryByArgs(Object... params) {
+        return queryByArgs(MapConverter.arr2Map(params));
+    }
+
+    @Override
     public void deleteById(K id) {
         dao.deleteById(id);
     }
@@ -183,6 +191,11 @@ public class GenericServiceImpl<B, K> extends GenericAbstractServiceImpl<B, K> i
             throw new BusinessException();
         }
         dao.deleteByArgs(params);
+    }
+
+    @Override
+    public void deleteByArgs(Object... params) {
+        deleteByArgs(MapConverter.arr2Map(params));
     }
 
     @Override
@@ -274,14 +287,6 @@ public class GenericServiceImpl<B, K> extends GenericAbstractServiceImpl<B, K> i
         this.updateByArgs(setSql.toString(), params);
     }
 
-    private String replaceUpdate4SqlInjection(String value) {
-        if(StringUtils.isBlank(value)) {
-            return value;
-        }
-
-        return value.replaceAll("'|\\\"", "");
-    }
-
     @Override
     public void add(B bean) {
         dao.create(bean);
@@ -292,7 +297,6 @@ public class GenericServiceImpl<B, K> extends GenericAbstractServiceImpl<B, K> i
      * @param beans 实体列表
      */
     @Override
-    @Deprecated
     public void addBatch(List<B> beans){
         if(CollectionUtils.isEmpty(beans)) {
             log.warn("List is empty while add batch");
@@ -303,6 +307,7 @@ public class GenericServiceImpl<B, K> extends GenericAbstractServiceImpl<B, K> i
     }
 
     @Override
+    @Deprecated
     public void addBatchAutoId(List<B> beans){
         if(CollectionUtils.isEmpty(beans)) {
             log.warn("List is empty while add batch(auto id)");
@@ -317,6 +322,35 @@ public class GenericServiceImpl<B, K> extends GenericAbstractServiceImpl<B, K> i
         }
 
         this.doAddBatch(beans);
+    }
+
+    @Override
+    public B getById(K id) {
+        return dao.getById(id);
+    }
+
+    @Override
+    public long countByArgs(Map<String, Object> params) {
+        return this.countByArgs(params, true);
+    }
+
+    @Override
+    public long countByArgs(Map<String, Object> params, boolean enable) {
+        params = this.doStatusParams(params, enable);
+        return dao.countByArgs(params);
+    }
+
+    @Override
+    public long countByArgs(Object... params) {
+        return countByArgs(MapConverter.arr2Map(params));
+    }
+
+    private String replaceUpdate4SqlInjection(String value) {
+        if(StringUtils.isBlank(value)) {
+            return value;
+        }
+
+        return value.replaceAll("'|\\\"", "");
     }
 
     private void doAddBatch(List<B> beans) {
@@ -342,22 +376,6 @@ public class GenericServiceImpl<B, K> extends GenericAbstractServiceImpl<B, K> i
                 transactionManager.commit(transactionStatus);
             }
         }
-    }
-
-    @Override
-    public B getById(K id) {
-        return dao.getById(id);
-    }
-
-    @Override
-    public long countByArgs(Map<String, Object> params) {
-        return this.countByArgs(params, true);
-    }
-
-    @Override
-    public long countByArgs(Map<String, Object> params, boolean enable) {
-        params = this.doStatusParams(params, enable);
-        return dao.countByArgs(params);
     }
 
     /**
