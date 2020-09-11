@@ -56,11 +56,19 @@ public interface GenericService<B,K> {
      */
     PageResult<B> pageByArgs(Page page, Object... params);
     /**
-     * 查询
+     * 查询部分字段
      */
     List<B> queryByField(String fieldSQL, Map<String, Object> params);
     /**
-     * 查询第一个
+     * 查询部分字段
+     */
+    List<B> queryByField(String fieldSQL, Object... params);
+    /**
+     * 查询部分字段(第一个)
+     */
+    B queryFirstByField(String fieldSQL, Map<String, Object> params);
+    /**
+     * 查询部分字段(第一个)
      */
     B queryFirstByField(String fieldSQL, Object... params);
     /**
@@ -189,7 +197,7 @@ public interface GenericService<B,K> {
     long countByArgs(Map<String, Object> params, boolean enable);
     /**
      * 获取数量
-     * @param args 参数
+     * @param params 参数
      * @return 数量
      */
     long countByArgs(Object... params);
