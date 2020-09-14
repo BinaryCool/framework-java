@@ -97,4 +97,15 @@ public class Page implements Serializable {
 		this.numPerPage = numPerPage;
 	}
 
+    @Override
+    public String toString() {
+        return "Page{" +
+                "pageNum=" + pageNum +
+                ", numPerPage=" + numPerPage +
+                ", orderField='" + orderField + '\'' +
+                ", orderDirection='" + orderDirection + '\'' +
+                ", totalCount=" + totalCount +
+                ", pageCount=" + pageCount +
+                '}';
+    }
 }
