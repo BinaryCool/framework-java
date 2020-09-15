@@ -26,6 +26,7 @@
         <commons.lang.version>3.9</commons.lang.version>
         <slf4j.version>1.7.21</slf4j.version>
         <fastjson.version>1.2.73</fastjson.version>
+        <framework.version>2.2.18</framework.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
     </properties>
@@ -37,7 +38,7 @@
                 <groupId>org.apache.commons</groupId>
                 <artifactId>commons-lang3</artifactId>
                 <version>${commons.lang.version}</version>
-                <scope>compile</scope>
+                <scope>provided</scope>
             </dependency>
             <!-- log -->
             <dependency>
@@ -51,7 +52,14 @@
                 <groupId>com.alibaba</groupId>
                 <artifactId>fastjson</artifactId>
                 <version>${fastjson.version}</version>
-                <scope>compile</scope>
+                <scope>provided</scope>
+            </dependency>
+
+            <dependency>
+                <groupId>pers.binaryhunter</groupId>
+                <artifactId>framework-starter</artifactId>
+                <version>${framework.version}</version>
+                <scope>provided</scope>
             </dependency>
         </dependencies>
     </dependencyManagement>
