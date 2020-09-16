@@ -293,7 +293,13 @@ public class GenericServiceImpl<B, K> extends GenericAbstractServiceImpl<B, K> i
                 if(value instanceof Boolean) {
                     setSql.append(value.toString());
                 } else {
-                    setSql.append("'").append(replaceUpdate4SqlInjection(value.toString())).append("'");
+                    String v = value.toString();
+                    if(v.startsWith("!'")) { //如果以 !' 开头, 则不需要包装为字符串
+                        v = v.substring(2);
+                        setSql.append(replaceUpdate4SqlInjection(v));
+                    } else {
+                        setSql.append("'").append(replaceUpdate4SqlInjection(v)).append("'");
+                    }
                 }
             } else {
                 setSql.append("null");
