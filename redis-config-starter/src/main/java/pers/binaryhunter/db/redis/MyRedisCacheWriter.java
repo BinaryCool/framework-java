@@ -76,8 +76,8 @@ public class MyRedisCacheWriter implements RedisCacheWriter {
             //name 以 ttl + 过期时间 + # 开头
             Long ttlManual = null;
             try {
-                if (name.startsWith("ttl") && -1 < name.indexOf("#")) {
-                    ttlManual = Long.parseLong(name.substring(3, name.indexOf("#")));
+                if (name.contains("#ttl")) {
+                    ttlManual = Long.parseLong(name.substring(name.indexOf("#ttl") + 4));
                 }
             } catch (Exception ex) {
                 
