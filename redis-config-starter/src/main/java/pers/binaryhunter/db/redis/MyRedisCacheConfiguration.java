@@ -21,11 +21,11 @@ import java.time.Duration;
 public class MyRedisCacheConfiguration extends CachingConfigurerSupport {
     private static final Logger log = LoggerFactory.getLogger(MyRedisCacheConfiguration.class);
     //过期时间, 单位(s)
-    private static final int DEFAULT_EXPIRATIOIN = 3000;
+    private static final int DEFAULT_EXPIRATIOIN = 1800;
     
     @Bean
     public CacheManager cacheManager(RedisTemplate redisTemplate) {
-        RedisCacheWriter cacheWriter = RedisCacheWriter.nonLockingRedisCacheWriter(redisTemplate.getConnectionFactory());
+        RedisCacheWriter cacheWriter = new MyRedisCacheWriter(redisTemplate.getConnectionFactory()); //RedisCacheWriter.nonLockingRedisCacheWriter(redisTemplate.getConnectionFactory());
         // RedisCacheConfiguration conf = RedisCacheConfiguration.defaultCacheConfig().entryTtl(Duration.ofSeconds(DEFAULT_EXPIRATIOIN));
         RedisCacheConfiguration conf = RedisCacheConfiguration.defaultCacheConfig().entryTtl(Duration.ofSeconds(DEFAULT_EXPIRATIOIN))
                 .serializeValuesWith(RedisSerializationContext.SerializationPair.fromSerializer(redisTemplate.getValueSerializer()));
