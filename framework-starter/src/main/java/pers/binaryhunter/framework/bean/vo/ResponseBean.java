@@ -35,7 +35,8 @@ public class ResponseBean {
 	    SUCC(0, "成功", "成功"),
         ERR_UNKOWN(1, "未知错误", "未知错误, 请联系管理员"),
         SESSION_OUT(2, "会话过期", "你的会话已过期, 请重新登陆"),
-        ERR_BUSS(3, "业务异常", "请求参数错误"),
+        ERR_BUSS(3, "业务异常", "参数或业务出错"),
+        PERMISSION_DENIED(4, "业务异常", "请求参数错误"),
         ;
 
         private int code;

@@ -6,25 +6,25 @@ import pers.binaryhunter.framework.bean.vo.ResponseBean;
  * 会话过期异常
  * @author Yuwen on 2017年6月23日
  */
-public class SessionOutException extends RuntimeException {
+public class PermissionDeniedException extends RuntimeException {
 	private static final long serialVersionUID = 1L;
-	private static final String MSG = ResponseBean.CodeEnum.SESSION_OUT.getMsg();
+	private static final String MSG = ResponseBean.CodeEnum.ERR_BUSS.getMsg();
     //0:成功, 1:未知错误, 2:会话过期, 3:业务异常, 4:权限不足
-	private static int CODE = ResponseBean.CodeEnum.SESSION_OUT.getCode();
+	private static int CODE = ResponseBean.CodeEnum.ERR_BUSS.getCode();
 
     private int code;
 
-    public SessionOutException() {
+    public PermissionDeniedException() {
         super(MSG);
         this.code = CODE;
     }
 
-    public SessionOutException(String message) {
+    public PermissionDeniedException(String message) {
         super(message);
         this.code = CODE;
     }
 
-    public SessionOutException(String message, int code) {
+    public PermissionDeniedException(String message, int code) {
         super(message);
 
         this.code = code;
