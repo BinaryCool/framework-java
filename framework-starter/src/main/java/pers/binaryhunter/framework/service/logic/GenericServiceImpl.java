@@ -202,6 +202,11 @@ public class GenericServiceImpl<B, K> extends GenericAbstractServiceImpl<B, K> i
     }
 
     @Override
+    public void deleteByIds(K[] ids) {
+        deleteByArgs("idIn", StringUtils.join(ids, ","));
+    }
+
+    @Override
     public void deleteByArgs(Map<String, Object> params) {
         if(isParamsEmpty(params)) {
             throw new BusinessException();

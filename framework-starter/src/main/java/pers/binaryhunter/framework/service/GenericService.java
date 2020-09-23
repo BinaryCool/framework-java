@@ -115,6 +115,12 @@ public interface GenericService<B,K> {
      */
     void deleteById(K id);
     /**
+     * 通过ids删除
+     * @param ids ids
+     * By Yuwen on 2017年6月22日
+     */
+    void deleteByIds(K[] ids);
+    /**
      * 通过参数删除
      * @param params 参数
      */

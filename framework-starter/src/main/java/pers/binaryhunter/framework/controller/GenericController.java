@@ -220,6 +220,21 @@ public class GenericController {
      * @param ids 删除的ID
      * @return 返回删除的ID
      */
+    protected Long[] deletePhysics(GenericService service, Long[] ids) {
+        if (null == ids || ids.length <= 0) {
+            throw new BusinessException();
+        }
+
+        service.deleteByIds(ids);
+        return ids;
+    }
+
+    /**
+     * 删除(物理删除)
+     * @param service service
+     * @param ids 删除的ID
+     * @return 返回删除的ID
+     */
     protected Long[] delete(GenericService service, Long[] ids) {
         if (null == ids || ids.length <= 0) {
             throw new BusinessException();
@@ -324,6 +339,16 @@ public class GenericController {
      */
     protected ResponseBean deleteResponse(GenericService service, Long[] ids) {
         return toResponse(delete(service, ids));
+    }
+
+    /**
+     * 删除
+     * @param service service
+     * @param ids 删除的ID
+     * @return 返回删除的ID
+     */
+    protected ResponseBean deletePhysicsResponse(GenericService service, Long[] ids) {
+        return toResponse(deletePhysics(service, ids));
     }
 
     /**
