@@ -54,7 +54,10 @@ public class RWPlugin implements Interceptor {
                     && !mappedStatement.getId().endsWith("getSequences")
                     ) {
 				key = ConnectionHolder.READ;
-			} 
+			} else {
+			    //写请求后, 后续请求都走写
+			    ConnectionHolder.FORCE_WRITE.set(Boolean.TRUE);
+            }
 			routeConnection(key, conn);
 		}
 
