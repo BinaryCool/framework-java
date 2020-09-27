@@ -1,14 +1,7 @@
 package pers.binaryhunter.db.redis;
 
-import java.nio.charset.StandardCharsets;
-import java.time.Duration;
-import java.util.Collections;
-import java.util.Optional;
-import java.util.concurrent.ThreadLocalRandom;
-import java.util.concurrent.TimeUnit;
-import java.util.function.Consumer;
-import java.util.function.Function;
-
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.dao.PessimisticLockingFailureException;
 import org.springframework.data.redis.cache.RedisCacheWriter;
 import org.springframework.data.redis.connection.RedisConnection;
@@ -17,6 +10,15 @@ import org.springframework.data.redis.connection.RedisStringCommands.SetOption;
 import org.springframework.data.redis.core.types.Expiration;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
+
+import java.nio.charset.StandardCharsets;
+import java.time.Duration;
+import java.util.Collections;
+import java.util.Optional;
+import java.util.concurrent.ThreadLocalRandom;
+import java.util.concurrent.TimeUnit;
+import java.util.function.Consumer;
+import java.util.function.Function;
 
 /**
  * {@link RedisCacheWriter} implementation capable of reading/writing binary data from/to Redis in {@literal standalone}
@@ -34,7 +36,9 @@ import org.springframework.util.Assert;
  * @author Mark Paluch
  * @since 2.0
  */
+
 public class MyRedisCacheWriter implements RedisCacheWriter {
+    private static final Logger log = LoggerFactory.getLogger(MyRedisCacheWriter.class);
 
     private final RedisConnectionFactory connectionFactory;
     private final Duration sleepTime;
@@ -235,25 +239,32 @@ public class MyRedisCacheWriter implements RedisCacheWriter {
     }
 
     private <T> T execute(String name, Function<RedisConnection, T> callback) {
-
-        RedisConnection connection = connectionFactory.getConnection();
+        RedisConnection connection = null;
         try {
-
+            connection = connectionFactory.getConnection();
             checkAndPotentiallyWaitUntilUnlocked(name, connection);
             return callback.apply(connection);
+        } catch (Exception ex) {
+            log.warn("", ex);
         } finally {
-            connection.close();
+            if (null != connection) {
+                connection.close();
+            }
         }
+        return null;
     }
 
     private void executeLockFree(Consumer<RedisConnection> callback) {
-
-        RedisConnection connection = connectionFactory.getConnection();
-
+        RedisConnection connection = null;
         try {
+            connection = connectionFactory.getConnection();
             callback.accept(connection);
+        } catch (Exception ex) {
+            log.warn("", ex);
         } finally {
-            connection.close();
+            if (null != connection) {
+                connection.close();
+            }
         }
     }
 
