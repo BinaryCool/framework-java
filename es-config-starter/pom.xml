@@ -39,7 +39,6 @@
             <groupId>pers.binaryhunter</groupId>
             <artifactId>framework-starter</artifactId>
             <scope>provided</scope>
-            <version>2.2.27</version>
         </dependency>
 
         <dependency>
