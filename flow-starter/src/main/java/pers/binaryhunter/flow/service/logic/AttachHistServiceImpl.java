@@ -10,7 +10,7 @@ import pers.binaryhunter.flow.service.AttachHistService;
  * 表：AttachHist Service Impl
  * @author BinaryHunter
  */
-@Service
+@Service("attachHistService")
 public class AttachHistServiceImpl extends GenericServiceImpl<AttachHist, Long> implements AttachHistService {
 	
 }

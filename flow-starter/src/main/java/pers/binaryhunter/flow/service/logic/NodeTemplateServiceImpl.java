@@ -16,7 +16,7 @@ import java.util.Map;
  * 表：NodeTemplate Service Impl
  * @author BinaryHunter
  */
-@Service
+@Service("nodeTemplateService")
 public class NodeTemplateServiceImpl extends GenericServiceImpl<NodeTemplate, Long> implements NodeTemplateService {
 
     @Override

@@ -10,7 +10,7 @@ import pers.binaryhunter.flow.service.NodeTemplateRefService;
  * 表：NodeTemplateRef Service Impl
  * @author BinaryHunter
  */
-@Service
+@Service("nodeTemplateRefService")
 public class NodeTemplateRefServiceImpl extends GenericServiceImpl<NodeTemplateRef, Long> implements NodeTemplateRefService {
 	
 }

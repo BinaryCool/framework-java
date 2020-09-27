@@ -10,7 +10,7 @@ import pers.binaryhunter.flow.service.AttachCurrService;
  * 表：AttachCurr Service Impl
  * @author BinaryHunter
  */
-@Service
+@Service("attachCurrService")
 public class AttachCurrServiceImpl extends GenericServiceImpl<AttachCurr, Long> implements AttachCurrService {
 	
 }

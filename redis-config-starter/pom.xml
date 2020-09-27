@@ -25,7 +25,7 @@
             <scope>provided</scope>
         </dependency>
 
-        <!-- redis impl -->
+        <!-- redis logic -->
         <dependency>
             <groupId>org.springframework.data</groupId>
             <artifactId>spring-data-redis</artifactId>

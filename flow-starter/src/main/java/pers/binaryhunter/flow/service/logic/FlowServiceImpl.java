@@ -27,7 +27,7 @@ import java.util.stream.Collectors;
  * @author BinaryHunter
  */
 @Slf4j
-@Service
+@Service("flowService")
 public class FlowServiceImpl extends GenericServiceImpl<Flow, Long> implements FlowService {
     @Resource
     private NodeCurrService nodeCurrService;
