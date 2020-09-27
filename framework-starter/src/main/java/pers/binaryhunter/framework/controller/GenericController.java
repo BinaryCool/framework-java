@@ -12,6 +12,7 @@ import pers.binaryhunter.framework.bean.dto.paging.Page;
 import pers.binaryhunter.framework.bean.po.PO;
 import pers.binaryhunter.framework.bean.vo.ResponseBean;
 import pers.binaryhunter.framework.bean.vo.paging.PageResult;
+import pers.binaryhunter.framework.exception.BusinessCheckedException;
 import pers.binaryhunter.framework.exception.BusinessException;
 import pers.binaryhunter.framework.exception.SessionOutException;
 import pers.binaryhunter.framework.service.GenericService;
@@ -55,7 +56,7 @@ public class GenericController {
 
         int code = ResponseBean.CodeEnum.ERR_UNKOWN.getCode();
         String msg;
-        if (ex instanceof BusinessException || ex instanceof IllegalArgumentException) {
+        if (ex instanceof BusinessException || ex instanceof IllegalArgumentException || ex instanceof BusinessCheckedException) {
             code = ((BusinessException) ex).getCode();
             msg = ex.getMessage();
         } else if (ex instanceof SessionOutException) {
