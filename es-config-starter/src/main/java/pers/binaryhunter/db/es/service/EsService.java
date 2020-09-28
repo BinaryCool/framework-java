@@ -47,15 +47,6 @@ public interface EsService {
     SearchResponse search(SearchSourceBuilder searchSourceBuilder, String... indices);
 
     /**
-     * 搜索
-     *
-     * @param from    用于分页，默认0，跳过前几个搜索结果
-     * @param size    用与分页，默认10，每页10条数据
-     * @param indices 需要搜索的索引，可以传多个
-     */
-    SearchResponse search(SearchSourceBuilder searchSourceBuilder, int from, int size, String... indices);
-
-    /**
      * 简单的搜索
      *
      * @param query   搜索条件，这个只适用于简单搜索，可满足大部分需求，高级搜索请自行实现。
@@ -79,13 +70,4 @@ public interface EsService {
      * @param indices 需要搜索的索引，可以传多个
      */
     <T> List<T> searchBean(Class<T> clazz, SearchSourceBuilder searchSourceBuilder, String... indices);
-
-    /**
-     * 搜索
-     *
-     * @param from    用于分页，默认0，跳过前几个搜索结果
-     * @param size    用与分页，默认10，每页10条数据
-     * @param indices 需要搜索的索引，可以传多个
-     */
-    <T> List<T> searchBean(Class<T> clazz, SearchSourceBuilder searchSourceBuilder, int from, int size, String... indices);
 }

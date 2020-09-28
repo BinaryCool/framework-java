@@ -72,26 +72,16 @@ public class EsServiceImpl implements EsService {
         searchSourceBuilder.query(QueryBuilders.simpleQueryStringQuery(query));
         searchSourceBuilder.from(from);
         searchSourceBuilder.size(size);
-        return this.search(searchSourceBuilder, from, size, indices);
+        return this.search(searchSourceBuilder, indices);
     }
 
     @Override
     public SearchResponse search(SearchSourceBuilder searchSourceBuilder, String... indices) {
-        return this.search(searchSourceBuilder, 0, 10, indices);
-    }
-
-    @Override
-    public SearchResponse search(SearchSourceBuilder searchSourceBuilder, int from, int size, String... indices) {
         try {
-            if (log.isDebugEnabled()) log.debug("query: {}， form: {}， size: {}", searchSourceBuilder, from, size);
             SearchRequest searchRequest = new SearchRequest(indices);
             searchRequest.source(searchSourceBuilder);
 
-            searchSourceBuilder.from(from);
-            searchSourceBuilder.size(size);
-
             SearchResponse response = restHighLevelClient.search(searchRequest, RequestOptions.DEFAULT);
-            if (log.isDebugEnabled()) log.debug("result: {}", response);
             return response;
         } catch (IOException ex) {
             log.error("", ex);
@@ -112,11 +102,6 @@ public class EsServiceImpl implements EsService {
     @Override
     public <T> List<T> searchBean(Class<T> clazz, SearchSourceBuilder searchSourceBuilder, String... indices) {
         return this.parseResponse(clazz, this.search(searchSourceBuilder, indices));
-    }
-
-    @Override
-    public <T> List<T> searchBean(Class<T> clazz, SearchSourceBuilder searchSourceBuilder, int from, int size, String... indices) {
-        return this.parseResponse(clazz, this.search(searchSourceBuilder, from, size, indices));
     }
 
     private <T> List<T> parseResponse(Class<T> clazz, SearchResponse response) {
