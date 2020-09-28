@@ -69,10 +69,10 @@ public class GenericController {
             HttpServletRequest request = ((ServletRequestAttributes) RequestContextHolder.getRequestAttributes()).getRequest();
             logger.error(JSON.toJSONString(request.getParameterMap()));
             logger.error("", ex);
-        }
 
-        if(50 < msg.length()) {
-            msg = msg.substring(0, 50);
+            if(50 < msg.length()) {
+                msg = msg.substring(0, 50);
+            }
         }
 
         return toResponse(msg, code);
