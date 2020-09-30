@@ -273,7 +273,6 @@ public class DataSourceProxy implements DataSource {
 					return null;
 				}
 				if (method.getName().equals("close")) {
-		            ConnectionHolder.FORCE_WRITE.set(Boolean.FALSE);
 					Map<String, Connection> connectionMap = ConnectionHolder.CONNECTION_CONTEXT.get();
                     
 					Connection readCon = connectionMap.remove(ConnectionHolder.READ);

@@ -26,6 +26,7 @@ import pers.binaryhunter.db.mybatis.datasource.DataSourceRouter;
 import pers.binaryhunter.db.mybatis.datasource.MyDataSource;
 import pers.binaryhunter.db.mybatis.datasource.impl.AbstractRWDataSourceRouter;
 import pers.binaryhunter.db.mybatis.datasource.impl.MyRandomRWDataSourceRouter;
+import pers.binaryhunter.db.mybatis.filter.ResetConnectionFilter;
 import pers.binaryhunter.db.mybatis.pulgin.RWPlugin;
 
 import javax.annotation.PostConstruct;
@@ -141,4 +142,8 @@ public class MybatisAutoConfiguration {
 		}
 	}
 
+    @Bean(name = "resetConnectionFilter")
+    public ResetConnectionFilter resetConnectionFilter() {
+        return new ResetConnectionFilter();
+    }
 }
