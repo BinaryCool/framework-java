@@ -37,6 +37,13 @@ public class MyRedisCacheConfiguration extends CachingConfigurerSupport {
     public KeyGenerator keyGenerator() {
         return (o, method, objects) -> {
             StringBuilder sb = new StringBuilder();
+            sb.append(o.getClass().getSimpleName()).append(":").append(method.getName());
+
+            if(null == objects && 0 >= objects.length) {
+                return sb.toString();
+            }
+
+            sb.append(":");
             for (Object obj : objects) {
                 if(null != obj) {
                     sb.append(obj.toString());
