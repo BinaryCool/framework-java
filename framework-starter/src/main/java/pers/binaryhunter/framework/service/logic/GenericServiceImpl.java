@@ -139,15 +139,7 @@ public class GenericServiceImpl<B, K> extends GenericAbstractServiceImpl<B, K> i
 
     @Override
     public B queryFirstByField(String fieldSQL, Map<String, Object> params) {
-        if(null == params) {
-            params = new HashMap<>();
-        }
-        params.put("limit", 1);
-        List<B> list = this.queryByField(fieldSQL, params);
-        if(null == list || 0 >= list.size()) {
-            return null;
-        }
-        return list.get(0);
+        return this.queryFirst(false, params, fieldSQL);
     }
 
     @Override
@@ -162,12 +154,21 @@ public class GenericServiceImpl<B, K> extends GenericAbstractServiceImpl<B, K> i
 
     @Override
     public B queryFirst(Map<String, Object> params, boolean enable) {
+        return this.queryFirst(true, params, enable);
+    }
+
+    private B queryFirst(boolean byArgs, Map<String, Object> params, Object args2) {
         if(null == params) {
             params = new HashMap<>();
         }
 
         params.put("limit", 1);
-        List<B> list = this.queryByArgs(params, enable);
+        List<B> list;
+        if(byArgs) {
+            list = this.queryByArgs(params, (Boolean) args2);
+        } else {
+            list = this.queryByField((String) args2, params);
+        }
         if(null == list || 0 >= list.size()) {
             return null;
         }
