@@ -25,6 +25,7 @@ public class MyRedisCacheConfiguration extends CachingConfigurerSupport {
     //过期时间, 单位(s)
     private static final int DEFAULT_EXPIRATIOIN = 1800;
     private static String REDIS_CACHE_KEY_PREFIX = "cache::";
+    private static String REDIS_CACHE_KEY_PREFIX_EXCLUED = "cache::#ttl";
 
     @Bean
     public CacheManager cacheManager(RedisTemplate redisTemplate) {
@@ -60,7 +61,7 @@ public class MyRedisCacheConfiguration extends CachingConfigurerSupport {
                 for (String v : value) {
                     if (!StringUtils.isEmpty(v)) {
                         // 如果缓存组件以 特定关键字开头默认"cache::", 则不添加类名和方法名
-                        if (v.startsWith(REDIS_CACHE_KEY_PREFIX)) {
+                        if (v.startsWith(REDIS_CACHE_KEY_PREFIX) && !v.startsWith(REDIS_CACHE_KEY_PREFIX_EXCLUED)) {
                             containPrefix = true;
                             break;
                         }
