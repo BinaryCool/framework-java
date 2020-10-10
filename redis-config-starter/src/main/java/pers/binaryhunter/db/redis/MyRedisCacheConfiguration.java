@@ -77,7 +77,9 @@ public class MyRedisCacheConfiguration extends CachingConfigurerSupport {
                 return sb.toString();
             }
 
-            sb.append(":");
+            if (!containPrefix) {
+                sb.append(":");
+            }
             for (Object obj : objects) {
                 if (null != obj) {
                     sb.append(obj.toString());
