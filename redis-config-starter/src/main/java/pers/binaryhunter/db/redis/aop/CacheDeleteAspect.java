@@ -11,6 +11,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
 import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.util.StringUtils;
 import pers.binaryhunter.db.redis.util.RedisUtil;
 
 import javax.annotation.Resource;
@@ -40,8 +41,13 @@ public class CacheDeleteAspect {
             // 并且方法名称以add|delete|update|import开头
             // 或者 有CacheDelete注解标记的方法
             // 都需要删除缓存
-            if ((target.getClass().isAnnotationPresent(Cacheable.class) && Pattern.compile("^(add|delete|update|import).*").matcher(method).matches()) || m1.isAnnotationPresent(CacheDelete.class)) {
-                String keyPre = "cache::" + target.getClass().getSimpleName() + ":*";
+            if ((target.getClass().isAnnotationPresent(Cacheable.class) && Pattern.compile("^(add|insert|delete|update|import).*").matcher(method).matches()) || m1.isAnnotationPresent(CacheDelete.class)) {
+                String keyPre = m1.getAnnotation(CacheDelete.class).value();
+                if(StringUtils.isEmpty(keyPre)) {
+                    keyPre = "cache::" + target.getClass().getSimpleName() + ":*";
+                } else {
+                    keyPre = "cache::" + keyPre + ":*";
+                }
                 RedisUtil.deleteKeys(redisTemplate, keyPre);
                 if (log.isDebugEnabled()) log.debug("Redis key {} has bean deleted", keyPre);
             }
