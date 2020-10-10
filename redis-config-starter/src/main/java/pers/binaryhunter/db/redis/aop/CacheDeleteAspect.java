@@ -42,7 +42,12 @@ public class CacheDeleteAspect {
             // 或者 有CacheDelete注解标记的方法
             // 都需要删除缓存
             if ((target.getClass().isAnnotationPresent(Cacheable.class) && Pattern.compile("^(add|insert|delete|update|import).*").matcher(method).matches()) || m1.isAnnotationPresent(CacheDelete.class)) {
-                String keyPre = m1.getAnnotation(CacheDelete.class).value();
+                String keyPre = null;
+                CacheDelete anno = m1.getAnnotation(CacheDelete.class);
+                if(null != anno) {
+                    keyPre = anno.value();
+                }
+                
                 if(StringUtils.isEmpty(keyPre)) {
                     keyPre = "cache::*" + target.getClass().getSimpleName() + ":*";
                 } else {
