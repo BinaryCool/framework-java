@@ -24,7 +24,7 @@ public class MyRedisCacheConfiguration extends CachingConfigurerSupport {
     private static final Logger log = LoggerFactory.getLogger(MyRedisCacheConfiguration.class);
     //过期时间, 单位(s)
     private static final int DEFAULT_EXPIRATIOIN = 1800;
-    private static String REDIS_CACHE_KEY_PREFIX = "cache::";
+    private static String REDIS_CACHE_KEY_PREFIX = "cache:";
     private static String REDIS_CACHE_KEY_PREFIX_EXCLUED = "cache::#ttl";
 
     @Bean
