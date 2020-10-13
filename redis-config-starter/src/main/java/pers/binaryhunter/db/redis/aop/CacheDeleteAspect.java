@@ -41,11 +41,13 @@ public class CacheDeleteAspect {
             // 并且方法名称以add|delete|update|import开头
             // 或者 有CacheDelete注解标记的方法
             // 都需要删除缓存
-            if ((target.getClass().isAnnotationPresent(Cacheable.class) && Pattern.compile("^(add|insert|delete|update|import).*").matcher(method).matches()) || m1.isAnnotationPresent(CacheDelete.class)) {
+            if (((target.getClass().isAnnotationPresent(Cacheable.class) || target.getClass().isAnnotationPresent(CacheDelete.class)) && Pattern.compile("^(add|insert|delete|update|import).*").matcher(method).matches()) || m1.isAnnotationPresent(CacheDelete.class)) {
                 String keyPre = null;
-                CacheDelete anno = m1.getAnnotation(CacheDelete.class);
-                if(null != anno) {
-                    keyPre = anno.value();
+
+                if(m1.isAnnotationPresent(CacheDelete.class)) {
+                    keyPre = m1.getAnnotation(CacheDelete.class).value();
+                } else if(target.getClass().isAnnotationPresent(CacheDelete.class)) {
+                    keyPre = target.getClass().getAnnotation(CacheDelete.class).value();
                 }
                 
                 if(StringUtils.isEmpty(keyPre)) {
