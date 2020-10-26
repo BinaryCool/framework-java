@@ -32,7 +32,7 @@ import java.util.Map;
  * @author BinaryHunter
  */
 public class GenericController {
-    private static final Logger logger = LoggerFactory.getLogger(GenericController.class);
+    private static final Logger log = LoggerFactory.getLogger(GenericController.class);
 
     /**
      * 把返回空对象
@@ -70,8 +70,9 @@ public class GenericController {
         } else {
             msg = ResponseBean.CodeEnum.ERR_UNKOWN.getMsg();
             HttpServletRequest request = ((ServletRequestAttributes) RequestContextHolder.getRequestAttributes()).getRequest();
-            logger.error(JSON.toJSONString(request.getParameterMap()));
-            logger.error("", ex);
+            log.error("==> " + request.getRequestURI());
+            log.error(JSON.toJSONString(request.getParameterMap()));
+            log.error("", ex);
 
             if(50 < msg.length()) {
                 msg = msg.substring(0, 50);
