@@ -50,11 +50,9 @@ public class GlobalExceptionResolver extends GenericController {
                 if(null != p) {
                     String[] path = constraintViolation.getPropertyPath().toString().split("\\.");
                     if(ArrayUtils.isEmpty(path)) {
-                        msgBuilder.append(constraintViolation.getPropertyPath().toString());
                         continue;
                     }
 
-                    boolean nameAppend = false;
                     if(1 < path.length) {
                         String methodName = path[0];
                         Class clazz = constraintViolation.getRootBeanClass();
@@ -70,21 +68,20 @@ public class GlobalExceptionResolver extends GenericController {
                             for(Parameter param : method.getParameters()) {
                                 // 如果只有一个参数, 参数名称会变为args0, 故只有一个参数也要进入
                                 if(param.getName().equals(paramName) || 1 == method.getParameters().length) {
-                                    if (param.isAnnotationPresent(FieldName.class)) {
-                                        String value = param.getAnnotation(FieldName.class).value();
-                                        if(StringUtils.isNotBlank(value)) {
-                                            msgBuilder.append(value);
-                                            nameAppend = true;
+                                    if(2 == path.length) {
+                                        if (param.isAnnotationPresent(FieldName.class)) {
+                                            String value = param.getAnnotation(FieldName.class).value();
+                                            if (StringUtils.isNotBlank(value)) {
+                                                msgBuilder.append(value);
+                                            }
                                         }
+                                    } else if (3 == path.length) {
+                                        msgBuilder.append(getFieldAnnotation(param.getParameterizedType().getClass(), path[2]));
                                     }
                                     break;
                                 }
                             }
                         }
-                    }
-
-                    if(!nameAppend) {
-                        msgBuilder.append(path[path.length - 1]);
                     }
                 }
                 msgBuilder.append(constraintViolation.getMessage()).append(",");
@@ -123,24 +120,8 @@ public class GlobalExceptionResolver extends GenericController {
                 if(objectError instanceof FieldError) {
                     FieldError fieldError = ((FieldError) objectError);
                     String field = fieldError.getField();
-                    boolean nameAppend = false;
                     if(null != target) {
-                        try {
-                            Field errorFiled = target.getClass().getDeclaredField(field);
-                            if (errorFiled.isAnnotationPresent(FieldName.class)) {
-                               String value = errorFiled.getAnnotation(FieldName.class).value();
-                               if(StringUtils.isNotBlank(value)) {
-                                   msgBuilder.append(value);
-                                   nameAppend = true;
-                               }
-                            }
-                        } catch (Exception e) {
-                            log.warn(e.getMessage());
-                        }
-                    }
-
-                    if(!nameAppend) {
-                        msgBuilder.append(field);
+                        msgBuilder.append(getFieldAnnotation(target.getClass(), field));
                     }
                 }
                 msgBuilder.append(objectError.getDefaultMessage()).append(",");
@@ -167,6 +148,21 @@ public class GlobalExceptionResolver extends GenericController {
             }
         }
         return toResponse(ex);
+    }
+    
+    private String getFieldAnnotation(Class clazz, String filedName) {
+        try {
+            Field errorFiled = clazz.getDeclaredField(filedName);
+            if (errorFiled.isAnnotationPresent(FieldName.class)) {
+                String value = errorFiled.getAnnotation(FieldName.class).value();
+                if(StringUtils.isNotBlank(value)) {
+                    return value;
+                }
+            }
+        } catch (Exception e) {
+            log.warn(e.getMessage());
+        }
+        return "";
     }
 
     private String processNull(String msg) {
