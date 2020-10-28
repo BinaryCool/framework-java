@@ -3,9 +3,7 @@ package pers.binaryhunter.db.redis;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.cache.CacheManager;
-import org.springframework.cache.annotation.Cacheable;
-import org.springframework.cache.annotation.CachingConfigurerSupport;
-import org.springframework.cache.annotation.EnableCaching;
+import org.springframework.cache.annotation.*;
 import org.springframework.cache.interceptor.KeyGenerator;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -16,6 +14,7 @@ import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.serializer.RedisSerializationContext;
 import org.springframework.util.StringUtils;
 
+import java.lang.reflect.Method;
 import java.time.Duration;
 
 @Configuration
@@ -42,20 +41,14 @@ public class MyRedisCacheConfiguration extends CachingConfigurerSupport {
         return (o, method, objects) -> {
             StringBuilder sb = new StringBuilder();
 
-            String[] value = null;
-            if (method.isAnnotationPresent(Cacheable.class)) {
-                Cacheable anno = method.getAnnotation(Cacheable.class);
-                value = anno.value();
-                if (null == value || 0 >= value.length) {
-                    value = anno.cacheNames();
-                }
-            } else if (o.getClass().isAnnotationPresent(Cacheable.class)) {
-                Cacheable anno = o.getClass().getAnnotation(Cacheable.class);
-                value = anno.value();
-                if (null == value || 0 >= value.length) {
-                    value = anno.cacheNames();
-                }
+            String[] value = getCacheAnnotationValues(o, method, Cacheable.class, 0);
+            if(null == value || 0 >= value.length) {
+                value = getCacheAnnotationValues(o, method, CachePut.class, 1);
             }
+            if(null == value || 0 >= value.length) {
+                value = getCacheAnnotationValues(o, method, CacheEvict.class, 2);
+            }
+
             boolean containPrefix = false;
             if (null != value && 0 < value.length) {
                 for (String v : value) {
@@ -90,5 +83,56 @@ public class MyRedisCacheConfiguration extends CachingConfigurerSupport {
 
             return sb.toString();
         };
+    }
+
+    private String[] getCacheAnnotationValues(Object o, Method method, Class annotationClass, int index) {
+        if (method.isAnnotationPresent(annotationClass)) {
+            Object annoObj = method.getAnnotation(annotationClass);
+            return getCacheAnnotationValues(annoObj, index);
+        } else if (o.getClass().isAnnotationPresent(annotationClass)) {
+            Object annoObj = o.getClass().getAnnotation(annotationClass);
+            return getCacheAnnotationValues(annoObj, index);
+        }
+        return null;
+    }
+
+    private String[] getCacheAnnotationValues(Object annoObj, int index) {
+        switch (index) {
+            case 0:
+                return getCacheableValues(annoObj);
+            case 1:
+                return getCachePutValues(annoObj);
+            case 2:
+                return getCacheEvictValues(annoObj);
+            default:
+                return null;
+        }
+    }
+
+    private String[] getCacheableValues(Object annoObj) {
+        Cacheable anno = (Cacheable) annoObj;
+        String[] value = anno.value();
+        if (null == value || 0 >= value.length) {
+            value = anno.cacheNames();
+        }
+        return value;
+    }
+
+    private String[] getCachePutValues(Object annoObj) {
+        CachePut anno = (CachePut) annoObj;
+        String[] value = anno.value();
+        if (null == value || 0 >= value.length) {
+            value = anno.cacheNames();
+        }
+        return value;
+    }
+
+    private String[] getCacheEvictValues(Object annoObj) {
+        CacheEvict anno = (CacheEvict) annoObj;
+        String[] value = anno.value();
+        if (null == value || 0 >= value.length) {
+            value = anno.cacheNames();
+        }
+        return value;
     }
 }
