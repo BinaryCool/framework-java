@@ -76,7 +76,7 @@ public class GlobalExceptionResolver extends GenericController {
                                             }
                                         }
                                     } else if (3 == path.length) {
-                                        msgBuilder.append(getFieldAnnotation(param.getClass(), path[2]));
+                                        msgBuilder.append(getFieldAnnotation((Class) param.getParameterizedType(), path[2]));
                                     }
                                     break;
                                 }
