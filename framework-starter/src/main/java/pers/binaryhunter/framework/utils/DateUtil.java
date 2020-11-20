@@ -20,7 +20,12 @@ public class DateUtil {
         YYYY_MM_DD_HH_MM("yyyy-MM-dd HH:mm"),
         YYYY_MM_DD_HH_MM_SS("yyyy-MM-dd HH:mm:ss"),
         HH_MM("HH:mm"),
-        YYYYMMDDHHMMSSSSS("yyyyMMddHHmmssSSS"),;
+        YYYYMMDDHHMMSSSSS("yyyyMMddHHmmssSSS"),
+        MMDD("MMdd"),
+        YYYYNIANMMYUEDDRI("yyyy年MM月dd日"),
+        YYYY_MM_DD_HH("yyyy-MM-dd HH"),
+        HH_MM_SS("HH:mm:ss"),
+        ;
 
         private String pattern;
 

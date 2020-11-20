@@ -149,11 +149,20 @@ public class GenericController {
     /**
      * 查询
      * @param service service
-     * @return 分页结果
+     * @return 结果
      */
     protected List select(GenericService service, Object... args) {
         Map<String, Object> params = MapConverter.arr2Map(args);
-        return service.queryByArgs(params);
+        return select(service, params);
+    }
+
+    /**
+     * 查询
+     * @param service service
+     * @return 结果
+     */
+    protected List select(GenericService service, Map<String, Object> args) {
+        return service.queryByArgs(args);
     }
 
     /**
@@ -288,11 +297,20 @@ public class GenericController {
     }
 
     /**
-     * 分页查询
+     * 查询
      * @param service service
-     * @return 分页结果
+     * @return 结果
      */
     protected ResponseBean selectResponse(GenericService service, Object... args) {
+        return toResponse(select(service, args));
+    }
+
+    /**
+     * 查询
+     * @param service service
+     * @return 结果
+     */
+    protected ResponseBean selectResponse(GenericService service, Map<String, Object> args) {
         return toResponse(select(service, args));
     }
 
