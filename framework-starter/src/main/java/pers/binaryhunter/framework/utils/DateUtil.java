@@ -49,6 +49,28 @@ public class DateUtil {
         }
     }
 
+    public enum DateTypeEnum {
+        YEAR(Calendar.YEAR, PatternType.YYYY),
+        MONTH(Calendar.MONTH, PatternType.YYYY_MM),
+        DATE(Calendar.DATE, PatternType.YYYY_MM_DD),
+        ;
+        private Integer dateType;
+        private PatternType patternType;
+
+        DateTypeEnum(Integer dateType, PatternType patternType) {
+            this.dateType = dateType;
+            this.patternType = patternType;
+        }
+
+        public Integer getDateType() {
+            return dateType;
+        }
+
+        public PatternType getPatternType() {
+            return patternType;
+        }
+    }
+
     public static DateFormat getSingletonByPattern(String pattern) {
         SimpleDateFormat df = threadLocal.get();
         df.applyPattern(pattern);
@@ -102,10 +124,14 @@ public class DateUtil {
         return dateParams(Stream.of(new String[]{dateStr, dateStr}).collect(Collectors.toList()), params, prefix);
     }
 
+    public static Map<String, Object> dateParams(List<String> queryList, Map<String, Object> params, String prefix) {
+        return dateParams(queryList, params, prefix, DateTypeEnum.DATE);
+    }
+
     /**
      * 封装日期查询
      */
-    public static Map<String, Object> dateParams(List<String> queryList, Map<String, Object> params, String prefix) {
+    public static Map<String, Object> dateParams(List<String> queryList, Map<String, Object> params, String prefix, DateTypeEnum dateTypeEnum) {
         if(null == params) {
             params = new HashMap<>();
         }
@@ -121,15 +147,15 @@ public class DateUtil {
             if (1 < queryList.size()) {
                 try {
                     String endTimeStr = queryList.get(1);
-                    Date endTime = pers.binaryhunter.framework.utils.DateUtil.parse(endTimeStr, pers.binaryhunter.framework.utils.DateUtil.PatternType.YYYY_MM_DD.getPattern());
+                    Date endTime = pers.binaryhunter.framework.utils.DateUtil.parse(endTimeStr, dateTypeEnum.getPatternType().getPattern());
 
                     Calendar cal = Calendar.getInstance();
                     cal.setTime(endTime);
-                    cal.add(Calendar.DATE, 1);
+                    cal.add(dateTypeEnum.getDateType(), 1);
                     if(StringUtils.isBlank(prefix)) {
-                        params.put("endTime", pers.binaryhunter.framework.utils.DateUtil.format(cal.getTime(), pers.binaryhunter.framework.utils.DateUtil.PatternType.YYYY_MM_DD.getPattern()));
+                        params.put("endTime", pers.binaryhunter.framework.utils.DateUtil.format(cal.getTime(), dateTypeEnum.getPatternType().getPattern()));
                     } else {
-                        params.put(prefix + "EndTime", pers.binaryhunter.framework.utils.DateUtil.format(cal.getTime(), pers.binaryhunter.framework.utils.DateUtil.PatternType.YYYY_MM_DD.getPattern()));
+                        params.put(prefix + "EndTime", pers.binaryhunter.framework.utils.DateUtil.format(cal.getTime(), dateTypeEnum.getPatternType().getPattern()));
                     }
                 } catch (Exception ex) {
                     log.error("", ex);
