@@ -35,7 +35,7 @@ public class MapConverter {
 					if (method == null) {
 						continue;
 					}
-					
+
 					Object value = method.invoke(obj);
 					if (value != null) {
 						if (value instanceof String) {
@@ -52,7 +52,7 @@ public class MapConverter {
 			}
 		}
 	}
-	
+
 	/**
 	 * 把对象转化为 map
 	 * @param map map
@@ -65,7 +65,7 @@ public class MapConverter {
 		if(null == map) {
 			map = new HashMap<>();
 		}
-		
+
 		if (obj != null) {
 			Class c = obj.getClass();
 			convertByField(c, obj, map);
@@ -87,7 +87,7 @@ public class MapConverter {
 		Map<String, Object> map = new HashMap<String, Object>();
 		return convertByField(map, obj);
 	}
-	
+
 	/**
 	 * 转化分页对象
 	 * @param map map
@@ -99,22 +99,22 @@ public class MapConverter {
 		if(null == map) {
 			map = new HashMap<>();
 		}
-		
+
 		map.put("start", (page.getPageNum() - 1) * page.getNumPerPage());
 		map.put("limit", page.getNumPerPage());
-		
+
 		if(StringUtils.isNotEmpty(page.getOrderField())) {
             String orderField = page.getOrderField();
             orderField = SqlUtil.replaceKeyWords4SqlInjection(orderField);
 			map.put("orderField", orderField);
 		}
-		
+
 		if(StringUtils.isNotEmpty(page.getOrderDirection())) {
             if("asc".equals(page.getOrderDirection()) || "desc".equals(page.getOrderDirection())) {
                 map.put("orderDirection", page.getOrderDirection());
             }
 		}
-		
+
 		return map;
 	}
 
@@ -123,9 +123,6 @@ public class MapConverter {
      * @return
      */
     public static void decodeByField(Object obj, String... fieldNames) {
-        if (ArrayUtils.isEmpty(fieldNames)) {
-            return;
-        }
         Class c = obj.getClass();
         Field[] fileds = c.getDeclaredFields();
         for (Field f : fileds) {
@@ -134,8 +131,10 @@ public class MapConverter {
             }
             String name = f.getName();
             String shortName = name.substring(0, 1).toUpperCase() + name.substring(1);
-            if(Stream.of(fieldNames).noneMatch(item -> name.equals(item))) {
-                continue;
+            if (ArrayUtils.isNotEmpty(fieldNames)) {
+                if (Stream.of(fieldNames).noneMatch(item -> name.equals(item))) {
+                    continue;
+                }
             }
 
             Method method;
