@@ -82,16 +82,23 @@ public class DateUtil {
     }
 
     public static Date parse(String dateStr, String pattern) throws ParseException {
+        if(StringUtils.isBlank(dateStr) || StringUtils.isBlank(pattern)) {
+            return null;
+        }
         return getSingletonByPattern(pattern).parse(dateStr);
     }
 
     public static String format(Date date, String pattern) {
+        if(null == date || StringUtils.isBlank(pattern)) {
+            return null;
+        }
+
         return getSingletonByPattern(pattern).format(date);
     }
 
     public static Date toDate(String dateStr) {
         try {
-            if (StringUtils.isEmpty(dateStr)) {
+            if (StringUtils.isBlank(dateStr)) {
                 return null;
             } else if (dateStr.contains("-")) {
                 return parse(dateStr, PatternType.YYYY_MM_DD.getPattern());
@@ -140,26 +147,29 @@ public class DateUtil {
             if (!CollectionUtils.isEmpty(queryList)) {
                 if (0 < queryList.size()) {
                     String startTimeStr = queryList.get(0);
-                    Date startTime = pers.binaryhunter.framework.utils.DateUtil.parse(startTimeStr, dateTypeEnum.getPatternType().getPattern());
-                    if (StringUtils.isBlank(prefix)) {
-                        params.put("startTime", pers.binaryhunter.framework.utils.DateUtil.format(startTime, dateTypeEnum.getPatternType().getPattern()));
-                    } else {
-                        params.put(prefix + "StartTime", pers.binaryhunter.framework.utils.DateUtil.format(startTime, dateTypeEnum.getPatternType().getPattern()));
+                    if(StringUtils.isNotBlank(startTimeStr)) {
+                        Date startTime = pers.binaryhunter.framework.utils.DateUtil.parse(startTimeStr, dateTypeEnum.getPatternType().getPattern());
+                        if (StringUtils.isBlank(prefix)) {
+                            params.put("startTime", pers.binaryhunter.framework.utils.DateUtil.format(startTime, dateTypeEnum.getPatternType().getPattern()));
+                        } else {
+                            params.put(prefix + "StartTime", pers.binaryhunter.framework.utils.DateUtil.format(startTime, dateTypeEnum.getPatternType().getPattern()));
+                        }
                     }
                 }
                 if (1 < queryList.size()) {
                     String endTimeStr = queryList.get(1);
-                    Date endTime = pers.binaryhunter.framework.utils.DateUtil.parse(endTimeStr, dateTypeEnum.getPatternType().getPattern());
+                    if(StringUtils.isNotBlank(endTimeStr)) {
+                        Date endTime = pers.binaryhunter.framework.utils.DateUtil.parse(endTimeStr, dateTypeEnum.getPatternType().getPattern());
 
-                    Calendar cal = Calendar.getInstance();
-                    cal.setTime(endTime);
-                    cal.add(dateTypeEnum.getDateType(), 1);
-                    if (StringUtils.isBlank(prefix)) {
-                        params.put("endTime", pers.binaryhunter.framework.utils.DateUtil.format(cal.getTime(), dateTypeEnum.getPatternType().getPattern()));
-                    } else {
-                        params.put(prefix + "EndTime", pers.binaryhunter.framework.utils.DateUtil.format(cal.getTime(), dateTypeEnum.getPatternType().getPattern()));
+                        Calendar cal = Calendar.getInstance();
+                        cal.setTime(endTime);
+                        cal.add(dateTypeEnum.getDateType(), 1);
+                        if (StringUtils.isBlank(prefix)) {
+                            params.put("endTime", pers.binaryhunter.framework.utils.DateUtil.format(cal.getTime(), dateTypeEnum.getPatternType().getPattern()));
+                        } else {
+                            params.put(prefix + "EndTime", pers.binaryhunter.framework.utils.DateUtil.format(cal.getTime(), dateTypeEnum.getPatternType().getPattern()));
+                        }
                     }
-
                 }
             }
         } catch (Exception ex) {
