@@ -56,6 +56,22 @@ public interface GenericService<B,K> {
      */
     PageResult<B> pageByArgs(Page page, Object... params);
     /**
+     * 分页查询
+     * @param params 参数
+     * @param page 分页参数
+     * @return 分页结果
+     * By Yuwen on 2017年6月22日
+     */
+    List<B> pageSkipCount(Map<String, Object> params, Page page);
+    /**
+     * 分页查询
+     * @param params 参数
+     * @param page 分页参数
+     * @return 分页结果
+     * By Yuwen on 2017年6月22日
+     */
+    List<B> pageSkipCount(Page page, Object... params);
+    /**
      * 查询部分字段
      */
     List<B> queryByField(String fieldSQL, Map<String, Object> params);

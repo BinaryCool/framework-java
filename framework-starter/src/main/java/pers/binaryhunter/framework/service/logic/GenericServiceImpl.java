@@ -126,6 +126,21 @@ public class GenericServiceImpl<B, K> extends GenericAbstractServiceImpl<B, K> i
     }
 
     @Override
+    public List<B> pageSkipCount(Map<String, Object> params, Page page) {
+        params = this.doStatusParams(params, true);
+        if(page.getPageNum() > page.getPageCount()) { //如果当前页面大于总页面
+            return null;
+        }
+        params = MapConverter.convertPage(params, page);
+        return dao.pageByArgs(params);
+    }
+
+    @Override
+    public List<B> pageSkipCount(Page page, Object... params) {
+        return pageSkipCount(MapConverter.arr2Map(params), page);
+    }
+
+    @Override
     public List<B> queryByField(String fieldSQL, Map<String, Object> params) {
         params = doStatusParams(params, true);
         params.put("fieldSQL", fieldSQL);
