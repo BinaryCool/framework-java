@@ -50,11 +50,11 @@ public class MybatisAutoConfiguration {
 
 	@Autowired(required = false)
 	private DatabaseIdProvider databaseIdProvider;
-	
+
 	private List<MyDataSource> readDataSources = new ArrayList<>();
 
 	private DruidDataSource writeDataSource;
-	
+
 	@PostConstruct
 	public void checkConfigFileExists() {
 		if (this.properties.isCheckConfigLocation() && StringUtils.hasText(this.properties.getConfigLocation())) {
@@ -69,12 +69,13 @@ public class MybatisAutoConfiguration {
 			throws Exception {
 		SqlSessionFactoryBean factory = new SqlSessionFactoryBean();
         factory.setVfs(SpringBootVFS.class);
-        
+
 		Interceptor rwplugin = new RWPlugin();
-		if (StringUtils.hasText(this.properties.getConfigLocation())) {
-			factory.setConfigLocation(this.resourceLoader.getResource(this.properties.getConfigLocation()));
+		String configLocation = this.properties.getConfigLocation();
+		if (StringUtils.hasText(configLocation)) {
+			factory.setConfigLocation(this.resourceLoader.getResource(configLocation));
 		}
-		factory.setConfiguration(properties.getConfiguration());
+		factory.setConfiguration(this.properties.getConfiguration());
 
 		if (ObjectUtils.isEmpty(this.interceptors)) {
 			Interceptor[] plugins = { rwplugin };
@@ -87,14 +88,17 @@ public class MybatisAutoConfiguration {
 		if (this.databaseIdProvider != null) {
 			factory.setDatabaseIdProvider(this.databaseIdProvider);
 		}
-		if (StringUtils.hasLength(this.properties.getTypeAliasesPackage())) {
-			factory.setTypeAliasesPackage(this.properties.getTypeAliasesPackage());
+		String typeAlias = this.properties.getTypeAliasesPackage();
+		if (StringUtils.hasLength(typeAlias)) {
+			factory.setTypeAliasesPackage(typeAlias);
 		}
-		if (StringUtils.hasLength(this.properties.getTypeHandlersPackage())) {
-			factory.setTypeHandlersPackage(this.properties.getTypeHandlersPackage());
+		String typeHandlers = this.properties.getTypeHandlersPackage();
+		if (StringUtils.hasLength(typeHandlers)) {
+			factory.setTypeHandlersPackage(typeHandlers);
 		}
-		if (!ObjectUtils.isEmpty(this.properties.resolveMapperLocations())) {
-			factory.setMapperLocations(this.properties.resolveMapperLocations());
+		Resource[] resolveMapperLocations = this.properties.resolveMapperLocations();
+		if (!ObjectUtils.isEmpty(resolveMapperLocations)) {
+			factory.setMapperLocations(resolveMapperLocations);
 		}
 		factory.setDataSource(dataSource);
 		return factory.getObject();
@@ -117,7 +121,7 @@ public class MybatisAutoConfiguration {
 	public DruidDataSource getWriteDataSource(){
 		return this.writeDataSource;
 	}
-	
+
 	public List<MyDataSource> getReadDataSources() {
 		return readDataSources;
 	}
