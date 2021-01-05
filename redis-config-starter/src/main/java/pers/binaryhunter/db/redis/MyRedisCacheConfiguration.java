@@ -76,7 +76,12 @@ public class MyRedisCacheConfiguration extends CachingConfigurerSupport {
             }
             for (Object obj : objects) {
                 if (null != obj) {
-                    sb.append(JSON.toJSONString(obj));
+                    String json = JSON.toJSONString(obj);
+                    if(!StringUtils.isEmpty(json)) {
+                        json = json.replaceAll(":", "_");
+                    }
+
+                    sb.append(json);
                 }
             }
 
