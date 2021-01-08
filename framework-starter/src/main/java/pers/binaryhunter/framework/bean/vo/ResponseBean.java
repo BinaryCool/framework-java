@@ -6,6 +6,7 @@ package pers.binaryhunter.framework.bean.vo;
  *
  */
 public class ResponseBean {
+    private String success;
 	/**
 	 * 返回代码
 	 */
@@ -31,7 +32,15 @@ public class ResponseBean {
 		this.data = data;
 	}
 
-	public enum CodeEnum {
+    public String getSuccess() {
+        return success;
+    }
+
+    public void setSuccess(String success) {
+        this.success = success;
+    }
+
+    public enum CodeEnum {
 	    SUCC(0, "成功", "成功"),
         ERR_UNKOWN(1, "未知错误", "未知错误, 请联系管理员"),
         SESSION_OUT(2, "会话过期", "你的会话已过期, 请重新登陆"),
