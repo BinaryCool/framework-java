@@ -392,8 +392,8 @@ public class GenericServiceImpl<B, K> extends GenericAbstractServiceImpl<B, K> i
             params = new HashMap<>();
         }
 
-        boolean enable = params.containsKey("_all");
-        if (!enable) {
+        boolean isAll = params.containsKey("_all");
+        if (!isAll) {
             if (!params.containsKey("status")) {
                 params.put("status", PO.STATUS_ENABLE);
             }
