@@ -54,9 +54,6 @@
 	
 	<!-- 新增 -->
 	<insert id="create" parameterType="pers.binaryhunter.flow.bean.po.AttachHist" useGeneratedKeys="true" keyProperty="id">
-		<selectKey keyProperty="id" order="BEFORE" resultType="long">
-			select <include refid="getSequenceSql"></include>
-		</selectKey>
 		<![CDATA[
 			insert into f_attach_hist ( 
 		]]>

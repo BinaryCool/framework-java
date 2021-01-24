@@ -6,7 +6,7 @@
     <groupId>pers.binaryhunter</groupId>
     <artifactId>flow-starter</artifactId>
     <packaging>jar</packaging>
-    <version>1.0.2</version>
+    <version>1.0.4</version>
 
     <parent>
         <groupId>pers.binaryhunter</groupId>

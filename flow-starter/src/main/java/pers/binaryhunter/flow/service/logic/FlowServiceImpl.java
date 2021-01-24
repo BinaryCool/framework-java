@@ -147,6 +147,16 @@ public class FlowServiceImpl extends GenericServiceImpl<Flow, Long> implements F
         }).collect(Collectors.toList());
     }
 
+    @Override
+    public Node getCurrOne(String flowCode, Long id) {
+        List<Node> list = getCurr(flowCode, id);
+        if (CollectionUtils.isEmpty(list)) {
+            return null;
+        } else {
+            return list.get(0);
+        }
+    }
+
     /**
      * 获取当前节点模板
      */
