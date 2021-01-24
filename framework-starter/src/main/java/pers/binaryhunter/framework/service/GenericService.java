@@ -17,20 +17,6 @@ import java.util.Map;
  */
 public interface GenericService<B,K> {
     /**
-     * 获取ID
-     * @return ID
-     */
-    @Deprecated
-    Long getSequence();
-
-    /**
-     * 获取ID
-     * @param step 步长
-     * @return ID
-     */
-    @Deprecated
-    Long getSequences(int step);
-    /**
      * 分页查询
      * @param params 参数
      * @param page 分页参数
