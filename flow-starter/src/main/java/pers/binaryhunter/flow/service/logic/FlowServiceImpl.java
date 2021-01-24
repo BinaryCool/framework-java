@@ -53,7 +53,7 @@ public class FlowServiceImpl extends GenericServiceImpl<Flow, Long> implements F
         }
         
         List<NodeCurr> nodeCurrList = genNodeCurr(flowCode, id, currTempList);
-        nodeCurrService.addBatchAutoId(nodeCurrList);
+        nodeCurrService.addBatch(nodeCurrList);
 
         return nodeHist;
     }
@@ -93,7 +93,7 @@ public class FlowServiceImpl extends GenericServiceImpl<Flow, Long> implements F
         List<NodeTemplate> currTempList = nodeTemplateService.getNextTemplate(nodeCurr.getFlowCode(), nodeCurr.getCascadeCode(), actionType);
         if(CollectionUtils.isNotEmpty(currTempList)) {
             List<NodeCurr> nodeCurrList = genNodeCurr(nodeCurr.getFlowCode(), nodeCurr.getIdBill(), currTempList);
-            nodeCurrService.addBatchAutoId(nodeCurrList);
+            nodeCurrService.addBatch(nodeCurrList);
         }
 
         return nodeCurr;

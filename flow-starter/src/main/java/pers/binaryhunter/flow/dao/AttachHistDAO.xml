@@ -3,12 +3,6 @@
 	PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 	"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="pers.binaryhunter.flow.dao.AttachHistDAO">
-	<sql id="getSequenceSql">
-		<![CDATA[
-			NEXTVALS('f_attach_hist', 1)
-		]]>
-	</sql>
-	
 	<sql id="whereClause">
 		<if test="null != id and '' != id">
 			<![CDATA[
@@ -45,7 +39,7 @@
 	<sql id="basicColumn">
 		<trim suffixOverrides=",">
 		<![CDATA[
-			id,id_node,attach_url,attach_type,
+			id_node,attach_url,attach_type,
 		]]>
 		</trim>
 	</sql>
@@ -58,18 +52,8 @@
 		</trim>
 	</sql>
 	
-	<!-- 获取唯一标识序列 -->
-	<select id="getSequence" resultType="long">
-		select <include refid="getSequenceSql"></include>
-	</select>
-
-	<!-- 获取唯一标识序列 -->
-    <select id="getSequences" resultType="long">
-        select NEXTVALS('f_attach_hist', #{0})
-    </select>
-
 	<!-- 新增 -->
-	<insert id="create" parameterType="pers.binaryhunter.flow.bean.po.AttachHist">
+	<insert id="create" parameterType="pers.binaryhunter.flow.bean.po.AttachHist" useGeneratedKeys="true" keyProperty="id">
 		<selectKey keyProperty="id" order="BEFORE" resultType="long">
 			select <include refid="getSequenceSql"></include>
 		</selectKey>
@@ -82,7 +66,7 @@
 		]]>
 		<trim suffixOverrides=",">
 		<![CDATA[
-			#{id},#{idNode},#{attachUrl},#{attachType},	
+			#{idNode},#{attachUrl},#{attachType},	
 		]]>
 		</trim>
 		<![CDATA[
@@ -91,7 +75,7 @@
 	</insert>
 	
 	<!-- 批量新增 -->
-	<insert id="createBatch" parameterType="java.util.List">
+	<insert id="createBatch" parameterType="java.util.List" useGeneratedKeys="true" keyProperty="id">
 		<![CDATA[
 			insert into f_attach_hist (  
 		]]>
@@ -100,10 +84,9 @@
 			 ) values 
 		]]>
 	    <foreach collection="list" item="item" open="(" close=")" separator="), ("> 
-	        <include refid="getSequenceSql"></include>
 			<trim suffixOverrides=",">
 			<![CDATA[
-				,#{item.idNode},#{item.attachUrl},#{item.attachType},	
+				#{item.idNode},#{item.attachUrl},#{item.attachType},	
 			]]>
 			</trim>
 	    </foreach>

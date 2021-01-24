@@ -3,12 +3,6 @@
 	PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 	"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="pers.binaryhunter.flow.dao.FlowDAO">
-	<sql id="getSequenceSql">
-		<![CDATA[
-			NEXTVALS('f_flow', 1)
-		]]>
-	</sql>
-	
 	<sql id="whereClause">
 		<if test="null != id and '' != id">
 			<![CDATA[
@@ -45,7 +39,7 @@
 	<sql id="basicColumn">
 		<trim suffixOverrides=",">
 		<![CDATA[
-			id,code,name,cascade_code_entry,
+			code,name,cascade_code_entry,
 		]]>
 		</trim>
 	</sql>
@@ -57,22 +51,9 @@
 		]]>
 		</trim>
 	</sql>
-	
-	<!-- 获取唯一标识序列 -->
-	<select id="getSequence" resultType="long">
-		select <include refid="getSequenceSql"></include>
-	</select>
-
-	<!-- 获取唯一标识序列 -->
-    <select id="getSequences" resultType="long">
-        select NEXTVALS('f_flow', #{0})
-    </select>
-
+    
 	<!-- 新增 -->
-	<insert id="create" parameterType="pers.binaryhunter.flow.bean.po.Flow">
-		<selectKey keyProperty="id" order="BEFORE" resultType="long">
-			select <include refid="getSequenceSql"></include>
-		</selectKey>
+	<insert id="create" parameterType="pers.binaryhunter.flow.bean.po.Flow" useGeneratedKeys="true" keyProperty="id">
 		<![CDATA[
 			insert into f_flow ( 
 		]]>
@@ -82,7 +63,7 @@
 		]]>
 		<trim suffixOverrides=",">
 		<![CDATA[
-			#{id},#{code},#{name},#{cascadeCodeEntry},	
+			#{code},#{name},#{cascadeCodeEntry},	
 		]]>
 		</trim>
 		<![CDATA[
@@ -91,7 +72,7 @@
 	</insert>
 	
 	<!-- 批量新增 -->
-	<insert id="createBatch" parameterType="java.util.List">
+	<insert id="createBatch" parameterType="java.util.List" useGeneratedKeys="true" keyProperty="id">
 		<![CDATA[
 			insert into f_flow (  
 		]]>
@@ -102,7 +83,7 @@
 	    <foreach collection="list" item="item" open="(" close=")" separator="), ("> 
 			<trim suffixOverrides=",">
 			<![CDATA[
-				#{item.id},#{item.code},#{item.name},#{item.cascadeCodeEntry},	
+				#{item.code},#{item.name},#{item.cascadeCodeEntry},	
 			]]>
 			</trim>
 	    </foreach>
