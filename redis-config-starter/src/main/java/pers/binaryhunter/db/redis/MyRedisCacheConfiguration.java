@@ -1,5 +1,6 @@
 package pers.binaryhunter.db.redis;
 
+import com.alibaba.fastjson.JSON;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.cache.CacheManager;
@@ -75,7 +76,12 @@ public class MyRedisCacheConfiguration extends CachingConfigurerSupport {
             }
             for (Object obj : objects) {
                 if (null != obj) {
-                    sb.append(obj.toString());
+                    String json = JSON.toJSONString(obj);
+                    if(!StringUtils.isEmpty(json)) {
+                        json = json.replaceAll(":", "_");
+                    }
+
+                    sb.append(json);
                 }
             }
 

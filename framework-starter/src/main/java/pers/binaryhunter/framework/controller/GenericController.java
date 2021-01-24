@@ -101,6 +101,7 @@ public class GenericController {
      */
     private ResponseBean toResponse(Object bean, int code) {
         ResponseBean rb = new ResponseBean();
+        rb.setSuccess("" + code);
         rb.setCode(code);
         rb.setData(bean);
         return rb;
