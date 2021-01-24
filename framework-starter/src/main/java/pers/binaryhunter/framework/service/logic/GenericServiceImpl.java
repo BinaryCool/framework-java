@@ -384,7 +384,7 @@ public class GenericServiceImpl<B, K> extends GenericAbstractServiceImpl<B, K> i
     /**
      * 处理status状态参数
      * @param params 参数
-     * _enable 是否只需要查出正常数据 (不包括已删除数据)
+     * _all 是否只需要查出正常数据 (不包括已删除数据)
      * @return 参数
      */
     protected Map<String, Object> doStatusParams(Map<String, Object> params) {
@@ -392,12 +392,12 @@ public class GenericServiceImpl<B, K> extends GenericAbstractServiceImpl<B, K> i
             params = new HashMap<>();
         }
 
-        boolean enable = params.containsKey("_enable");
-        if (enable) {
+        boolean enable = params.containsKey("_all");
+        if (!enable) {
             if (!params.containsKey("status")) {
                 params.put("status", PO.STATUS_ENABLE);
             }
-            params.remove("_enable");
+            params.remove("_all");
         }
         return params;
     }
