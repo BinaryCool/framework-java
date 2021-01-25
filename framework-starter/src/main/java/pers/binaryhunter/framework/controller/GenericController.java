@@ -57,10 +57,10 @@ public class GenericController {
         int code = ResponseBean.CodeEnum.ERR_UNKOWN.getCode();
         String msg;
         if (ex instanceof BusinessException || ex instanceof IllegalArgumentException) {
-            code = ResponseBean.CodeEnum.ERR_BUSS.getCode();
+            code = ((BusinessException) ex).getCode();
             msg = ex.getMessage();
         } else if (ex instanceof BusinessCheckedException) {
-            code = ResponseBean.CodeEnum.ERR_BUSS_CHECKED.getCode();
+            code = ((BusinessCheckedException) ex).getCode();
             msg = ex.getMessage();
         } else if (ex instanceof SessionOutException) {
             code = ((SessionOutException) ex).getCode();

@@ -81,11 +81,19 @@ public class DateUtil {
         return new SimpleDateFormat(pattern);
     }
 
+    public static Date parse(String dateStr, PatternType patternType) throws ParseException {
+        return parse(dateStr, patternType.getPattern());
+    }
+
     public static Date parse(String dateStr, String pattern) throws ParseException {
         if(StringUtils.isBlank(dateStr) || StringUtils.isBlank(pattern)) {
             return null;
         }
         return getSingletonByPattern(pattern).parse(dateStr);
+    }
+
+    public static String format(Date date, PatternType patternType) {
+        return format(date, patternType.getPattern());
     }
 
     public static String format(Date date, String pattern) {
