@@ -13,12 +13,7 @@ public class GenericCacheableServiceImpl<B, K> extends GenericServiceImpl<B, K> 
     public PageResult<B> pageByArgs(Map<String, Object> params, Page page) {
         return super.pageByArgs(params, page);
     }
-
-    @Override
-    public PageResult<B> pageByArgs(Map<String, Object> params, Page page, boolean enable) {
-        return super.pageByArgs(params, page, enable);
-    }
-
+    
     @Override
     public PageResult<B> pageByArgs(Page page, Object... params) {
         return super.pageByArgs(page, params);
@@ -50,11 +45,6 @@ public class GenericCacheableServiceImpl<B, K> extends GenericServiceImpl<B, K> 
     }
 
     @Override
-    public B queryFirst(Map<String, Object> params, boolean enable) {
-        return super.queryFirst(params, enable);
-    }
-
-    @Override
     public B queryFirst(Object... params) {
         return super.queryFirst(params);
     }
@@ -63,12 +53,7 @@ public class GenericCacheableServiceImpl<B, K> extends GenericServiceImpl<B, K> 
     public List<B> queryByArgs(Map<String, Object> params) {
         return super.queryByArgs(params);
     }
-
-    @Override
-    public List<B> queryByArgs(Map<String, Object> params, boolean enable) {
-        return super.queryByArgs(params, enable);
-    }
-
+    
     @Override
     public List<B> queryByArgs(Object... params) {
         return super.queryByArgs(params);
@@ -82,11 +67,6 @@ public class GenericCacheableServiceImpl<B, K> extends GenericServiceImpl<B, K> 
     @Override
     public long countByArgs(Map<String, Object> params) {
         return super.countByArgs(params);
-    }
-
-    @Override
-    public long countByArgs(Map<String, Object> params, boolean enable) {
-        return super.countByArgs(params, enable);
     }
 
     @Override

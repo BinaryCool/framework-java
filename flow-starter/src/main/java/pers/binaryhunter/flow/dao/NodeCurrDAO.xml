@@ -3,12 +3,6 @@
 	PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 	"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="pers.binaryhunter.flow.dao.NodeCurrDAO">
-	<sql id="getSequenceSql">
-		<![CDATA[
-			NEXTVALS('f_node_curr', 1)
-		]]>
-	</sql>
-	
 	<sql id="whereClause">
 		<if test="null != id and '' != id">
 			<![CDATA[
@@ -95,7 +89,7 @@
 	<sql id="basicColumn">
 		<trim suffixOverrides=",">
 		<![CDATA[
-			id,flow_code,cascade_code,action,roles,deal_note,deal_role,deal_user_id,deal_user_name,deal_user_tel,id_bill,node_desc,template_id,process_status,
+			flow_code,cascade_code,action,roles,deal_note,deal_role,deal_user_id,deal_user_name,deal_user_tel,id_bill,node_desc,template_id,process_status,
 		]]>
 		</trim>
 	</sql>
@@ -107,22 +101,9 @@
 		]]>
 		</trim>
 	</sql>
-	
-	<!-- 获取唯一标识序列 -->
-	<select id="getSequence" resultType="long">
-		select <include refid="getSequenceSql"></include>
-	</select>
-
-	<!-- 获取唯一标识序列 -->
-    <select id="getSequences" resultType="long">
-        select NEXTVALS('f_node_curr', #{0})
-    </select>
-
+    
 	<!-- 新增 -->
-	<insert id="create" parameterType="pers.binaryhunter.flow.bean.po.NodeCurr">
-		<selectKey keyProperty="id" order="BEFORE" resultType="long">
-			select <include refid="getSequenceSql"></include>
-		</selectKey>
+	<insert id="create" parameterType="pers.binaryhunter.flow.bean.po.NodeCurr" useGeneratedKeys="true" keyProperty="id">
 		<![CDATA[
 			insert into f_node_curr ( 
 		]]>
@@ -132,7 +113,7 @@
 		]]>
 		<trim suffixOverrides=",">
 		<![CDATA[
-			#{id},#{flowCode},#{cascadeCode},#{action},#{roles},#{dealNote},#{dealRole},#{dealUserId},#{dealUserName},#{dealUserTel},#{idBill},#{nodeDesc},#{templateId},#{processStatus},	
+			#{flowCode},#{cascadeCode},#{action},#{roles},#{dealNote},#{dealRole},#{dealUserId},#{dealUserName},#{dealUserTel},#{idBill},#{nodeDesc},#{templateId},#{processStatus},	
 		]]>
 		</trim>
 		<![CDATA[
@@ -141,7 +122,7 @@
 	</insert>
 	
 	<!-- 批量新增 -->
-	<insert id="createBatch" parameterType="java.util.List">
+	<insert id="createBatch" parameterType="java.util.List" useGeneratedKeys="true" keyProperty="id">
 		<![CDATA[
 			insert into f_node_curr (  
 		]]>
@@ -152,7 +133,7 @@
 	    <foreach collection="list" item="item" open="(" close=")" separator="), ("> 
 			<trim suffixOverrides=",">
 			<![CDATA[
-				#{item.id},#{item.flowCode},#{item.cascadeCode},#{item.action},#{item.roles},#{item.dealNote},#{item.dealRole},#{item.dealUserId},#{item.dealUserName},#{item.dealUserTel},#{item.idBill},#{item.nodeDesc},#{item.templateId},#{item.processStatus},	
+				#{item.flowCode},#{item.cascadeCode},#{item.action},#{item.roles},#{item.dealNote},#{item.dealRole},#{item.dealUserId},#{item.dealUserName},#{item.dealUserTel},#{item.idBill},#{item.nodeDesc},#{item.templateId},#{item.processStatus},	
 			]]>
 			</trim>
 	    </foreach>

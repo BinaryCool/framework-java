@@ -3,12 +3,6 @@
 	PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 	"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="pers.binaryhunter.flow.dao.NodeTemplateDAO">
-	<sql id="getSequenceSql">
-		<![CDATA[
-			NEXTVALS('f_node_template', 1)
-		]]>
-	</sql>
-	
 	<sql id="whereClause">
         <if test="null != currCode and '' != currCode">
             <![CDATA[
@@ -82,7 +76,7 @@
 	<sql id="basicColumn">
 		<trim suffixOverrides=",">
 		<![CDATA[
-			id,action,flow_code,cascade_code,roles,node_desc,
+			action,flow_code,cascade_code,roles,node_desc,
 		]]>
 		</trim>
 	</sql>
@@ -95,21 +89,8 @@
 		</trim>
 	</sql>
 	
-	<!-- 获取唯一标识序列 -->
-	<select id="getSequence" resultType="long">
-		select <include refid="getSequenceSql"></include>
-	</select>
-
-	<!-- 获取唯一标识序列 -->
-    <select id="getSequences" resultType="long">
-        select NEXTVALS('f_node_template', #{0})
-    </select>
-
 	<!-- 新增 -->
-	<insert id="create" parameterType="pers.binaryhunter.flow.bean.po.NodeTemplate">
-		<selectKey keyProperty="id" order="BEFORE" resultType="long">
-			select <include refid="getSequenceSql"></include>
-		</selectKey>
+	<insert id="create" parameterType="pers.binaryhunter.flow.bean.po.NodeTemplate" useGeneratedKeys="true" keyProperty="id">
 		<![CDATA[
 			insert into f_node_template ( 
 		]]>
@@ -119,7 +100,7 @@
 		]]>
 		<trim suffixOverrides=",">
 		<![CDATA[
-			#{id},#{action},#{flowCode},#{cascadeCode},#{roles},#{nodeDesc},	
+			#{action},#{flowCode},#{cascadeCode},#{roles},#{nodeDesc},	
 		]]>
 		</trim>
 		<![CDATA[
@@ -128,7 +109,7 @@
 	</insert>
 	
 	<!-- 批量新增 -->
-	<insert id="createBatch" parameterType="java.util.List">
+	<insert id="createBatch" parameterType="java.util.List" useGeneratedKeys="true" keyProperty="id">
 		<![CDATA[
 			insert into f_node_template (  
 		]]>
@@ -139,7 +120,7 @@
 	    <foreach collection="list" item="item" open="(" close=")" separator="), ("> 
 			<trim suffixOverrides=",">
 			<![CDATA[
-				#{item.id},#{item.action},#{item.flowCode},#{item.cascadeCode},#{item.roles},#{item.nodeDesc},	
+				#{item.action},#{item.flowCode},#{item.cascadeCode},#{item.roles},#{item.nodeDesc},	
 			]]>
 			</trim>
 	    </foreach>

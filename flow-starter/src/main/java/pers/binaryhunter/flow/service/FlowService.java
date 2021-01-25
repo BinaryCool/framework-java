@@ -26,6 +26,11 @@ public interface FlowService extends GenericService<Flow, Long> {
     List<Node> getCurr(String flowCode, Long id);
 
     /**
+     * 获取当前单据节点
+     */
+    Node getCurrOne(String flowCode, Long id);
+
+    /**
      * 下一步
      */
     Node pass(Node nodeCurr, FlowDTO dto);

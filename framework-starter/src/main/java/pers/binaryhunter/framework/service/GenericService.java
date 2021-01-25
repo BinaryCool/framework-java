@@ -17,20 +17,6 @@ import java.util.Map;
  */
 public interface GenericService<B,K> {
     /**
-     * 获取ID
-     * @return ID
-     */
-    @Deprecated
-    Long getSequence();
-
-    /**
-     * 获取ID
-     * @param step 步长
-     * @return ID
-     */
-    @Deprecated
-    Long getSequences(int step);
-    /**
      * 分页查询
      * @param params 参数
      * @param page 分页参数
@@ -38,15 +24,6 @@ public interface GenericService<B,K> {
      * By Yuwen on 2017年6月22日
      */
     PageResult<B> pageByArgs(Map<String, Object> params, Page page);
-    /**
-     * 分页查询
-     * @param params 参数
-     * @param page 分页参数
-     * @param enable 如果需要查出已删除数据, 把enable置为false
-     * @return 分页结果
-     * By Yuwen on 2017年6月22日
-     */
-    PageResult<B> pageByArgs(Map<String, Object> params, Page page, boolean enable);
     /**
      * 分页查询
      * @param params 参数
@@ -94,12 +71,6 @@ public interface GenericService<B,K> {
     B queryFirst(Map<String, Object> params);
     /**
      * 查询第一个
-     * @param enable 如果需要查出已删除数据, 把enable置为false
-     * @return 查询结果
-     */
-    B queryFirst(Map<String, Object> params, boolean enable);
-    /**
-     * 查询第一个
      * @return 查询结果
      */
     B queryFirst(Object... params);
@@ -110,14 +81,6 @@ public interface GenericService<B,K> {
      * By Yuwen on 2017年6月22日
      */
     List<B> queryByArgs(Map<String, Object> params);
-    /**
-     * 查询
-     * @param params 参数
-     * @param enable 如果需要查出已删除数据, 把enable置为false
-     * @return 查询结果
-     * By Yuwen on 2017年6月22日
-     */
-    List<B> queryByArgs(Map<String, Object> params, boolean enable);
     /**
      * 查询
      * @param params 参数
@@ -189,13 +152,6 @@ public interface GenericService<B,K> {
      */
     void addBatch(List<B> beans);
     /**
-     * @since 2.1.3
-     * 批量新增(自动注入ID)
-     * @param beans
-     */
-    @Deprecated
-    void addBatchAutoId(List<B> beans);
-    /**
      * 通过编号获取
      * @param id 编号
      * @return 实体
@@ -209,14 +165,6 @@ public interface GenericService<B,K> {
      * By Yuwen on 2017年6月22日
      */
     long countByArgs(Map<String, Object> params);
-    /**
-     * 获取数量
-     * @param params 参数
-     * @param enable 如果需要查出已删除数据, 把enable置为false
-     * @return 数量
-     * By Yuwen on 2017年6月22日
-     */
-    long countByArgs(Map<String, Object> params, boolean enable);
     /**
      * 获取数量
      * @param params 参数
