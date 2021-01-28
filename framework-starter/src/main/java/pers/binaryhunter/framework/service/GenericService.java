@@ -8,6 +8,7 @@ package pers.binaryhunter.framework.service;
 import pers.binaryhunter.framework.bean.dto.paging.Page;
 import pers.binaryhunter.framework.bean.vo.paging.PageResult;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
@@ -158,6 +159,21 @@ public interface GenericService<B,K> {
      * By Yuwen on 2017年6月22日
      */
     B getById(K id);
+    /**
+     * 通过编号获取
+     * @param ids 编号
+     * @return 实体
+     * By Yuwen on 2017年6月22日
+     */
+    List<B> getByIds(Collection<K> ids);
+
+    /**
+     * 通过编号获取
+     * @param ids 编号
+     * @return 实体
+     * By Yuwen on 2017年6月22日
+     */
+    List<B> getByIds(K[] ids);
     /**
      * 获取数量
      * @param params 参数

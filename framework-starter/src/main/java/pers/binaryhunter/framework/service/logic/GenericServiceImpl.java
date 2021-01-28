@@ -4,6 +4,7 @@
  */
 package pers.binaryhunter.framework.service.logic;
 
+import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -21,10 +22,9 @@ import pers.binaryhunter.framework.service.GenericService;
 import pers.binaryhunter.framework.utils.MapConverter;
 
 import javax.annotation.Resource;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 
 /**
@@ -113,7 +113,7 @@ public class GenericServiceImpl<B, K> extends GenericAbstractServiceImpl<B, K> i
     public B queryFirst(Map<String, Object> params) {
         return queryFirstPrivate(params, null);
     }
-    
+
     @Override
     public B queryFirst(Object... params) {
         return queryFirst(MapConverter.arr2Map(params));
@@ -287,6 +287,22 @@ public class GenericServiceImpl<B, K> extends GenericAbstractServiceImpl<B, K> i
     @Override
     public B getById(K id) {
         return dao.getById(id);
+    }
+
+    @Override
+    public List<B> getByIds(Collection<K> ids) {
+        if(CollectionUtils.isEmpty(ids)) {
+            return null;
+        }
+        return queryByArgs("idIn", ids.stream().map(item -> item.toString()).collect(Collectors.joining("','", "'", "'")));
+    }
+
+    @Override
+    public List<B> getByIds(K[] ids) {
+        if(ArrayUtils.isEmpty(ids)) {
+            return null;
+        }
+        return queryByArgs("idIn", Stream.of(ids).map(item -> item.toString()).collect(Collectors.joining("','", "'", "'")));
     }
 
     @Override
