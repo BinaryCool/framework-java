@@ -1,6 +1,13 @@
 package pers.binaryhunter.framework.utils;
 
+import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.util.CollectionUtils;
+
+import java.util.Collection;
+import java.util.Collections;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  * Created by BinaryHunter on 2019/3/30.
@@ -15,8 +22,28 @@ public class SqlUtil {
         if(StringUtils.isEmpty(str)) {
             return str;
         }
-        
+
         String keywordsReg = "'|\\*|%|;|-|\\+|,| ";
         return str.replaceAll(keywordsReg, "");
+    }
+
+    /**
+     * 把数组转为sql in
+     */
+    public static String toSqlIn(Object[] objArr) {
+        if (ArrayUtils.isEmpty(objArr)) {
+            return null;
+        }
+        return Stream.of(objArr).map(Object::toString).collect(Collectors.joining("','", "'", "'"));
+    }
+
+    /**
+     * 把数组转为sql in
+     */
+    public static <T> String toSqlIn(Collection<T> objColl) {
+        if (CollectionUtils.isEmpty(objColl)) {
+            return null;
+        }
+        return objColl.stream().map(Object::toString).collect(Collectors.joining("','", "'", "'"));
     }
 }
