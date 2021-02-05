@@ -40,6 +40,54 @@ public class GenericServiceImpl<B, K> extends GenericAbstractServiceImpl<B, K> i
     private DataSourceTransactionManager transactionManager;
 
     @Override
+    @Deprecated
+    public Long getSequence() {
+        //获得事务状态
+        TransactionStatus transactionStatus = null;
+        try {
+            //获取事务定义
+            DefaultTransactionDefinition def = new DefaultTransactionDefinition();
+            //设置事务隔离级别，开启新事务
+            def.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRED);
+            transactionStatus = transactionManager.getTransaction(def);
+
+            return dao.getSequence();
+        } catch (Exception e) {
+            transactionManager.rollback(transactionStatus);
+            throw e;
+        } finally {
+            if (transactionStatus != null && transactionStatus.isNewTransaction()
+                    && !transactionStatus.isCompleted()) {
+                transactionManager.commit(transactionStatus);
+            }
+        }
+    }
+
+    @Override
+    @Deprecated
+    public Long getSequences(int step) {
+        //获得事务状态
+        TransactionStatus transactionStatus = null;
+        try {
+            //获取事务定义
+            DefaultTransactionDefinition def = new DefaultTransactionDefinition();
+            //设置事务隔离级别，开启新事务
+            def.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRED);
+            transactionStatus = transactionManager.getTransaction(def);
+
+            return dao.getSequences(step);
+        } catch (Exception e) {
+            transactionManager.rollback(transactionStatus);
+            throw e;
+        } finally {
+            if (transactionStatus != null && transactionStatus.isNewTransaction()
+                    && !transactionStatus.isCompleted()) {
+                transactionManager.commit(transactionStatus);
+            }
+        }
+    }
+
+    @Override
     public PageResult<B> pageByArgs(Map<String, Object> params, Page page) {
         PageResult<B> pageResult = new PageResult<>();
         params = this.doStatusParams(params);
@@ -279,6 +327,24 @@ public class GenericServiceImpl<B, K> extends GenericAbstractServiceImpl<B, K> i
         if(CollectionUtils.isEmpty(beans)) {
             log.warn("List is empty while add batch");
             return;
+        }
+
+        this.doAddBatch(beans);
+    }
+
+    @Override
+    @Deprecated
+    public void addBatchAutoId(List<B> beans) {
+        if (CollectionUtils.isEmpty(beans)) {
+            log.warn("List is empty while add batch(auto id)");
+            return;
+        }
+
+        if (beans.get(0) instanceof PO) {
+            Long id = getSequences(beans.size());
+            for (B bean : beans) {
+                ((PO) bean).setId(id++);
+            }
         }
 
         this.doAddBatch(beans);
