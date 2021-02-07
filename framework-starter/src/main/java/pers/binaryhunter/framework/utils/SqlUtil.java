@@ -23,7 +23,7 @@ public class SqlUtil {
             return str;
         }
 
-        String keywordsReg = "'|\\*|%|;|-|\\+|,| ";
+        String keywordsReg = "'|\\*|\\\\*|%|;|-|\\+|,| ";
         return str.replaceAll(keywordsReg, "");
     }
 
