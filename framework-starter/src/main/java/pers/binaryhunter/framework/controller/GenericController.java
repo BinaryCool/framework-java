@@ -56,7 +56,7 @@ public class GenericController {
 
         int code = ResponseBean.CodeEnum.ERR_UNKOWN.getCode();
         String msg;
-        if (ex instanceof BusinessException || ex instanceof IllegalArgumentException) {
+        if (ex instanceof BusinessException) {
             code = ((BusinessException) ex).getCode();
             msg = ex.getMessage();
         } else if (ex instanceof BusinessCheckedException) {
@@ -67,6 +67,8 @@ public class GenericController {
             msg = ex.getMessage();
         } else if (ex instanceof ClientAbortException) {
             msg = ResponseBean.CodeEnum.ERR_UNKOWN.getMsg();
+        } else if (ex instanceof IllegalArgumentException) {
+            msg = ResponseBean.CodeEnum.ERR_BUSS.getMsg();
         } else {
             msg = ResponseBean.CodeEnum.ERR_UNKOWN.getMsg();
             HttpServletRequest request = ((ServletRequestAttributes) RequestContextHolder.getRequestAttributes()).getRequest();
