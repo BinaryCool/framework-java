@@ -167,6 +167,17 @@ public class GenericServiceImpl<B, K> extends GenericAbstractServiceImpl<B, K> i
         return queryFirst(MapConverter.arr2Map(params));
     }
 
+    @Override
+    public boolean exists(Map<String, Object> params) {
+        B bean = queryFirstByField("id", params);
+        return null != bean;
+    }
+
+    @Override
+    public boolean exists(Object... params) {
+        return exists(MapConverter.arr2Map(params));
+    }
+
     private B queryFirstPrivate(Map<String, Object> params, String args2) {
         if(null == params) {
             params = new HashMap<>();

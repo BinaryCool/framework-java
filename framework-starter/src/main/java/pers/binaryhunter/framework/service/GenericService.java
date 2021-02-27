@@ -90,6 +90,16 @@ public interface GenericService<B,K> {
      */
     B queryFirst(Object... params);
     /**
+     * 判断是否存在
+     * @return 是否存在
+     */
+    boolean exists(Map<String, Object> params);
+    /**
+     * 判断是否存在
+     * @return 判断是否存在
+     */
+    boolean exists(Object... params);
+    /**
      * 查询
      * @param params 参数
      * @return 查询结果
