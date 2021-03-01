@@ -4,7 +4,7 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <groupId>pers.binaryhunter</groupId>
     <artifactId>es-config-starter</artifactId>
-    <version>1.0.7</version>
+    <version>1.0.8</version>
 
     <parent>
         <artifactId>framework-starter-parent</artifactId>
