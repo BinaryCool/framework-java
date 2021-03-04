@@ -41,7 +41,7 @@ public class RWPlugin implements Interceptor {
 			}	
 			StatementHandler statementHandler = (StatementHandler) invocation.getTarget();
 			MetaObject metaObject = MetaObject.forObject(statementHandler, new DefaultObjectFactory(), new DefaultObjectWrapperFactory(), new DefaultReflectorFactory());
-			MappedStatement mappedStatement = null;
+			MappedStatement mappedStatement;
 			if (statementHandler instanceof RoutingStatementHandler) {
 				mappedStatement = (MappedStatement) metaObject.getValue("delegate.mappedStatement");
 			} else {
