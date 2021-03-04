@@ -274,12 +274,11 @@ public class DataSourceProxy implements DataSource {
 				}
 				if (method.getName().equals("close")) {
 					Map<String, Connection> connectionMap = ConnectionHolder.CONNECTION_CONTEXT.get();
-                    
 					Connection readCon = connectionMap.remove(ConnectionHolder.READ);
 					if (readCon != null) {
 					    readCon.close();
                     }
-                    
+					
 					Connection writeCon = connectionMap.remove(ConnectionHolder.WRITE);
 					if (writeCon != null) {
 						writeCon.close();
@@ -306,10 +305,11 @@ public class DataSourceProxy implements DataSource {
 
                 Map<String, Connection> currentContext = ConnectionHolder.CONNECTION_CONTEXT.get();
                 if(CollectionUtils.isEmpty(currentContext)) {
-                    logger.warn("Current context " + currentConnection + " is empty");
+                    if (logger.isDebugEnabled()) logger.debug("Current context " + currentConnection + " is empty");
                     Connection conn = getTargetConnection(method);
                     currentContext.put(currentConnection, conn);
                 }
+                
 
                 Connection conn = currentContext.get(currentConnection);
                 if(null == conn) {

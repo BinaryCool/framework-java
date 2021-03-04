@@ -45,7 +45,7 @@ public class MyRedisAutoConfiguration {
         configuration.setMaster(master);
         
         Set<RedisNode> set = new HashSet<>();
-        RedisNode node = null;
+        RedisNode node;
         if(null != sentinels) {
             for(MyRedisNode tmp : sentinels) {
                 node = new RedisNode(tmp.getHost(), tmp.getPort());

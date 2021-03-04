@@ -50,7 +50,7 @@ public class MyRandomRWDataSourceRouter extends AbstractRWDataSourceRouter {
         }
         //选择当前值最大的节点为选中节点，并把它的当前值减去所有节点的权重总和。
         if(null != maxMds) {
-            log.debug("Max current {}/{}", maxMds.getCurrent(),  maxMds.getWeight());
+            if (log.isDebugEnabled()) log.debug("Max current {}/{}", maxMds.getCurrent(),  maxMds.getWeight());
             maxMds.setCurrent(maxMds.getCurrent() - totalWeight);
             return maxMds;
         }

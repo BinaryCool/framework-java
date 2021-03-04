@@ -19,6 +19,7 @@ import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Proxy;
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.util.Map;
 import java.util.Properties;
 
 /**
@@ -60,7 +61,7 @@ public class RWPlugin implements Interceptor {
             }
 			routeConnection(key, conn);
 		} else {
-		    log.info("conn is not instanceof ConnectionProxy, It's {}", conn);
+		    log.info("Connection is not instanceof ConnectionProxy, It's {}", conn);
         }
 
 		return invocation.proceed();
@@ -70,8 +71,9 @@ public class RWPlugin implements Interceptor {
 	private void routeConnection(String key, Connection conn) {
         ConnectionHolder.CURRENT_CONNECTION.set(key);
 
+        Map<String, Connection> connectionMap = ConnectionHolder.CONNECTION_CONTEXT.get();
         // 同一个线程下保证最多只有一个写数据链接和读数据链接
-        if (!ConnectionHolder.CONNECTION_CONTEXT.get().containsKey(key)) {
+        if (!connectionMap.containsKey(key)) {
             ConnectionProxy conToUse = (ConnectionProxy) conn;
             conn = conToUse.getTargetConnection();
             if (ConnectionHolder.READ.equals(key)) {
@@ -81,8 +83,7 @@ public class RWPlugin implements Interceptor {
                     e.printStackTrace();
                 }
             }
-            log.info("Put {} conn to holder", key);
-            ConnectionHolder.CONNECTION_CONTEXT.get().put(key, conn);
+            connectionMap.put(key, conn);
         }
 	}
 
