@@ -26,7 +26,7 @@ import java.util.Properties;
  */
 @Intercepts({ @Signature(type = StatementHandler.class, method = "prepare", args = {Connection.class, Integer.class}) })
 public class RWPlugin implements Interceptor {
-    private static final Logger logger = LoggerFactory.getLogger(RWPlugin.class);
+    private static final Logger log = LoggerFactory.getLogger(RWPlugin.class);
     
 	public Object intercept(Invocation invocation) throws Throwable {
 
@@ -59,7 +59,9 @@ public class RWPlugin implements Interceptor {
 			    ConnectionHolder.FORCE_WRITE.set(Boolean.TRUE);
             }
 			routeConnection(key, conn);
-		}
+		} else {
+		    log.info("conn is not instanceof ConnectionProxy, It's {}", conn);
+        }
 
 		return invocation.proceed();
 
@@ -79,6 +81,7 @@ public class RWPlugin implements Interceptor {
                     e.printStackTrace();
                 }
             }
+            log.info("Put {} conn to holder", key);
             ConnectionHolder.CONNECTION_CONTEXT.get().put(key, conn);
         }
 	}
