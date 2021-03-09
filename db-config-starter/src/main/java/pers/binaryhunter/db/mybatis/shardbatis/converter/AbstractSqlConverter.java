@@ -24,7 +24,7 @@ public abstract class AbstractSqlConverter implements SqlConverter {
 	 * @return
 	 */
 	protected String doDeParse(Statement statement) {
-		StatementDeParser deParser = new StatementDeParser(new StringBuffer());
+		StatementDeParser deParser = new StatementDeParser(new StringBuilder());
 		statement.accept(deParser);
 		return deParser.getBuffer().toString();
 	}

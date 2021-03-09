@@ -12,6 +12,7 @@ import net.sf.jsqlparser.schema.Column;
 import net.sf.jsqlparser.schema.Table;
 import net.sf.jsqlparser.statement.Statement;
 import net.sf.jsqlparser.statement.select.*;
+import net.sf.jsqlparser.statement.values.ValuesStatement;
 
 import java.util.Iterator;
 
@@ -66,13 +67,19 @@ public class SelectSqlConverter extends AbstractSqlConverter {
 
 		}
 
-		@SuppressWarnings("unchecked")
-		public void visit(Union union) {
-			for (Iterator iter = union.getPlainSelects().iterator(); iter
-					.hasNext();) {
-				PlainSelect plainSelect = (PlainSelect) iter.next();
-				visit(plainSelect);
-			}
+		@Override
+		public void visit(SetOperationList setOperationList) {
+
+		}
+
+		@Override
+		public void visit(WithItem withItem) {
+
+		}
+
+		@Override
+		public void visit(ValuesStatement valuesStatement) {
+
 		}
 
 		public void visit(Table tableName) {
@@ -84,6 +91,11 @@ public class SelectSqlConverter extends AbstractSqlConverter {
 
 		public void visit(SubSelect subSelect) {
 			subSelect.getSelectBody().accept(this);
+		}
+
+		@Override
+		public void visit(SubJoin subJoin) {
+
 		}
 
 		public void visit(Addition addition) {
@@ -107,6 +119,11 @@ public class SelectSqlConverter extends AbstractSqlConverter {
 			visitBinaryExpression(division);
 		}
 
+		@Override
+		public void visit(IntegerDivision integerDivision) {
+
+		}
+
 		public void visit(DoubleValue doubleValue) {
 		}
 
@@ -115,6 +132,11 @@ public class SelectSqlConverter extends AbstractSqlConverter {
 		}
 
 		public void visit(Function function) {
+		}
+
+		@Override
+		public void visit(SignedExpression signedExpression) {
+
 		}
 
 		public void visit(GreaterThan greaterThan) {
@@ -127,17 +149,29 @@ public class SelectSqlConverter extends AbstractSqlConverter {
 
 		public void visit(InExpression inExpression) {
 			inExpression.getLeftExpression().accept(this);
-			inExpression.getItemsList().accept(this);
+			inExpression.getLeftItemsList().accept(this);
+			inExpression.getRightItemsList().accept(this);
 		}
 
-		public void visit(InverseExpression inverseExpression) {
-			inverseExpression.getExpression().accept(this);
+		@Override
+		public void visit(FullTextSearch fullTextSearch) {
+
 		}
 
 		public void visit(IsNullExpression isNullExpression) {
 		}
 
+		@Override
+		public void visit(IsBooleanExpression isBooleanExpression) {
+
+		}
+
 		public void visit(JdbcParameter jdbcParameter) {
+		}
+
+		@Override
+		public void visit(JdbcNamedParameter jdbcNamedParameter) {
+
 		}
 
 		public void visit(LikeExpression likeExpression) {
@@ -149,6 +183,11 @@ public class SelectSqlConverter extends AbstractSqlConverter {
 		}
 
 		public void visit(LongValue longValue) {
+		}
+
+		@Override
+		public void visit(HexValue hexValue) {
+
 		}
 
 		public void visit(MinorThan minorThan) {
@@ -165,6 +204,16 @@ public class SelectSqlConverter extends AbstractSqlConverter {
 
 		public void visit(NotEqualsTo notEqualsTo) {
 			visitBinaryExpression(notEqualsTo);
+		}
+
+		@Override
+		public void visit(BitwiseRightShift bitwiseRightShift) {
+
+		}
+
+		@Override
+		public void visit(BitwiseLeftShift bitwiseLeftShift) {
+
 		}
 
 		public void visit(NullValue nullValue) {
@@ -194,6 +243,16 @@ public class SelectSqlConverter extends AbstractSqlConverter {
 				Expression expression = (Expression) iter.next();
 				expression.accept(this);
 			}
+
+		}
+
+		@Override
+		public void visit(NamedExpressionList namedExpressionList) {
+
+		}
+
+		@Override
+		public void visit(MultiExpressionList multiExpressionList) {
 
 		}
 
@@ -231,16 +290,31 @@ public class SelectSqlConverter extends AbstractSqlConverter {
 		}
 
 		public void visit(AllComparisonExpression allComparisonExpression) {
-			allComparisonExpression.GetSubSelect().getSelectBody().accept(this);
+			allComparisonExpression.getSubSelect().getSelectBody().accept(this);
 		}
 
 		public void visit(AnyComparisonExpression anyComparisonExpression) {
-			anyComparisonExpression.GetSubSelect().getSelectBody().accept(this);
+			anyComparisonExpression.getSubSelect().getSelectBody().accept(this);
 		}
 
-		public void visit(SubJoin subjoin) {
-			subjoin.getLeft().accept(this);
-			subjoin.getJoin().getRightItem().accept(this);
+		@Override
+		public void visit(LateralSubSelect lateralSubSelect) {
+
+		}
+
+		@Override
+		public void visit(ValuesList valuesList) {
+
+		}
+
+		@Override
+		public void visit(TableFunction tableFunction) {
+
+		}
+
+		@Override
+		public void visit(ParenthesisFromItem parenthesisFromItem) {
+
 		}
 
 		public void visit(Concat concat) {
@@ -264,6 +338,136 @@ public class SelectSqlConverter extends AbstractSqlConverter {
 
 		public void visit(BitwiseXor bitwiseXor) {
 			visitBinaryExpression(bitwiseXor);
+		}
+
+		@Override
+		public void visit(CastExpression castExpression) {
+
+		}
+
+		@Override
+		public void visit(Modulo modulo) {
+
+		}
+
+		@Override
+		public void visit(AnalyticExpression analyticExpression) {
+
+		}
+
+		@Override
+		public void visit(ExtractExpression extractExpression) {
+
+		}
+
+		@Override
+		public void visit(IntervalExpression intervalExpression) {
+
+		}
+
+		@Override
+		public void visit(OracleHierarchicalExpression oracleHierarchicalExpression) {
+
+		}
+
+		@Override
+		public void visit(RegExpMatchOperator regExpMatchOperator) {
+
+		}
+
+		@Override
+		public void visit(JsonExpression jsonExpression) {
+
+		}
+
+		@Override
+		public void visit(JsonOperator jsonOperator) {
+
+		}
+
+		@Override
+		public void visit(RegExpMySQLOperator regExpMySQLOperator) {
+
+		}
+
+		@Override
+		public void visit(UserVariable userVariable) {
+
+		}
+
+		@Override
+		public void visit(NumericBind numericBind) {
+
+		}
+
+		@Override
+		public void visit(KeepExpression keepExpression) {
+
+		}
+
+		@Override
+		public void visit(MySQLGroupConcat mySQLGroupConcat) {
+
+		}
+
+		@Override
+		public void visit(ValueListExpression valueListExpression) {
+
+		}
+
+		@Override
+		public void visit(RowConstructor rowConstructor) {
+
+		}
+
+		@Override
+		public void visit(OracleHint oracleHint) {
+
+		}
+
+		@Override
+		public void visit(TimeKeyExpression timeKeyExpression) {
+
+		}
+
+		@Override
+		public void visit(DateTimeLiteralExpression dateTimeLiteralExpression) {
+
+		}
+
+		@Override
+		public void visit(NotExpression notExpression) {
+
+		}
+
+		@Override
+		public void visit(NextValExpression nextValExpression) {
+
+		}
+
+		@Override
+		public void visit(CollateExpression collateExpression) {
+
+		}
+
+		@Override
+		public void visit(SimilarToExpression similarToExpression) {
+
+		}
+
+		@Override
+		public void visit(ArrayExpression arrayExpression) {
+
+		}
+
+		@Override
+		public void visit(VariableAssignment variableAssignment) {
+
+		}
+
+		@Override
+		public void visit(XMLSerializeExpr xmlSerializeExpr) {
+
 		}
 
 		public void visit(StringValue stringValue) {
