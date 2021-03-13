@@ -17,11 +17,15 @@ public class PO {
 	public static final int STATUS_ENABLE = 1;
 
 	private Long id;
-	
+
 	private Integer status;
 
+	private String createBy;
+
 	private Date createTime;
-	
+
+	private String updateBy;
+
 	private Date updateTime;
 
     public Long getId() {
@@ -33,26 +37,42 @@ public class PO {
     }
 
     public Integer getStatus() {
-		return status;
-	}
+        return status;
+    }
 
-	public void setStatus(Integer status) {
-		this.status = status;
-	}
+    public void setStatus(Integer status) {
+        this.status = status;
+    }
 
-	public Date getCreateTime() {
-		return createTime;
-	}
+    public String getCreateBy() {
+        return createBy;
+    }
 
-	public void setCreateTime(Date createTime) {
-		this.createTime = createTime;
-	}
+    public void setCreateBy(String createBy) {
+        this.createBy = createBy;
+    }
 
-	public Date getUpdateTime() {
-		return updateTime;
-	}
+    public Date getCreateTime() {
+        return createTime;
+    }
 
-	public void setUpdateTime(Date updateTime) {
-		this.updateTime = updateTime;
-	}
+    public void setCreateTime(Date createTime) {
+        this.createTime = createTime;
+    }
+
+    public String getUpdateBy() {
+        return updateBy;
+    }
+
+    public void setUpdateBy(String updateBy) {
+        this.updateBy = updateBy;
+    }
+
+    public Date getUpdateTime() {
+        return updateTime;
+    }
+
+    public void setUpdateTime(Date updateTime) {
+        this.updateTime = updateTime;
+    }
 }

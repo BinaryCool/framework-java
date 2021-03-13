@@ -68,7 +68,7 @@ public class GenericController {
         } else if (ex instanceof ClientAbortException) {
             msg = ResponseBean.CodeEnum.ERR_UNKOWN.getMsg();
         } else if (ex instanceof IllegalArgumentException) {
-            msg = ResponseBean.CodeEnum.ERR_BUSS.getMsg();
+            msg = ex.getMessage();
         } else {
             msg = ResponseBean.CodeEnum.ERR_UNKOWN.getMsg();
             HttpServletRequest request = ((ServletRequestAttributes) RequestContextHolder.getRequestAttributes()).getRequest();
@@ -178,10 +178,11 @@ public class GenericController {
         if(null == bean) {
             throw new BusinessException();
         }
-        service.add(bean);
 
         bean.setCreateTime(new Date());
         bean.setStatus(PO.STATUS_ENABLE);
+        service.add(bean);
+
         return bean;
     }
 
@@ -192,10 +193,7 @@ public class GenericController {
      * @return 返回对象
      */
     protected PO createDB(GenericService service, PO bean) {
-        if(null == bean) {
-            throw new BusinessException();
-        }
-        service.add(bean);
+        this.create(service, bean);
 
         bean = (PO) service.getById(bean.getId());
         return bean;
