@@ -15,6 +15,7 @@ import org.springframework.transaction.support.DefaultTransactionDefinition;
 import org.springframework.util.CollectionUtils;
 import pers.binaryhunter.framework.bean.dto.paging.Page;
 import pers.binaryhunter.framework.bean.po.PO;
+import pers.binaryhunter.framework.bean.po.UserPO;
 import pers.binaryhunter.framework.bean.vo.paging.PageResult;
 import pers.binaryhunter.framework.dao.GenericDAO;
 import pers.binaryhunter.framework.exception.BusinessException;
@@ -29,6 +30,7 @@ import java.util.stream.Stream;
 
 /**
  * 业务泛型实现类
+ *
  * @author Liyw -- 2014-5-22
  */
 public class GenericServiceImpl<B, K> extends GenericAbstractServiceImpl<B, K> implements GenericService<B, K> {
@@ -92,17 +94,17 @@ public class GenericServiceImpl<B, K> extends GenericAbstractServiceImpl<B, K> i
         PageResult<B> pageResult = new PageResult<>();
         params = this.doStatusParams(params);
         Long count = dao.countByArgs(params);
-        if(null != count) {
+        if (null != count) {
             page.setTotalCount(count);
-            if(count > 0L) {
-                if(page.getPageNum() > page.getPageCount()) { //如果当前页面大于总页面
+            if (count > 0L) {
+                if (page.getPageNum() > page.getPageCount()) { //如果当前页面大于总页面
                     page.setPageNum(1);
                 }
                 params = MapConverter.convertPage(params, page);
 
                 List<B> results = dao.pageByArgs(params);
 
-                if(null == results) {
+                if (null == results) {
                     results = new ArrayList<>();
                 }
 
@@ -123,7 +125,7 @@ public class GenericServiceImpl<B, K> extends GenericAbstractServiceImpl<B, K> i
     @Override
     public List<B> pageSkipCount(Map<String, Object> params, Page page) {
         params = this.doStatusParams(params);
-        if(page.getPageNum() > page.getPageCount()) { //如果当前页面大于总页面
+        if (page.getPageNum() > page.getPageCount()) { //如果当前页面大于总页面
             return null;
         }
         params = MapConverter.convertPage(params, page);
@@ -179,18 +181,18 @@ public class GenericServiceImpl<B, K> extends GenericAbstractServiceImpl<B, K> i
     }
 
     private B queryFirstPrivate(Map<String, Object> params, String args2) {
-        if(null == params) {
+        if (null == params) {
             params = new HashMap<>();
         }
 
         params.put("limit", 1);
         List<B> list;
-        if(StringUtils.isBlank(args2)) {
+        if (StringUtils.isBlank(args2)) {
             list = this.queryByArgs(params);
         } else {
             list = this.queryByField(args2, params);
         }
-        if(null == list || 0 >= list.size()) {
+        if (null == list || 0 >= list.size()) {
             return null;
         }
         return list.get(0);
@@ -219,7 +221,7 @@ public class GenericServiceImpl<B, K> extends GenericAbstractServiceImpl<B, K> i
 
     @Override
     public void deleteByArgs(Map<String, Object> params) {
-        if(isParamsEmpty(params)) {
+        if (isParamsEmpty(params)) {
             throw new BusinessException();
         }
         dao.deleteByArgs(params);
@@ -230,22 +232,47 @@ public class GenericServiceImpl<B, K> extends GenericAbstractServiceImpl<B, K> i
         deleteByArgs(MapConverter.arr2Map(params));
     }
 
+    private void appendAdd(B bean) {
+        UserPO userPO = getLoginedUser();
+        if (null == userPO) {
+            return;
+        }
+
+        PO po = (PO) bean;
+        po.setCreateBy(userPO.getName());
+    }
+
+    private void appendUpdate(B bean) {
+        UserPO userPO = getLoginedUser();
+        if (null == userPO) {
+            return;
+        }
+
+        PO po = (PO) bean;
+        po.setUpdateBy(userPO.getName());
+    }
+
     @Override
     public void update(B bean) {
+        this.appendUpdate(bean);
         dao.update(bean);
     }
 
     @Override
-    public void updateNotNull(B bean){
+    public void updateNotNull(B bean) {
+        this.appendUpdate(bean);
         dao.updateNotNull(bean);
     }
 
     @Override
-    public void updateBatch(List<B> beans){
-        if(CollectionUtils.isEmpty(beans)) {
+    public void updateBatch(List<B> beans) {
+        if (CollectionUtils.isEmpty(beans)) {
             log.warn("List is empty while update batch");
             return;
         }
+        beans.forEach(bean -> appendUpdate(bean));
+
+
         int times = (int) (Math.ceil(beans.size() * 1.0 / COUNT_BATCH));
         //获得事务状态
         TransactionStatus transactionStatus = null;
@@ -256,7 +283,7 @@ public class GenericServiceImpl<B, K> extends GenericAbstractServiceImpl<B, K> i
             def.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRED);
             transactionStatus = transactionManager.getTransaction(def);
 
-            for(int i = 0; i < times; i ++ ) {
+            for (int i = 0; i < times; i++) {
                 dao.updateBatch(beans.subList(COUNT_BATCH * i, Math.min(COUNT_BATCH * (i + 1), beans.size())));
             }
         } catch (Exception e) {
@@ -272,12 +299,17 @@ public class GenericServiceImpl<B, K> extends GenericAbstractServiceImpl<B, K> i
 
     @Override
     public void updateByArgs(String setSql, Map<String, Object> params) {
-        if(StringUtils.isBlank(setSql)) {
+        if (StringUtils.isBlank(setSql)) {
             throw new BusinessException();
         }
 
-        if(isParamsEmpty(params)) {
+        if (isParamsEmpty(params)) {
             throw new BusinessException();
+        }
+
+        UserPO userPO = getLoginedUser();
+        if (null != userPO && StringUtils.isNotBlank(userPO.getName())) {
+            setSql += ", t.update_by = '" + userPO.getName() + "', t.update_time = now()";
         }
 
         params.put("setSql", setSql);
@@ -286,31 +318,31 @@ public class GenericServiceImpl<B, K> extends GenericAbstractServiceImpl<B, K> i
 
     @Override
     public void updateByArgs(Map<String, Object> params, Object... setArr) {
-        if(null == setArr || 0 >= setArr.length || 1 == setArr.length % 2){
+        if (null == setArr || 0 >= setArr.length || 1 == setArr.length % 2) {
             throw new BusinessException();
         }
 
-        if(isParamsEmpty(params)) {
+        if (isParamsEmpty(params)) {
             throw new BusinessException();
         }
 
         StringBuffer setSql = new StringBuffer();
-        for(int index = 0; index < setArr.length / 2; index ++) {
+        for (int index = 0; index < setArr.length / 2; index++) {
             Object key = setArr[index * 2];
             Object value = setArr[index * 2 + 1];
-            if(null == key || StringUtils.isBlank(key.toString())) {
+            if (null == key || StringUtils.isBlank(key.toString())) {
                 continue;
             }
-            if(0 < index) {
+            if (0 < index) {
                 setSql.append(", ");
             }
             setSql.append(key.toString()).append(" = ");
             if (null != value) {
-                if(value instanceof Boolean) {
+                if (value instanceof Boolean) {
                     setSql.append(value.toString());
                 } else {
                     String v = value.toString();
-                    if(v.startsWith("!'")) { //如果以 !' 开头, 则不需要包装为字符串
+                    if (v.startsWith("!'")) { //如果以 !' 开头, 则不需要包装为字符串
                         v = v.substring(2);
                         setSql.append(replaceUpdate4SqlInjection(v));
                     } else {
@@ -327,6 +359,7 @@ public class GenericServiceImpl<B, K> extends GenericAbstractServiceImpl<B, K> i
 
     @Override
     public void add(B bean) {
+        this.appendAdd(bean);
         dao.create(bean);
     }
 
@@ -334,8 +367,8 @@ public class GenericServiceImpl<B, K> extends GenericAbstractServiceImpl<B, K> i
      * @param beans 实体列表
      */
     @Override
-    public void addBatch(List<B> beans){
-        if(CollectionUtils.isEmpty(beans)) {
+    public void addBatch(List<B> beans) {
+        if (CollectionUtils.isEmpty(beans)) {
             log.warn("List is empty while add batch");
             return;
         }
@@ -368,7 +401,7 @@ public class GenericServiceImpl<B, K> extends GenericAbstractServiceImpl<B, K> i
 
     @Override
     public List<B> getByIds(Collection<K> ids) {
-        if(CollectionUtils.isEmpty(ids)) {
+        if (CollectionUtils.isEmpty(ids)) {
             return null;
         }
         return queryByArgs("idIn", ids.stream().map(item -> item.toString()).collect(Collectors.joining("','", "'", "'")));
@@ -376,7 +409,7 @@ public class GenericServiceImpl<B, K> extends GenericAbstractServiceImpl<B, K> i
 
     @Override
     public List<B> getByIds(K[] ids) {
-        if(ArrayUtils.isEmpty(ids)) {
+        if (ArrayUtils.isEmpty(ids)) {
             return null;
         }
         return queryByArgs("idIn", Stream.of(ids).map(item -> item.toString()).collect(Collectors.joining("','", "'", "'")));
@@ -394,7 +427,7 @@ public class GenericServiceImpl<B, K> extends GenericAbstractServiceImpl<B, K> i
     }
 
     private String replaceUpdate4SqlInjection(String value) {
-        if(StringUtils.isBlank(value)) {
+        if (StringUtils.isBlank(value)) {
             return value;
         }
 
@@ -403,6 +436,9 @@ public class GenericServiceImpl<B, K> extends GenericAbstractServiceImpl<B, K> i
 
     private void doAddBatch(List<B> beans) {
         int times = (int) (Math.ceil(beans.size() * 1.0 / COUNT_BATCH));
+
+        beans.forEach(bean -> appendAdd(bean));
+
         //获得事务状态
         TransactionStatus transactionStatus = null;
         try {
@@ -412,7 +448,7 @@ public class GenericServiceImpl<B, K> extends GenericAbstractServiceImpl<B, K> i
             def.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRED);
             transactionStatus = transactionManager.getTransaction(def);
 
-            for(int i = 0; i < times; i ++ ) {
+            for (int i = 0; i < times; i++) {
                 dao.createBatch(beans.subList(COUNT_BATCH * i, Math.min(COUNT_BATCH * (i + 1), beans.size())));
             }
         } catch (Exception e) {
@@ -428,8 +464,9 @@ public class GenericServiceImpl<B, K> extends GenericAbstractServiceImpl<B, K> i
 
     /**
      * 处理status状态参数
+     *
      * @param params 参数
-     * _all 是否只需要查出正常数据 (不包括已删除数据)
+     *               _all 是否只需要查出正常数据 (不包括已删除数据)
      * @return 参数
      */
     protected Map<String, Object> doStatusParams(Map<String, Object> params) {
@@ -448,17 +485,27 @@ public class GenericServiceImpl<B, K> extends GenericAbstractServiceImpl<B, K> i
     }
 
 
+    /**
+     * 判别map参数是否为空
+     */
     protected boolean isParamsEmpty(Map<String, Object> params) {
-        if(CollectionUtils.isEmpty(params)) {
+        if (CollectionUtils.isEmpty(params)) {
             return true;
         }
         boolean empty = true;
-        for(Map.Entry<String, Object> param : params.entrySet()) {
-            if(null != param.getKey() && !"".equals(param.getKey()) && null != param.getValue()) {
+        for (Map.Entry<String, Object> param : params.entrySet()) {
+            if (null != param.getKey() && !"".equals(param.getKey()) && null != param.getValue()) {
                 empty = false;
                 break;
             }
         }
         return empty;
+    }
+
+    /**
+     * 获取登录用户
+     */
+    protected UserPO getLoginedUser() {
+        return null;
     }
 }
