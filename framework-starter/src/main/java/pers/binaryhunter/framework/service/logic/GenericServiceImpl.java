@@ -307,9 +307,11 @@ public class GenericServiceImpl<B, K> extends GenericAbstractServiceImpl<B, K> i
             throw new BusinessException();
         }
 
+        setSql += ", t.update_time = now()";
+
         UserPO userPO = getLoginedUser();
         if (null != userPO && StringUtils.isNotBlank(userPO.getName())) {
-            setSql += ", t.update_by = '" + userPO.getName() + "', t.update_time = now()";
+            setSql += ", t.update_by = '" + userPO.getName() + "'";
         }
 
         params.put("setSql", setSql);
