@@ -28,11 +28,14 @@ import pers.binaryhunter.db.mybatis.datasource.impl.AbstractRWDataSourceRouter;
 import pers.binaryhunter.db.mybatis.datasource.impl.MyRandomRWDataSourceRouter;
 import pers.binaryhunter.db.mybatis.filter.ResetConnectionFilter;
 import pers.binaryhunter.db.mybatis.pulgin.RWPlugin;
+import pers.binaryhunter.db.mybatis.pulgin.ShardPlugin;
 
 import javax.annotation.PostConstruct;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Properties;
 
 @Configuration()
 @ConditionalOnClass({ SqlSessionFactory.class, SqlSessionFactoryBean.class })
@@ -71,6 +74,9 @@ public class MybatisAutoConfiguration {
         factory.setVfs(SpringBootVFS.class);
 
 		Interceptor rwplugin = new RWPlugin();
+
+		boolean isSeparateTale = properties.isSeparateTable();
+
 		String configLocation = this.properties.getConfigLocation();
 		if (StringUtils.hasText(configLocation)) {
 			factory.setConfigLocation(this.resourceLoader.getResource(configLocation));
@@ -78,11 +84,21 @@ public class MybatisAutoConfiguration {
 		factory.setConfiguration(this.properties.getConfiguration());
 
 		if (ObjectUtils.isEmpty(this.interceptors)) {
-			Interceptor[] plugins = { rwplugin };
+			Interceptor[] plugins = null;
+			if(isSeparateTale) {
+				Interceptor shardPlugin = getShardPlugin();
+				plugins = new Interceptor[]{rwplugin,shardPlugin};
+			}else{
+				plugins = new Interceptor[]{rwplugin};
+			}
 			factory.setPlugins(plugins);
 		} else {
 			List<Interceptor> interceptorList = Arrays.asList(interceptors);
 			interceptorList.add(rwplugin);
+			if(isSeparateTale) {
+				Interceptor shardPlugin = getShardPlugin();
+				interceptorList.add(shardPlugin);
+			}
 			factory.setPlugins((Interceptor[]) interceptorList.toArray());
 		}
 		if (this.databaseIdProvider != null) {
@@ -149,5 +165,17 @@ public class MybatisAutoConfiguration {
     @Bean(name = "resetConnectionFilter")
     public ResetConnectionFilter resetConnectionFilter() {
         return new ResetConnectionFilter();
+    }
+
+	/**
+	 * mybaits分表插件
+	 * @return
+	 */
+    public ShardPlugin getShardPlugin() {
+	    ShardPlugin shardPlugin = new ShardPlugin();
+	    Properties properties = new Properties();
+	    properties.put("shardingConfig", "shard_config.xml");//文件加载--键值必须为shardingConfig，这是类的内部要求，否则加载失败
+	    shardPlugin.setProperties(properties);
+	    return shardPlugin;
     }
 }

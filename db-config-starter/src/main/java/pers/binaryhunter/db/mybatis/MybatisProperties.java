@@ -68,6 +68,11 @@ public class MybatisProperties {
 	private Configuration configuration;
 
 	/**
+	 * Is it a separate table
+	 */
+	private boolean separateTable = false;
+
+	/**
 	 * @since 1.1.0
 	 * @return
 	 */
@@ -178,6 +183,14 @@ public class MybatisProperties {
 
 	public void setConfiguration(Configuration configuration) {
 		this.configuration = configuration;
+	}
+
+	public boolean isSeparateTable() {
+		return separateTable;
+	}
+
+	public void setSeparateTable(boolean separateTable) {
+		this.separateTable = separateTable;
 	}
 
 	public Resource[] resolveMapperLocations() {
