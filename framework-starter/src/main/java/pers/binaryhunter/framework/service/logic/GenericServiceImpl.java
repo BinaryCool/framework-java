@@ -43,7 +43,7 @@ public class GenericServiceImpl<B, K> extends GenericAbstractServiceImpl<B, K> i
 
     @Override
     @Deprecated
-    public Long getSequence() {
+    public final Long getSequence() {
         //获得事务状态
         TransactionStatus transactionStatus = null;
         try {
@@ -67,7 +67,7 @@ public class GenericServiceImpl<B, K> extends GenericAbstractServiceImpl<B, K> i
 
     @Override
     @Deprecated
-    public Long getSequences(int step) {
+    public final Long getSequences(int step) {
         //获得事务状态
         TransactionStatus transactionStatus = null;
         try {
@@ -118,7 +118,7 @@ public class GenericServiceImpl<B, K> extends GenericAbstractServiceImpl<B, K> i
     }
 
     @Override
-    public PageResult<B> pageByArgs(Page page, Object... params) {
+    public final PageResult<B> pageByArgs(Page page, Object... params) {
         return pageByArgs(MapConverter.arr2Map(params), page);
     }
 
@@ -133,7 +133,7 @@ public class GenericServiceImpl<B, K> extends GenericAbstractServiceImpl<B, K> i
     }
 
     @Override
-    public List<B> pageSkipCount(Page page, Object... params) {
+    public final List<B> pageSkipCount(Page page, Object... params) {
         return pageSkipCount(MapConverter.arr2Map(params), page);
     }
 
@@ -145,7 +145,7 @@ public class GenericServiceImpl<B, K> extends GenericAbstractServiceImpl<B, K> i
     }
 
     @Override
-    public List<B> queryByField(String fieldSQL, Object... params) {
+    public final List<B> queryByField(String fieldSQL, Object... params) {
         return queryByField(fieldSQL, MapConverter.arr2Map(params));
     }
 
@@ -155,7 +155,7 @@ public class GenericServiceImpl<B, K> extends GenericAbstractServiceImpl<B, K> i
     }
 
     @Override
-    public B queryFirstByField(String fieldSQL, Object... params) {
+    public final B queryFirstByField(String fieldSQL, Object... params) {
         return queryFirstByField(fieldSQL, MapConverter.arr2Map(params));
     }
 
@@ -165,7 +165,7 @@ public class GenericServiceImpl<B, K> extends GenericAbstractServiceImpl<B, K> i
     }
 
     @Override
-    public B queryFirst(Object... params) {
+    public final B queryFirst(Object... params) {
         return queryFirst(MapConverter.arr2Map(params));
     }
 
@@ -176,7 +176,7 @@ public class GenericServiceImpl<B, K> extends GenericAbstractServiceImpl<B, K> i
     }
 
     @Override
-    public boolean exists(Object... params) {
+    public final boolean exists(Object... params) {
         return exists(MapConverter.arr2Map(params));
     }
 
@@ -205,7 +205,7 @@ public class GenericServiceImpl<B, K> extends GenericAbstractServiceImpl<B, K> i
     }
 
     @Override
-    public List<B> queryByArgs(Object... params) {
+    public final List<B> queryByArgs(Object... params) {
         return queryByArgs(MapConverter.arr2Map(params));
     }
 
@@ -228,7 +228,7 @@ public class GenericServiceImpl<B, K> extends GenericAbstractServiceImpl<B, K> i
     }
 
     @Override
-    public void deleteByArgs(Object... params) {
+    public final void deleteByArgs(Object... params) {
         deleteByArgs(MapConverter.arr2Map(params));
     }
 
@@ -319,7 +319,7 @@ public class GenericServiceImpl<B, K> extends GenericAbstractServiceImpl<B, K> i
     }
 
     @Override
-    public void updateByArgs(Map<String, Object> params, Object... setArr) {
+    public final void updateByArgs(Map<String, Object> params, Object... setArr) {
         if (null == setArr || 0 >= setArr.length || 1 == setArr.length % 2) {
             throw new BusinessException();
         }
@@ -424,7 +424,7 @@ public class GenericServiceImpl<B, K> extends GenericAbstractServiceImpl<B, K> i
     }
 
     @Override
-    public long countByArgs(Object... params) {
+    public final long countByArgs(Object... params) {
         return countByArgs(MapConverter.arr2Map(params));
     }
 
