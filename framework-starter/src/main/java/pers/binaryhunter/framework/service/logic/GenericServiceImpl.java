@@ -20,6 +20,7 @@ import pers.binaryhunter.framework.bean.vo.paging.PageResult;
 import pers.binaryhunter.framework.dao.GenericDAO;
 import pers.binaryhunter.framework.exception.BusinessException;
 import pers.binaryhunter.framework.service.GenericService;
+import pers.binaryhunter.framework.utils.DateUtil;
 import pers.binaryhunter.framework.utils.MapConverter;
 
 import javax.annotation.Resource;
@@ -342,6 +343,8 @@ public class GenericServiceImpl<B, K> extends GenericAbstractServiceImpl<B, K> i
             if (null != value) {
                 if (value instanceof Boolean) {
                     setSql.append(value.toString());
+                } else if (value instanceof Date) {
+                    setSql.append("'").append(DateUtil.format((Date) value, DateUtil.PatternType.YYYY_MM_DD_HH_MM_SS.getPattern())).append("'");
                 } else {
                     String v = value.toString();
                     if (v.startsWith("!'")) { //如果以 !' 开头, 则不需要包装为字符串
