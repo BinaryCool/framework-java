@@ -1,11 +1,15 @@
 package pers.binaryhunter.framework.bean.vo;
 
+import java.io.Serializable;
+
 /**
  * 返回客户端对象
  * @author BinaryHunter
  *
  */
-public class ResponseBean {
+public class ResponseBean<T> implements Serializable {
+    private static final long serialVersionUID = -3706325472006568883L;
+
     private String success;
 	/**
 	 * 返回代码
@@ -14,7 +18,7 @@ public class ResponseBean {
 	/**
 	 * 返回对象
 	 */
-	private Object data;
+	private T data;
 
 	public int getCode() {
 		return code;
@@ -24,11 +28,11 @@ public class ResponseBean {
 		this.code = code;
 	}
 
-	public Object getData() {
+	public T getData() {
 		return data;
 	}
 
-	public void setData(Object data) {
+	public void setData(T data) {
 		this.data = data;
 	}
 
