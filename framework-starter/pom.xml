@@ -6,7 +6,7 @@
     <groupId>pers.binaryhunter</groupId>
     <artifactId>framework-starter</artifactId>
     <packaging>jar</packaging>
-    <version>3.0.3</version>
+    <version>3.0.4</version>
 
     <parent>
         <groupId>pers.binaryhunter</groupId>
