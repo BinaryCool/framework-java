@@ -517,7 +517,7 @@ public class GenericServiceImpl<B, K> extends GenericAbstractServiceImpl<B, K> i
     /**
      * 获取DAO
      */
-    protected <T> T getDAO() {
-        return (T) dao;
+    protected <T> T getDAO(Class<T> clazz) {
+        return clazz.cast(dao);
     }
 }
