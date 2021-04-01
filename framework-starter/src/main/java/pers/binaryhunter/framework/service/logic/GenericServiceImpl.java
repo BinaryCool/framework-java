@@ -513,4 +513,11 @@ public class GenericServiceImpl<B, K> extends GenericAbstractServiceImpl<B, K> i
     protected UserPO getLoginedUser() {
         return null;
     }
+
+    /**
+     * 获取DAO
+     */
+    protected <T> T getDAO() {
+        return (T) dao;
+    }
 }
