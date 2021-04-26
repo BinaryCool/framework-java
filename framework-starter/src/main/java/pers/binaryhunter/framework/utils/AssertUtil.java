@@ -75,4 +75,16 @@ public class AssertUtil {
             throw new BusinessException(ifnull(msg));
         }
     }
+
+    public static void notNulls(Object... objects) {
+        for (Object obj : objects) {
+            if (obj instanceof String) {
+                notBlank((String) obj);
+            } else if (obj instanceof Number) {
+                notNullPositive((Number) obj);
+            } else {
+                notNull(obj);
+            }
+        }
+    }
 }
