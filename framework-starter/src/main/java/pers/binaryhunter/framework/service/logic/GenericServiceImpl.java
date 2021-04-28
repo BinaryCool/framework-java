@@ -271,8 +271,7 @@ public class GenericServiceImpl<B, K> extends GenericAbstractServiceImpl<B, K> i
             log.warn("List is empty while update batch");
             return;
         }
-        beans.forEach(bean -> appendUpdate(bean));
-
+        beans.forEach(bean -> this.appendUpdate(bean));
 
         int times = (int) (Math.ceil(beans.size() * 1.0 / COUNT_BATCH));
         //获得事务状态
@@ -307,8 +306,6 @@ public class GenericServiceImpl<B, K> extends GenericAbstractServiceImpl<B, K> i
         if (isParamsEmpty(params)) {
             throw new BusinessException();
         }
-
-        setSql += ", t.update_time = now()";
 
         UserPO userPO = getLoginedUser();
         if (null != userPO && StringUtils.isNotBlank(userPO.getName())) {
@@ -377,7 +374,7 @@ public class GenericServiceImpl<B, K> extends GenericAbstractServiceImpl<B, K> i
             log.warn("List is empty while add batch");
             return;
         }
-
+        beans.forEach(bean -> this.appendAdd(bean));
         this.doAddBatch(beans);
     }
 
