@@ -50,11 +50,6 @@ public class GenericController {
      * @return json 串
      */
     protected ResponseBean<String> toResponse(Exception ex) {
-        HttpServletRequest request = ((ServletRequestAttributes) RequestContextHolder.getRequestAttributes()).getRequest();
-        log.error("==> " + request.getRequestURI());
-        log.error(JSON.toJSONString(request.getParameterMap()));
-        log.error("", ex);
-        
         if (null == ex) {
             return toResponse("", ResponseBean.CodeEnum.SUCC.getCode());
         }
@@ -76,13 +71,10 @@ public class GenericController {
             msg = ex.getMessage();
         } else {
             msg = ResponseBean.CodeEnum.ERR_UNKOWN.getMsg();
-            /*
             HttpServletRequest request = ((ServletRequestAttributes) RequestContextHolder.getRequestAttributes()).getRequest();
             log.error("==> " + request.getRequestURI());
             log.error(JSON.toJSONString(request.getParameterMap()));
             log.error("", ex);
-            
-             */
 
             if(50 < msg.length()) {
                 msg = msg.substring(0, 50);
