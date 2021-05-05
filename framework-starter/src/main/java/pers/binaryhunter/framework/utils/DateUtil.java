@@ -71,6 +71,13 @@ public class DateUtil {
         }
     }
 
+    public static void castCalenderToDate(Calendar cal) {
+        cal.set(Calendar.HOUR, 0);
+        cal.set(Calendar.MINUTE, 0);
+        cal.set(Calendar.SECOND, 0);
+        cal.set(Calendar.MILLISECOND, 0);
+    }
+
     public static DateFormat getSingletonByPattern(String pattern) {
         SimpleDateFormat df = threadLocal.get();
         df.applyPattern(pattern);
