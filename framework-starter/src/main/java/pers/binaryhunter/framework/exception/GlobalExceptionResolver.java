@@ -1,6 +1,7 @@
 package pers.binaryhunter.framework.exception;
 
 import com.alibaba.fastjson.JSON;
+import org.apache.catalina.connector.ClientAbortException;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -143,7 +144,7 @@ public class GlobalExceptionResolver extends GenericController {
     @ExceptionHandler(value = Exception.class)
     public Object defaultErrorHandler(Exception ex) {
         if (!(ex instanceof SessionOutException)) {
-            if (ex instanceof BusinessException) {
+            if (ex instanceof BusinessException || ex instanceof ClientAbortException) {
                 warnLogException(ex);
             } else {
                 errorLogException(ex);
