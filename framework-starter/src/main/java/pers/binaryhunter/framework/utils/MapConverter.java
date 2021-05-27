@@ -18,108 +18,112 @@ import org.slf4j.LoggerFactory;
 import pers.binaryhunter.framework.bean.dto.paging.Page;
 
 public class MapConverter {
-	private static final Logger log = LoggerFactory.getLogger(MapConverter.class);
+    private static final Logger log = LoggerFactory.getLogger(MapConverter.class);
 
-	@SuppressWarnings({ "unchecked", "rawtypes" })
-	private static void convertByField(Class c, Object obj, Map<String, Object> map) {
-		if (c != null) {
-			Field[] fileds = c.getDeclaredFields();
-			for (Field f : fileds) {
-                if(Modifier.isStatic(f.getModifiers())) { // 跳过静态属性
+    @SuppressWarnings({"unchecked", "rawtypes"})
+    private static void convertByField(Class c, Object obj, Map<String, Object> map) {
+        if (c != null) {
+            Field[] fileds = c.getDeclaredFields();
+            for (Field f : fileds) {
+                if (Modifier.isStatic(f.getModifiers())) { // 跳过静态属性
                     continue;
                 }
-				String name = f.getName();
-				Method method = null;
-				try {
-					method = c.getMethod("get" + name.substring(0, 1).toUpperCase() + name.substring(1));
-					if (method == null) {
-						continue;
-					}
+                String name = f.getName();
+                Method method = null;
+                try {
+                    method = c.getMethod("get" + name.substring(0, 1).toUpperCase() + name.substring(1));
+                    if (method == null) {
+                        continue;
+                    }
 
-					Object value = method.invoke(obj);
-					if (value != null) {
-						if (value instanceof String) {
-							if (StringUtils.isNotEmpty((String) value)) {
-								map.put(name, value);
-							}
-						} else {
-							map.put(name, value);
-						}
-					}
-				} catch (Exception e) {
-					log.error("", e);
-				}
-			}
-		}
-	}
+                    Object value = method.invoke(obj);
+                    if (value != null) {
+                        if (value instanceof String) {
+                            if (StringUtils.isNotEmpty((String) value)) {
+                                map.put(name, value);
+                            }
+                        } else {
+                            map.put(name, value);
+                        }
+                    }
+                } catch (Exception e) {
+                    log.error("", e);
+                }
+            }
+        }
+    }
 
-	/**
-	 * 把对象转化为 map
-	 * @param map map
-	 * @param obj 对象
-	 * @return map
-	 * By Yuwen on 2017年6月22日
-	 */
-	@SuppressWarnings("rawtypes")
-	public static Map<String, Object> convertByField(Map<String, Object> map, Object obj) {
-		if(null == map) {
-			map = new HashMap<>();
-		}
+    /**
+     * 把对象转化为 map
+     *
+     * @param map map
+     * @param obj 对象
+     * @return map
+     * By Yuwen on 2017年6月22日
+     */
+    @SuppressWarnings("rawtypes")
+    public static Map<String, Object> convertByField(Map<String, Object> map, Object obj) {
+        if (null == map) {
+            map = new HashMap<>();
+        }
 
-		if (obj != null) {
-			Class c = obj.getClass();
-			convertByField(c, obj, map);
-			// 转化继承属性
-			if (obj.getClass().getSuperclass() != null && !obj.getClass().getSuperclass().getName().equals("java.lang.Object")) {
-				convertByField(obj.getClass().getSuperclass(), obj, map);
-			}
-		}
-		return map;
-	}
+        if (obj != null) {
+            Class c = obj.getClass();
+            convertByField(c, obj, map);
+            // 转化继承属性
+            if (obj.getClass().getSuperclass() != null && !obj.getClass().getSuperclass().getName().equals("java.lang.Object")) {
+                convertByField(obj.getClass().getSuperclass(), obj, map);
+            }
+        }
+        return map;
+    }
 
-	/**
-	 * 把对象转化为 map
-	 * @param obj 对象
-	 * @return map
-	 * By Yuwen on 2017年6月22日
-	 */
-	public static Map<String, Object> convertByField(Object obj) {
-		Map<String, Object> map = new HashMap<String, Object>();
-		return convertByField(map, obj);
-	}
+    /**
+     * 把对象转化为 map
+     *
+     * @param obj 对象
+     * @return map
+     * By Yuwen on 2017年6月22日
+     */
+    public static Map<String, Object> convertByField(Object obj) {
+        Map<String, Object> map = new HashMap<String, Object>();
+        return convertByField(map, obj);
+    }
 
-	/**
-	 * 转化分页对象
-	 * @param map map
-	 * @param page 分页对象
-	 * @return map
-	 * By Yuwen on 2017年6月22日
-	 */
-	public static Map<String, Object> convertPage(Map<String, Object> map, Page page) {
-		if(null == map) {
-			map = new HashMap<>();
-		}
+    /**
+     * 转化分页对象
+     *
+     * @param map  map
+     * @param page 分页对象
+     * @return map
+     * By Yuwen on 2017年6月22日
+     */
+    public static Map<String, Object> convertPage(Map<String, Object> map, Page page) {
+        if (null == map) {
+            map = new HashMap<>();
+        }
 
-		map.put("start", (page.getPageNum() - 1) * page.getNumPerPage());
-		map.put("limit", page.getNumPerPage());
+        map.put("start", (page.getPageNum() - 1) * page.getNumPerPage());
+        map.put("limit", page.getNumPerPage());
 
-		if(StringUtils.isNotEmpty(page.getOrderField())) {
+        if (StringUtils.isNotEmpty(page.getOrderField())) {
             String orderField = page.getOrderField();
             orderField = SqlUtil.replaceKeyWords4SqlInjection(orderField);
-			map.put("orderField", orderField);
-		}
+            map.put("orderField", orderField);
+        }
 
-		if(StringUtils.isNotEmpty(page.getOrderDirection())) {
-            if("asc".equals(page.getOrderDirection()) || "desc".equals(page.getOrderDirection())) {
+        if (StringUtils.isNotEmpty(page.getOrderDirection())) {
+            if ("asc".equals(page.getOrderDirection()) || "desc".equals(page.getOrderDirection())) {
                 map.put("orderDirection", page.getOrderDirection());
             }
-		}
+        }
 
-		return map;
-	}
+        return map;
+    }
 
     /**
      * 解码UTF8
+     *
      * @return
      */
     public static void decodeByField(Object obj, String... fieldNames) {
@@ -147,7 +151,7 @@ public class MapConverter {
                 Object value = method.invoke(obj);
                 if (value != null && value instanceof String && StringUtils.isNotEmpty((String) value)) {
                     methodSet = c.getMethod("set" + shortName, String.class);
-                    if(null != methodSet) {
+                    if (null != methodSet) {
                         methodSet.invoke(obj, URLDecoder.decode(value.toString(), "UTF-8"));
                     }
                 }
@@ -172,9 +176,9 @@ public class MapConverter {
             params = new HashMap<>();
         }
 
-        if(ArrayUtils.isNotEmpty(args)) {
-            for(int i = 0; i < args.length; i += 2) {
-                if(null != args[i] && (i +1) < args.length && null != args[i]) {
+        if (ArrayUtils.isNotEmpty(args)) {
+            for (int i = 0; i < args.length; i += 2) {
+                if (null != args[i] && (i + 1) < args.length && null != args[i + 1]) {
                     params.put(args[i].toString(), args[i + 1]);
                 }
             }
