@@ -32,7 +32,10 @@ public class SqlUtil {
      */
     public static String toSqlIn(Object[] objArr) {
         if (ArrayUtils.isEmpty(objArr)) {
-            return null;
+            return "''";
+        }
+        if (objArr[0] instanceof Number) {
+            return Stream.of(objArr).map(Object::toString).collect(Collectors.joining(","));
         }
         return Stream.of(objArr).map(Object::toString).collect(Collectors.joining("','", "'", "'"));
     }
@@ -41,9 +44,6 @@ public class SqlUtil {
      * 把数组转为sql in
      */
     public static <T> String toSqlIn(Collection<T> objColl) {
-        if (CollectionUtils.isEmpty(objColl)) {
-            return null;
-        }
-        return objColl.stream().map(Object::toString).collect(Collectors.joining("','", "'", "'"));
+        return toSqlIn(objColl.toArray());
     }
 }
