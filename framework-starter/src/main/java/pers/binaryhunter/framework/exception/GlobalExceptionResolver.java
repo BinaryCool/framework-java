@@ -94,7 +94,7 @@ public class GlobalExceptionResolver extends GenericController {
             errorMessage = processNull(errorMessage);
         }
 
-        warnLogException(ex, errorMessage);
+        errorLogException(ex, errorMessage);
         return toResponse(new BusinessException(errorMessage));
     }
 
@@ -136,7 +136,7 @@ public class GlobalExceptionResolver extends GenericController {
             }
             errorMessage = processNull(errorMessage);
         }
-        warnLogException(ex, errorMessage);
+        errorLogException(ex, errorMessage);
         return toResponse(new BusinessException(errorMessage));
     }
 
