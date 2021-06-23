@@ -40,8 +40,8 @@ public class MyRedisAutoConfiguration {
     private String pass;
     private int database;
 
-    private int maxIdle = 100;
-    private int maxActive = 600;
+    private int maxIdle = 10;
+    private int maxActive = 60;
     private int maxWait = 1000;
     private boolean testOnBorrow = true;
     private int connTimeout = 5000;
