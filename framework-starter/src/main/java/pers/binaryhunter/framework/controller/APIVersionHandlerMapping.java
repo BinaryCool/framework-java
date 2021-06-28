@@ -1,6 +1,8 @@
 package pers.binaryhunter.framework.controller;
 
 
+import org.apache.commons.lang3.ArrayUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.core.annotation.AnnotatedElementUtils;
 import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.stereotype.Controller;
@@ -9,6 +11,8 @@ import org.springframework.web.servlet.mvc.method.RequestMappingInfo;
 import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping;
 
 import java.lang.reflect.Method;
+import java.util.List;
+import java.util.stream.Collectors;
 
 public class APIVersionHandlerMapping extends RequestMappingHandlerMapping {
 
@@ -29,11 +33,24 @@ public class APIVersionHandlerMapping extends RequestMappingHandlerMapping {
             apiVersion = methodAnnotation;
         }
 
-        String[] urlPatterns = apiVersion == null ? new String[0] : apiVersion.value();
-
-        PatternsRequestCondition apiPattern = new PatternsRequestCondition(urlPatterns);
         PatternsRequestCondition oldPattern = mapping.getPatternsCondition();
-        PatternsRequestCondition updatedFinalPattern = oldPattern.combine(apiPattern);
+        PatternsRequestCondition updatedFinalPattern;
+        if (null != apiVersion) {
+            List<String> patterns = oldPattern.getPatterns().stream()
+                    .map(p -> {
+                        if (StringUtils.isBlank(p)) {
+                            return p;
+                        }
+                        int index = p.indexOf("/", 1);
+                        if (0 <= index) {
+                            p = p.substring(index);
+                        }
+                        return p;
+                    }).collect(Collectors.toList());
+            updatedFinalPattern = new PatternsRequestCondition(apiVersion.value()).combine(new PatternsRequestCondition(patterns.toArray(new String[patterns.size()])));
+        } else {
+            updatedFinalPattern = oldPattern;
+        }
 
         //重新构建RequestMappingInfo
         mapping = new RequestMappingInfo(mapping.getName(), updatedFinalPattern, mapping.getMethodsCondition(),
