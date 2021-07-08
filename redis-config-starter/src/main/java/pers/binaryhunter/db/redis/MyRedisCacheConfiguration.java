@@ -67,6 +67,12 @@ public class MyRedisCacheConfiguration extends CachingConfigurerSupport {
                 sb.append(o.getClass().getSimpleName()).append(":").append(method.getName());
             }
 
+            // 如果有租户ID
+            String tenantId = MyRedisTenantHolder.TENANT_ID.get();
+            if (null != tenantId) {
+                sb.append(":").append(tenantId);
+            }
+
             if (null == objects && 0 >= objects.length) {
                 return sb.toString();
             }
