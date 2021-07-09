@@ -27,9 +27,7 @@ public class RedisUtil {
 
     public static void tryLock(RedisTemplate redisTemplate, String key, String requestId) {
         try {
-            Boolean result = redisTemplate.opsForValue().setIfAbsent(key, requestId);
-            redisTemplate.expire(key, TIMEOUT_CACHE_IN_SECOND, TimeUnit.SECONDS);
-
+            Boolean result = redisTemplate.opsForValue().setIfAbsent(key, requestId, TIMEOUT_CACHE_IN_SECOND, TimeUnit.SECONDS);
             if (null == result || !result) {
                 log.info("Waiting " + key);
                 Thread.sleep(200L);
