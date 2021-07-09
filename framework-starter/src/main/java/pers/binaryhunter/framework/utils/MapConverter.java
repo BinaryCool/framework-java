@@ -113,7 +113,7 @@ public class MapConverter {
         }
 
         if (StringUtils.isNotEmpty(page.getOrderDirection())) {
-            if ("asc".equals(page.getOrderDirection()) || "desc".equals(page.getOrderDirection())) {
+            if ("asc".equalsIgnoreCase(page.getOrderDirection()) || "desc".equalsIgnoreCase(page.getOrderDirection())) {
                 map.put("orderDirection", page.getOrderDirection());
             }
         }
