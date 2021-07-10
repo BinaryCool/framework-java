@@ -29,10 +29,10 @@ public class MyRedisCacheConfiguration extends CachingConfigurerSupport {
 
     @Bean
     public CacheManager cacheManager(RedisTemplate redisTemplate) {
-        RedisCacheWriter cacheWriter = new MyRedisCacheWriter(redisTemplate.getConnectionFactory()); //RedisCacheWriter.nonLockingRedisCacheWriter(redisTemplate.getConnectionFactory());
         // RedisCacheConfiguration conf = RedisCacheConfiguration.defaultCacheConfig().entryTtl(Duration.ofSeconds(DEFAULT_EXPIRATIOIN));
         RedisCacheConfiguration conf = RedisCacheConfiguration.defaultCacheConfig().entryTtl(Duration.ofSeconds(DEFAULT_EXPIRATIOIN))
                 .serializeValuesWith(RedisSerializationContext.SerializationPair.fromSerializer(redisTemplate.getValueSerializer()));
+        RedisCacheWriter cacheWriter = new MyRedisCacheWriter(redisTemplate.getConnectionFactory(), conf); //RedisCacheWriter.nonLockingRedisCacheWriter(redisTemplate.getConnectionFactory());
         RedisCacheManager cacheManager = new RedisCacheManager(cacheWriter, conf);
         return cacheManager;
     }

@@ -1,9 +1,11 @@
 package pers.binaryhunter.db.redis;
 
+import com.alibaba.fastjson.JSON;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.cache.support.NullValue;
 import org.springframework.dao.PessimisticLockingFailureException;
+import org.springframework.data.redis.cache.RedisCacheConfiguration;
 import org.springframework.data.redis.cache.RedisCacheWriter;
 import org.springframework.data.redis.connection.RedisConnection;
 import org.springframework.data.redis.connection.RedisConnectionFactory;
@@ -14,6 +16,7 @@ import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.ObjectUtils;
 
+import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 import java.util.Collections;
@@ -44,14 +47,15 @@ public class MyRedisCacheWriter implements RedisCacheWriter {
     private static final byte[] BINARY_NULL_VALUE = RedisSerializer.java().serialize(NullValue.INSTANCE);
     private static final Logger log = LoggerFactory.getLogger(MyRedisCacheWriter.class);
 
+    private final RedisCacheConfiguration cacheConfig;
     private final RedisConnectionFactory connectionFactory;
     private final Duration sleepTime;
 
     /**
      * @param connectionFactory must not be {@literal null}.
      */
-    MyRedisCacheWriter(RedisConnectionFactory connectionFactory) {
-        this(connectionFactory, Duration.ZERO);
+    MyRedisCacheWriter(RedisConnectionFactory connectionFactory, RedisCacheConfiguration cacheConfig) {
+        this(connectionFactory, Duration.ZERO, cacheConfig);
     }
 
     /**
@@ -59,13 +63,14 @@ public class MyRedisCacheWriter implements RedisCacheWriter {
      * @param sleepTime sleep time between lock request attempts. Must not be {@literal null}. Use {@link Duration#ZERO}
      *          to disable locking.
      */
-    MyRedisCacheWriter(RedisConnectionFactory connectionFactory, Duration sleepTime) {
+    MyRedisCacheWriter(RedisConnectionFactory connectionFactory, Duration sleepTime, RedisCacheConfiguration cacheConfig) {
 
         Assert.notNull(connectionFactory, "ConnectionFactory must not be null!");
         Assert.notNull(sleepTime, "SleepTime must not be null!");
 
         this.connectionFactory = connectionFactory;
         this.sleepTime = sleepTime;
+        this.cacheConfig = cacheConfig;
     }
 
     /*
@@ -79,8 +84,8 @@ public class MyRedisCacheWriter implements RedisCacheWriter {
         Assert.notNull(key, "Key must not be null!");
         Assert.notNull(value, "Value must not be null!");
         
-        // 如果是控制, 不进行缓存
-        if (ObjectUtils.nullSafeEquals(value, BINARY_NULL_VALUE)) {
+        // 如果是空值, 不进行缓存
+        if (isNullCacheValue(value)) {
             return;
         }
 
@@ -135,7 +140,7 @@ public class MyRedisCacheWriter implements RedisCacheWriter {
         Assert.notNull(value, "Value must not be null!");
 
         // 如果是控制, 不进行缓存
-        if (ObjectUtils.nullSafeEquals(value, BINARY_NULL_VALUE)) {
+        if (isNullCacheValue(value)) {
             return null;
         }
 
@@ -309,5 +314,19 @@ public class MyRedisCacheWriter implements RedisCacheWriter {
 
     private static byte[] createCacheLockKey(String name) {
         return (name + "~lock").getBytes(StandardCharsets.UTF_8);
+    }
+
+    protected boolean isNullCacheValue(byte[] value) {
+
+        if (ObjectUtils.nullSafeEquals(value, BINARY_NULL_VALUE)) {
+            return true;
+        }
+
+        Object obj = cacheConfig.getValueSerializationPair().read(ByteBuffer.wrap(value));
+        if (null == obj) {
+            return true;
+        }
+        String json = JSON.toJSONString(obj);
+        return null == json || "[]".equals(json) || "{}".equals(json);
     }
 }
