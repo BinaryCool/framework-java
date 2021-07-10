@@ -327,6 +327,6 @@ public class MyRedisCacheWriter implements RedisCacheWriter {
             return true;
         }
         String json = JSON.toJSONString(obj);
-        return null == json || "[]".equals(json) || "{}".equals(json);
+        return null == json || "".equals(json) || "\"\"".equals(json) || "[]".equals(json) || "{}".equals(json);
     }
 }
