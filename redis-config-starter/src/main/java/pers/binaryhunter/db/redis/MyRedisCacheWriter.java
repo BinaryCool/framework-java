@@ -2,14 +2,17 @@ package pers.binaryhunter.db.redis;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.cache.support.NullValue;
 import org.springframework.dao.PessimisticLockingFailureException;
 import org.springframework.data.redis.cache.RedisCacheWriter;
 import org.springframework.data.redis.connection.RedisConnection;
 import org.springframework.data.redis.connection.RedisConnectionFactory;
 import org.springframework.data.redis.connection.RedisStringCommands.SetOption;
 import org.springframework.data.redis.core.types.Expiration;
+import org.springframework.data.redis.serializer.RedisSerializer;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
+import org.springframework.util.ObjectUtils;
 
 import java.nio.charset.StandardCharsets;
 import java.time.Duration;
@@ -38,6 +41,7 @@ import java.util.function.Function;
  */
 
 public class MyRedisCacheWriter implements RedisCacheWriter {
+    private static final byte[] BINARY_NULL_VALUE = RedisSerializer.java().serialize(NullValue.INSTANCE);
     private static final Logger log = LoggerFactory.getLogger(MyRedisCacheWriter.class);
 
     private final RedisConnectionFactory connectionFactory;
@@ -74,6 +78,11 @@ public class MyRedisCacheWriter implements RedisCacheWriter {
         Assert.notNull(name, "Name must not be null!");
         Assert.notNull(key, "Key must not be null!");
         Assert.notNull(value, "Value must not be null!");
+        
+        // 如果是控制, 不进行缓存
+        if (ObjectUtils.nullSafeEquals(value, BINARY_NULL_VALUE)) {
+            return;
+        }
 
         execute(name, connection -> {
             //判断name里面是否设置了过期时间，如果设置了则对key进行缓存，并设置过期时间
@@ -124,6 +133,11 @@ public class MyRedisCacheWriter implements RedisCacheWriter {
         Assert.notNull(name, "Name must not be null!");
         Assert.notNull(key, "Key must not be null!");
         Assert.notNull(value, "Value must not be null!");
+
+        // 如果是控制, 不进行缓存
+        if (ObjectUtils.nullSafeEquals(value, BINARY_NULL_VALUE)) {
+            return null;
+        }
 
         return execute(name, connection -> {
 
