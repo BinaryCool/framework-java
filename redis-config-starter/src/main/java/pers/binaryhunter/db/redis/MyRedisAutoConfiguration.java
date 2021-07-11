@@ -1,8 +1,16 @@
 package pers.binaryhunter.db.redis;
 
+import org.redisson.Redisson;
+import org.redisson.api.RedissonClient;
+import org.redisson.config.ClusterServersConfig;
+import org.redisson.config.Config;
+import org.redisson.config.SentinelServersConfig;
+import org.redisson.config.SingleServerConfig;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
+import org.springframework.boot.autoconfigure.data.redis.RedisProperties;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -15,19 +23,24 @@ import org.springframework.data.redis.connection.jedis.JedisConnectionFactory;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.data.redis.serializer.StringRedisSerializer;
+import org.springframework.util.ReflectionUtils;
+import org.springframework.util.StringUtils;
 import redis.clients.jedis.JedisPoolConfig;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.lang.reflect.Method;
 import java.time.Duration;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Configuration()
 @ConditionalOnClass({ JedisPoolConfig.class, JedisConnectionFactory.class })
-@ConfigurationProperties("binaryhunter.redis")
+@ConfigurationProperties("spring.redis")
 public class MyRedisAutoConfiguration {
     private static final Logger log = LoggerFactory.getLogger(MyRedisAutoConfiguration.class);
+
+    private static final String REDIS_PROTOCOL_PREFIX = "redis://";
 
     private String master;
     private List<MyRedisNode> sentinels = new ArrayList<>();
@@ -192,6 +205,69 @@ public class MyRedisAutoConfiguration {
         template.setHashValueSerializer(new StringRedisSerializer());
 
         return template;
+    }
+
+    @Bean(destroyMethod = "shutdown")
+    @ConditionalOnMissingBean(RedissonClient.class)
+    public RedissonClient redisson() {
+        Config config;
+        Object timeoutValue = this.connTimeout;
+        int timeout;
+        if(null == timeoutValue){
+            timeout = 10000;
+        } else {
+            timeout = (Integer)timeoutValue;
+        }
+
+        if(null != sentinels && 0 < sentinels.size()) {
+            String[] nodes = convert(sentinels.stream().map(node -> node.getHost() + ":" + node.getPort()).collect(Collectors.toList()));
+            
+            config = new Config();
+            SentinelServersConfig sentinelServersConfig = config.useSentinelServers()
+                    .setMasterName(master)
+                    .addSentinelAddress(nodes)
+                    .setDatabase(database)
+                    .setConnectTimeout(timeout);
+            if (null != pass && !"".equals(pass)) {
+                sentinelServersConfig.setPassword(pass);
+            }
+        } else if (null != nodes && 0 < nodes.size()) {
+            List<String> nodesObject = nodes.stream().map(node -> node.getHost() + ":" + node.getPort()).collect(Collectors.toList());
+
+            String[] nodes = convert(nodesObject);
+
+            config = new Config();
+            ClusterServersConfig clusterServersConfig = config.useClusterServers()
+                    .addNodeAddress(nodes)
+                    .setConnectTimeout(timeout);
+            if (null != pass && !"".equals(pass)) {
+                clusterServersConfig.setPassword(pass);
+            }
+        } else {
+            config = new Config();
+            String prefix = REDIS_PROTOCOL_PREFIX;
+
+            SingleServerConfig singleServerConfig = config.useSingleServer()
+                    .setAddress(prefix + host + ":" + port)
+                    .setConnectTimeout(timeout)
+                    .setDatabase(database);
+            if (null != pass && !"".equals(pass)) {
+                singleServerConfig.setPassword(pass);
+            }
+        }
+        return Redisson.create(config);
+    }
+
+    private String[] convert(List<String> nodesObject) {
+        List<String> nodes = new ArrayList<>(nodesObject.size());
+        for (String node : nodesObject) {
+            if (!node.startsWith(REDIS_PROTOCOL_PREFIX)) {
+                nodes.add(REDIS_PROTOCOL_PREFIX + node);
+            } else {
+                nodes.add(node);
+            }
+        }
+        return nodes.toArray(new String[nodes.size()]);
     }
 
     public int getDatabase() {

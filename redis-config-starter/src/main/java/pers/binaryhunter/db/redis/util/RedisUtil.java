@@ -1,48 +1,64 @@
 package pers.binaryhunter.db.redis.util;
 
+import org.redisson.api.RLock;
+import org.redisson.api.RedissonClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.redis.core.Cursor;
 import org.springframework.data.redis.core.RedisCallback;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.ScanOptions;
-import org.springframework.data.redis.core.script.DefaultRedisScript;
-import org.springframework.data.redis.core.script.RedisScript;
 
 import java.nio.charset.StandardCharsets;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 public class RedisUtil {
     private static final Logger log = LoggerFactory.getLogger(RedisUtil.class);
-    public static final long TIMEOUT_CACHE_IN_SECOND = 10L;
-    private static RedisScript<Long> scriptDel;
-    static {
-        String scriptStr = "if redis.call('get', KEYS[1]) == ARGV[1] then return redis.call('del', KEYS[1]) else return 0 end";
-        scriptDel = new DefaultRedisScript<>(scriptStr, Long.class);
+
+    public static RLock tryLock(RedissonClient redisson, String key) {
+        try {
+            RLock lock = redisson.getFairLock(key);
+            lock.lock();
+            return lock;
+        } catch (Exception ex) {
+            log.warn("", ex);
+        }
+        return null;
     }
 
-    public static void tryLock(RedisTemplate redisTemplate, String key, String requestId) {
+    public static RLock tryLock(RedissonClient redisson, String key, int maxLockSeconds) {
         try {
-            Boolean result = redisTemplate.opsForValue().setIfAbsent(key, requestId, TIMEOUT_CACHE_IN_SECOND, TimeUnit.SECONDS);
-            if (null == result || !result) {
-                log.info("Waiting " + key);
-                Thread.sleep(200L);
-                tryLock(redisTemplate, key, requestId);
+            RLock lock = redisson.getFairLock(key);
+            lock.lock(maxLockSeconds, TimeUnit.SECONDS);
+            return lock;
+        } catch (Exception ex) {
+            log.warn("", ex);
+        }
+        return null;
+    }
+
+    public static RLock tryLock(RedissonClient redisson, String key, int maxLockSeconds, int maxWaitSeconds) {
+        try {
+            RLock lock = redisson.getFairLock(key);
+            boolean res = lock.tryLock(maxWaitSeconds, maxLockSeconds, TimeUnit.SECONDS);
+            if (res) {
+                return lock;
             }
         } catch (Exception ex) {
-            log.info("", ex);
+            log.warn("", ex);
         }
+        return null;
     }
 
-    public static void unlock(RedisTemplate redisTemplate, String key, String requestId) {
+    public static void unlock(RLock lock) {
         try {
-            redisTemplate.execute(scriptDel, Stream.of(key).collect(Collectors.toList()), requestId);
+            if (null != lock) {
+                lock.unlock();
+            }
         } catch (Exception ex) {
-            log.info("", ex);
+            log.warn("", ex);
         }
     }
 
