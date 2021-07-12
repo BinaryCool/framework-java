@@ -8,6 +8,8 @@ import org.springframework.data.redis.core.Cursor;
 import org.springframework.data.redis.core.RedisCallback;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.ScanOptions;
+import org.springframework.transaction.support.TransactionSynchronizationAdapter;
+import org.springframework.transaction.support.TransactionSynchronizationManager;
 
 import java.nio.charset.StandardCharsets;
 import java.util.HashSet;
@@ -17,45 +19,43 @@ import java.util.concurrent.TimeUnit;
 public class RedisUtil {
     private static final Logger log = LoggerFactory.getLogger(RedisUtil.class);
 
-    public static RLock tryLock(RedissonClient redisson, String key) {
-        try {
-            RLock lock = redisson.getFairLock(key);
-            lock.lock();
-            return lock;
-        } catch (Exception ex) {
-            log.warn("", ex);
-        }
-        return null;
+    public static RLock tryLock(RedissonClient redisson, String key) throws InterruptedException {
+        return tryLock(redisson, key, 30);
     }
 
-    public static RLock tryLock(RedissonClient redisson, String key, int maxLockSeconds) {
-        try {
-            RLock lock = redisson.getFairLock(key);
-            lock.lock(maxLockSeconds, TimeUnit.SECONDS);
-            return lock;
-        } catch (Exception ex) {
-            log.warn("", ex);
-        }
-        return null;
+    public static RLock tryLock(RedissonClient redisson, String key, int maxLockSeconds) throws InterruptedException {
+        return tryLock(redisson, key, maxLockSeconds, 15);
     }
 
-    public static RLock tryLock(RedissonClient redisson, String key, int maxLockSeconds, int maxWaitSeconds) {
-        try {
-            RLock lock = redisson.getFairLock(key);
-            boolean res = lock.tryLock(maxWaitSeconds, maxLockSeconds, TimeUnit.SECONDS);
-            if (res) {
-                return lock;
-            }
-        } catch (Exception ex) {
-            log.warn("", ex);
+    public static RLock tryLock(RedissonClient redisson, String key, int maxLockSeconds, int maxWaitSeconds) throws InterruptedException {
+        log.info("Try lock {} ...", key);
+        RLock lock = redisson.getFairLock(key);
+        boolean res = lock.tryLock(maxWaitSeconds, maxLockSeconds, TimeUnit.SECONDS);
+        if (res) {
+            log.info("Lock {} success", key);
+            return lock;
         }
         return null;
     }
 
     public static void unlock(RLock lock) {
         try {
+            log.info("Try unlock {} ...", lock.getName());
             if (null != lock) {
-                lock.unlock();
+                // 如果存在事务
+                if (TransactionSynchronizationManager.isSynchronizationActive()) {
+                    //事物完成后释放锁
+                    TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronizationAdapter() {
+                        @Override
+                        public void afterCompletion(int status) {
+                            super.afterCompletion(status);
+                            lock.unlock();
+                            log.info("Unlock {} success", lock.getName());
+                        }
+                    });
+                } else {
+                    lock.unlock();
+                }
             }
         } catch (Exception ex) {
             log.warn("", ex);
