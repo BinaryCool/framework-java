@@ -54,6 +54,7 @@ public class RedisUtil {
                         }
                     });
                 } else {
+                    log.info("Unlock {} success", lock.getName());
                     lock.unlock();
                 }
             }
