@@ -19,28 +19,58 @@ import java.util.concurrent.TimeUnit;
 public class RedisUtil {
     private static final Logger log = LoggerFactory.getLogger(RedisUtil.class);
 
-    public static RLock tryLock(RedissonClient redisson, String key) throws InterruptedException {
-        return tryLock(redisson, key, 30);
-    }
-
-    public static RLock tryLock(RedissonClient redisson, String key, int maxLockSeconds) throws InterruptedException {
-        return tryLock(redisson, key, maxLockSeconds, 15);
-    }
-
-    public static RLock tryLock(RedissonClient redisson, String key, int maxLockSeconds, int maxWaitSeconds) throws InterruptedException {
-        log.info("Try lock {} ...", key);
+    /**
+     * 分布式锁 (未设置等待时间和过期时间)
+     * 有可能会锁死系统
+     */
+    public static RLock lock(RedissonClient redisson, String key) {
         RLock lock = redisson.getFairLock(key);
-        boolean res = lock.tryLock(maxWaitSeconds, maxLockSeconds, TimeUnit.SECONDS);
+        boolean res = lock.tryLock();
         if (res) {
-            log.info("Lock {} success", key);
             return lock;
         }
         return null;
     }
 
+    /**
+     * 分布式锁
+     * 加锁最大等待 15s
+     * 获取锁 30s 后自动释放
+     */
+    public static RLock tryLock(RedissonClient redisson, String key) throws InterruptedException {
+        return tryLock(redisson, key, 30);
+    }
+
+    /**
+     * 分布式锁
+     * 加锁最大等待14s
+     * 获取锁 maxLockSeconds 后自动释放
+     */
+    public static RLock tryLock(RedissonClient redisson, String key, int maxLockSeconds) throws InterruptedException {
+        return tryLock(redisson, key, maxLockSeconds, 15);
+    }
+
+    /**
+     * 分布式锁
+     * 加锁最大等待 maxWaitSeconds
+     * 获取锁 maxLockSeconds 后自动释放
+     */
+    public static RLock tryLock(RedissonClient redisson, String key, int maxLockSeconds, int maxWaitSeconds) throws InterruptedException {
+        RLock lock = redisson.getFairLock(key);
+        boolean res = lock.tryLock(maxWaitSeconds, maxLockSeconds, TimeUnit.SECONDS);
+        if (res) {
+            return lock;
+        }
+        return null;
+    }
+
+    /**
+     * 解开分布式锁
+     * 如果有事务, 会等到当前事务提交才会释放锁
+     * 如果无事务, 会立即是否
+     */
     public static void unlock(RLock lock) {
         try {
-            log.info("Try unlock {} ...", lock.getName());
             if (null != lock) {
                 // 如果存在事务
                 if (TransactionSynchronizationManager.isSynchronizationActive()) {
@@ -50,11 +80,9 @@ public class RedisUtil {
                         public void afterCompletion(int status) {
                             super.afterCompletion(status);
                             lock.unlock();
-                            log.info("Unlock {} success", lock.getName());
                         }
                     });
                 } else {
-                    log.info("Unlock {} success", lock.getName());
                     lock.unlock();
                 }
             }
@@ -63,6 +91,10 @@ public class RedisUtil {
         }
     }
 
+    /**
+     * scan 实现 删除keys
+     * @param keys     表达式，如：abc*，找出所有以abc开始的键
+     */
     public static void deleteKeys(RedisTemplate redisTemplate, String keys) {
         try {
             Set<String> keySet = keysByScan(redisTemplate, keys);
@@ -74,7 +106,6 @@ public class RedisUtil {
 
     /**
      * scan 实现 查找keys
-     * @param redisTemplate redisTemplate
      * @param pattern       表达式，如：abc*，找出所有以abc开始的键
      */
     private static Set<String> keysByScan(RedisTemplate<String, Object> redisTemplate, String pattern) {
