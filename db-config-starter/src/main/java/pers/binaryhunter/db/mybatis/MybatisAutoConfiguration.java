@@ -40,7 +40,7 @@ import java.util.Properties;
 @Configuration()
 @ConditionalOnClass({SqlSessionFactory.class, SqlSessionFactoryBean.class})
 @EnableConfigurationProperties(MybatisProperties.class)
-@ConfigurationProperties("binaryhunter.jdbc")
+@ConfigurationProperties("spring.datasource")
 public class MybatisAutoConfiguration {
 
     @Autowired
