@@ -12,12 +12,12 @@ import java.lang.reflect.ParameterizedType;
 /**
  * Created by BinaryHunter on 2018/3/17.
  */
-public class GenericAbstractServiceImpl<B, K> {
+public class GenericAbstractServiceImpl<B> {
     private static final Logger log = LoggerFactory.getLogger(GenericServiceImpl.class);
-    
+
     private static final String SUFFIX_DAO_CLASS = "DAO";
     private static final String GENERIC_DAO_NAME = "dao";
-    
+
     @Resource
     private ApplicationContext context;
 

@@ -18,20 +18,6 @@ import java.util.Map;
  */
 public interface GenericService<B,K> {
     /**
-     * 获取ID
-     * @return ID
-     */
-    @Deprecated
-    Long getSequence();
-
-    /**
-     * 获取ID
-     * @param step 步长
-     * @return ID
-     */
-    @Deprecated
-    Long getSequences(int step);
-    /**
      * 分页查询
      * @param params 参数
      * @param page 分页参数
@@ -158,6 +144,7 @@ public interface GenericService<B,K> {
      * 有SQL注入分析, 谨慎使用
      * @see pers.binaryhunter.framework.service.GenericService#updateByArgs(Map, Object...)
      */
+    @Deprecated
     void updateByArgs(String setSql, Map<String, Object> params);
     /**
      * 更新(根据参数)
@@ -176,13 +163,6 @@ public interface GenericService<B,K> {
      * @param beans 实体列表
      */
     void addBatch(List<B> beans);
-    /**
-     * @since 2.1.3
-     * 批量新增(自动注入ID)
-     * @param beans
-     */
-    @Deprecated
-    void addBatchAutoId(List<B> beans);
     /**
      * 通过编号获取
      * @param id 编号

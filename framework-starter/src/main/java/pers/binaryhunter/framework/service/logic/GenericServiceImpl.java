@@ -22,11 +22,10 @@ import pers.binaryhunter.framework.exception.BusinessException;
 import pers.binaryhunter.framework.service.GenericService;
 import pers.binaryhunter.framework.utils.DateUtil;
 import pers.binaryhunter.framework.utils.MapConverter;
+import pers.binaryhunter.framework.utils.SqlUtil;
 
 import javax.annotation.Resource;
 import java.util.*;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 
 /**
@@ -34,61 +33,13 @@ import java.util.stream.Stream;
  *
  * @author Liyw -- 2014-5-22
  */
-public class GenericServiceImpl<B, K> extends GenericAbstractServiceImpl<B, K> implements GenericService<B, K> {
+public class GenericServiceImpl<B, K> extends GenericAbstractServiceImpl<B> implements GenericService<B, K> {
     private static final Logger log = LoggerFactory.getLogger(GenericServiceImpl.class);
     private static final int COUNT_BATCH = 1000;
 
     protected GenericDAO<B, K> dao;
     @Resource
     private DataSourceTransactionManager transactionManager;
-
-    @Override
-    @Deprecated
-    public Long getSequence() {
-        //获得事务状态
-        TransactionStatus transactionStatus = null;
-        try {
-            //获取事务定义
-            DefaultTransactionDefinition def = new DefaultTransactionDefinition();
-            //设置事务隔离级别，开启新事务
-            def.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRED);
-            transactionStatus = transactionManager.getTransaction(def);
-
-            return dao.getSequence();
-        } catch (Exception e) {
-            transactionManager.rollback(transactionStatus);
-            throw e;
-        } finally {
-            if (transactionStatus != null && transactionStatus.isNewTransaction()
-                    && !transactionStatus.isCompleted()) {
-                transactionManager.commit(transactionStatus);
-            }
-        }
-    }
-
-    @Override
-    @Deprecated
-    public Long getSequences(int step) {
-        //获得事务状态
-        TransactionStatus transactionStatus = null;
-        try {
-            //获取事务定义
-            DefaultTransactionDefinition def = new DefaultTransactionDefinition();
-            //设置事务隔离级别，开启新事务
-            def.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRED);
-            transactionStatus = transactionManager.getTransaction(def);
-
-            return dao.getSequences(step);
-        } catch (Exception e) {
-            transactionManager.rollback(transactionStatus);
-            throw e;
-        } finally {
-            if (transactionStatus != null && transactionStatus.isNewTransaction()
-                    && !transactionStatus.isCompleted()) {
-                transactionManager.commit(transactionStatus);
-            }
-        }
-    }
 
     @Override
     public PageResult<B> pageByArgs(Map<String, Object> params, Page page) {
@@ -217,7 +168,7 @@ public class GenericServiceImpl<B, K> extends GenericAbstractServiceImpl<B, K> i
 
     @Override
     public void deleteByIds(K[] ids) {
-        deleteByArgs("idIn", StringUtils.join(ids, ","));
+        deleteByArgs("idIn", SqlUtil.toSqlIn(ids));
     }
 
     @Override
@@ -379,24 +330,6 @@ public class GenericServiceImpl<B, K> extends GenericAbstractServiceImpl<B, K> i
     }
 
     @Override
-    @Deprecated
-    public void addBatchAutoId(List<B> beans) {
-        if (CollectionUtils.isEmpty(beans)) {
-            log.warn("List is empty while add batch(auto id)");
-            return;
-        }
-
-        if (beans.get(0) instanceof PO) {
-            Long id = getSequences(beans.size());
-            for (B bean : beans) {
-                ((PO) bean).setId(id++);
-            }
-        }
-
-        this.doAddBatch(beans);
-    }
-
-    @Override
     public B getById(K id) {
         return dao.getById(id);
     }
@@ -406,7 +339,7 @@ public class GenericServiceImpl<B, K> extends GenericAbstractServiceImpl<B, K> i
         if (CollectionUtils.isEmpty(ids)) {
             return null;
         }
-        return queryByArgs("idIn", ids.stream().map(item -> item.toString()).collect(Collectors.joining("','", "'", "'")));
+        return queryByArgs("idIn", SqlUtil.toSqlIn(ids));
     }
 
     @Override
@@ -414,7 +347,7 @@ public class GenericServiceImpl<B, K> extends GenericAbstractServiceImpl<B, K> i
         if (ArrayUtils.isEmpty(ids)) {
             return null;
         }
-        return queryByArgs("idIn", Stream.of(ids).map(item -> item.toString()).collect(Collectors.joining("','", "'", "'")));
+        return queryByArgs("idIn", SqlUtil.toSqlIn(ids));
     }
 
     @Override

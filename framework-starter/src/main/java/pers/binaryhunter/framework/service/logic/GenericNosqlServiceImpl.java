@@ -16,7 +16,7 @@ import java.util.List;
  * 业务泛型实现类
  * @author Liyw -- 2014-5-22
  */
-public class GenericNosqlServiceImpl<B,K> extends GenericAbstractServiceImpl<B,K> implements GenericNosqlService<B,K> {
+public class GenericNosqlServiceImpl<B,K> extends GenericAbstractServiceImpl<B> implements GenericNosqlService<B,K> {
     private static final Logger log = LoggerFactory.getLogger(GenericNosqlServiceImpl.class);
 
     protected GenericNosqlDAO<B,K> dao;
@@ -32,7 +32,7 @@ public class GenericNosqlServiceImpl<B,K> extends GenericAbstractServiceImpl<B,K
         } catch (Exception ex) {
             log.error("", ex);
         }
-        
+
         return null;
     }
 
