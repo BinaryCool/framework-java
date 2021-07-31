@@ -1,6 +1,6 @@
 package pers.binaryhunter.framework.exception;
 
-import pers.binaryhunter.framework.bean.vo.ResponseBean;
+import pers.binaryhunter.framework.bean.vo.R;
 
 /**
  * 业务异常
@@ -9,9 +9,9 @@ import pers.binaryhunter.framework.bean.vo.ResponseBean;
 public class BusinessCheckedException extends Exception {
 	private static final long serialVersionUID = 1L;
 
-    private static final String MSG = ResponseBean.CodeEnum.ERR_BUSS_CHECKED.getMsg();
+    private static final String MSG = R.CodeEnum.ERR_BUSS_CHECKED.getMsg();
     //0:成功, 1:未知错误, 2:会话过期, 3:业务异常, 4:权限不足, 5:需要捕获的异常
-    private static int CODE = ResponseBean.CodeEnum.ERR_BUSS_CHECKED.getCode();
+    private static int CODE = R.CodeEnum.ERR_BUSS_CHECKED.getCode();
 
     private int code;
 

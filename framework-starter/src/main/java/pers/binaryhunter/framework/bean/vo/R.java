@@ -7,7 +7,7 @@ import java.io.Serializable;
  * @author BinaryHunter
  *
  */
-public class ResponseBean<T> implements Serializable {
+public class R<T> implements Serializable {
     private static final long serialVersionUID = -3706325472006568883L;
 
     private String success;

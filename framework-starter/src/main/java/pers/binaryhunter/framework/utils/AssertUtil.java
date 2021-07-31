@@ -3,7 +3,7 @@ package pers.binaryhunter.framework.utils;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.util.CollectionUtils;
-import pers.binaryhunter.framework.bean.vo.ResponseBean;
+import pers.binaryhunter.framework.bean.vo.R;
 import pers.binaryhunter.framework.exception.BusinessException;
 
 import java.util.Collection;
@@ -15,7 +15,7 @@ public class AssertUtil {
 
     private static String ifnull(String msg) {
         if (StringUtils.isBlank(msg)) {
-            return ResponseBean.CodeEnum.ERR_BUSS.getMsg();
+            return R.CodeEnum.ERR_BUSS.getMsg();
         }
         return msg;
     }

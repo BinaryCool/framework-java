@@ -10,7 +10,7 @@ import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 import pers.binaryhunter.framework.bean.dto.paging.Page;
 import pers.binaryhunter.framework.bean.po.PO;
-import pers.binaryhunter.framework.bean.vo.ResponseBean;
+import pers.binaryhunter.framework.bean.vo.R;
 import pers.binaryhunter.framework.bean.vo.paging.PageResult;
 import pers.binaryhunter.framework.exception.BusinessCheckedException;
 import pers.binaryhunter.framework.exception.BusinessException;
@@ -39,8 +39,8 @@ public class GenericController {
      *
      * @return json 串
      */
-    protected <T> ResponseBean<T> toResponse() {
-        return toResponse(null, ResponseBean.CodeEnum.SUCC.getCode());
+    protected <T> R<T> toResponse() {
+        return toResponse(null, R.CodeEnum.SUCC.getCode());
     }
 
     /**
@@ -49,12 +49,12 @@ public class GenericController {
      * @param ex 错误对象
      * @return json 串
      */
-    protected ResponseBean<String> toResponse(Exception ex) {
+    protected R<String> toResponse(Exception ex) {
         if (null == ex) {
-            return toResponse("", ResponseBean.CodeEnum.SUCC.getCode());
+            return toResponse("", R.CodeEnum.SUCC.getCode());
         }
 
-        int code = ResponseBean.CodeEnum.ERR_UNKOWN.getCode();
+        int code = R.CodeEnum.ERR_UNKOWN.getCode();
         String msg;
         if (ex instanceof BusinessException) {
             code = ((BusinessException) ex).getCode();
@@ -66,11 +66,11 @@ public class GenericController {
             code = ((SessionOutException) ex).getCode();
             msg = ex.getMessage();
         } else if (ex instanceof ClientAbortException) {
-            msg = ResponseBean.CodeEnum.ERR_UNKOWN.getMsg();
+            msg = R.CodeEnum.ERR_UNKOWN.getMsg();
         } else if (ex instanceof IllegalArgumentException) {
             msg = ex.getMessage();
         } else {
-            msg = ResponseBean.CodeEnum.ERR_UNKOWN.getMsg();
+            msg = R.CodeEnum.ERR_UNKOWN.getMsg();
             HttpServletRequest request = ((ServletRequestAttributes) RequestContextHolder.getRequestAttributes()).getRequest();
             log.error("==> " + request.getRequestURI());
             log.error(JSON.toJSONString(request.getParameterMap()));
@@ -90,8 +90,8 @@ public class GenericController {
      * @param bean 返回对象
      * @return json 串
      */
-    protected <T> ResponseBean<T> toResponse(T bean) {
-        return toResponse(bean, ResponseBean.CodeEnum.SUCC.getCode());
+    protected <T> R<T> toResponse(T bean) {
+        return toResponse(bean, R.CodeEnum.SUCC.getCode());
     }
 
     /**
@@ -100,8 +100,8 @@ public class GenericController {
      * @param code 返回代码
      * @return json 串
      */
-    private <T> ResponseBean<T> toResponse(T bean, int code) {
-        ResponseBean rb = new ResponseBean();
+    private <T> R<T> toResponse(T bean, int code) {
+        R rb = new R();
         rb.setSuccess("" + code);
         rb.setCode(code);
         rb.setData(bean);
@@ -283,7 +283,7 @@ public class GenericController {
      * @param page 分页
      * @return 分页结果
      */
-    protected <B> ResponseBean<PageResult<B>> retrieveResponse(GenericService service, Object bean, Page page, Map<String, Object> params) {
+    protected <B> R<PageResult<B>> retrieveResponse(GenericService service, Object bean, Page page, Map<String, Object> params) {
         return toResponse(retrieve(service, bean, page, params));
     }
 
@@ -294,7 +294,7 @@ public class GenericController {
      * @param page 分页
      * @return 分页结果
      */
-    protected <B> ResponseBean<PageResult<B>> retrieveResponse(GenericService service, Object bean, Page page, Object... args) {
+    protected <B> R<PageResult<B>> retrieveResponse(GenericService service, Object bean, Page page, Object... args) {
         return toResponse(retrieve(service, bean, page, args));
     }
 
@@ -303,7 +303,7 @@ public class GenericController {
      * @param service service
      * @return 结果
      */
-    protected <B> ResponseBean<List<B>> selectResponse(GenericService service, Object... args) {
+    protected <B> R<List<B>> selectResponse(GenericService service, Object... args) {
         return toResponse(select(service, args));
     }
 
@@ -312,7 +312,7 @@ public class GenericController {
      * @param service service
      * @return 结果
      */
-    protected <B> ResponseBean<List<B>> selectResponse(GenericService service, Map<String, Object> args) {
+    protected <B> R<List<B>> selectResponse(GenericService service, Map<String, Object> args) {
         return toResponse(select(service, args));
     }
 
@@ -322,7 +322,7 @@ public class GenericController {
      * @param bean 参数
      * @return 返回对象
      */
-    protected <B extends PO> ResponseBean<B> createResponse(GenericService service, B bean) {
+    protected <B extends PO> R<B> createResponse(GenericService service, B bean) {
         return toResponse(create(service, bean));
     }
 
@@ -332,7 +332,7 @@ public class GenericController {
      * @param bean 参数
      * @return 返回对象
      */
-    protected <B extends PO> ResponseBean<B> createResponseDB(GenericService service, B bean) {
+    protected <B extends PO> R<B> createResponseDB(GenericService service, B bean) {
         return toResponse(createDB(service, bean));
     }
 
@@ -342,7 +342,7 @@ public class GenericController {
      * @param bean 参数
      * @return 返回对象
      */
-    protected <B extends PO> ResponseBean<B> updateNotNullResponse(GenericService service, B bean) {
+    protected <B extends PO> R<B> updateNotNullResponse(GenericService service, B bean) {
         return toResponse(updateNotNull(service, bean));
     }
 
@@ -352,7 +352,7 @@ public class GenericController {
      * @param bean 参数
      * @return 返回对象
      */
-    protected <B extends PO> ResponseBean<B> updateResponse(GenericService service, B bean) {
+    protected <B extends PO> R<B> updateResponse(GenericService service, B bean) {
         return toResponse(update(service, bean));
     }
 
@@ -362,7 +362,7 @@ public class GenericController {
      * @param ids 删除的ID
      * @return 返回删除的ID
      */
-    protected ResponseBean<Long[]> deleteResponse(GenericService service, Long[] ids) {
+    protected R<Long[]> deleteResponse(GenericService service, Long[] ids) {
         return toResponse(delete(service, ids));
     }
 
@@ -372,7 +372,7 @@ public class GenericController {
      * @param ids 删除的ID
      * @return 返回删除的ID
      */
-    protected ResponseBean<Long[]> deletePhysicsResponse(GenericService service, Long[] ids) {
+    protected R<Long[]> deletePhysicsResponse(GenericService service, Long[] ids) {
         return toResponse(deletePhysics(service, ids));
     }
 
@@ -382,7 +382,7 @@ public class GenericController {
      * @param id ID
      * @return 返回对象
      */
-    protected <B extends PO> ResponseBean<B> getResponse(GenericService service, Long id) {
+    protected <B extends PO> R<B> getResponse(GenericService service, Long id) {
         return toResponse(get(service, id));
     }
 }
