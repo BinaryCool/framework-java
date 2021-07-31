@@ -84,23 +84,9 @@ public class MyRedisCacheWriter implements RedisCacheWriter {
         Assert.notNull(key, "Key must not be null!");
         Assert.notNull(value, "Value must not be null!");
         
-        // 如果是空值, 不进行缓存
-        if (isNullCacheValue(value)) {
-            return;
-        }
-
         execute(name, connection -> {
-            //判断name里面是否设置了过期时间，如果设置了则对key进行缓存，并设置过期时间
-            //name 以 ttl + 过期时间 + # 开头
-            Long ttlManual = null;
-            try {
-                if (name.contains("#ttl")) {
-                    ttlManual = Long.parseLong(name.substring(name.indexOf("#ttl") + 4));
-                }
-            } catch (Exception ex) {
-                
-            }
             
+            Long ttlManual = getTtlManual(name, value);
             if(null != ttlManual) {
                 connection.set(key, value, Expiration.from(ttlManual, TimeUnit.SECONDS), SetOption.upsert());
             } else if (shouldExpireWithin(ttl)) {
@@ -139,7 +125,7 @@ public class MyRedisCacheWriter implements RedisCacheWriter {
         Assert.notNull(key, "Key must not be null!");
         Assert.notNull(value, "Value must not be null!");
 
-        // 如果是控制, 不进行缓存
+        // 如果是空值, 不进行缓存
         if (isNullCacheValue(value)) {
             return null;
         }
@@ -153,9 +139,16 @@ public class MyRedisCacheWriter implements RedisCacheWriter {
             try {
                 if (connection.setNX(key, value)) {
 
-                    if (shouldExpireWithin(ttl)) {
-                        connection.pExpire(key, ttl.toMillis());
+                    Long ttlManual = getTtlManual(name, value);
+
+                    if(null != ttlManual) {
+                        connection.pExpire(key, ttlManual *  1000L);
+                    } else if (shouldExpireWithin(ttl)) {
+                        long ttlIinMillis = ttl.toMillis();
+                        ttlIinMillis += ThreadLocalRandom.current().nextLong(1800000);
+                        connection.pExpire(key, ttlIinMillis);
                     }
+                    
                     return null;
                 }
 
@@ -167,6 +160,24 @@ public class MyRedisCacheWriter implements RedisCacheWriter {
                 }
             }
         });
+    }
+    
+    private Long getTtlManual(String name, byte[] value) {
+        //判断name里面是否设置了过期时间，如果设置了则对key进行缓存，并设置过期时间
+        //name 以 #ttl + 过期时间结尾
+        
+        Long ttlManual = null;
+        try {
+            // 如果是空值, 设置缓存时间为 5 - 10s
+            if (isNullCacheValue(value)) {
+                ttlManual = 5L + ThreadLocalRandom.current().nextLong(5);
+            } else if (name.contains("#ttl")) {
+                ttlManual = Long.parseLong(name.substring(name.indexOf("#ttl") + 4));
+            }
+        } catch (Exception ex) {
+
+        }
+        return ttlManual;
     }
 
     /*
