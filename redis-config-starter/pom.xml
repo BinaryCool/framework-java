@@ -6,17 +6,13 @@
     <groupId>pers.binaryhunter</groupId>
     <artifactId>redis-config-starter</artifactId>
     <packaging>jar</packaging>
-    <version>2.9.0</version>
+    <version>2.9.1</version>
 
     <parent>
         <groupId>pers.binaryhunter</groupId>
         <artifactId>framework-starter-parent</artifactId>
         <version>1.0.0</version>
     </parent>
-
-    <properties>
-        <redis.clients.version>2.9.0</redis.clients.version>
-    </properties>
 
     <dependencies>
         <dependency>
@@ -39,21 +35,17 @@
         <dependency>
             <groupId>redis.clients</groupId>
             <artifactId>jedis</artifactId>
-            <version>${redis.clients.version}</version>
         </dependency>
 
         <!-- redisson -->
         <dependency>
             <groupId>org.redisson</groupId>
             <artifactId>redisson</artifactId>
-            <version>3.16.0</version>
         </dependency>
 
         <dependency>
             <groupId>com.alibaba</groupId>
             <artifactId>fastjson</artifactId>
-            <version>1.2.73</version>
-            <scope>provided</scope>
         </dependency>
     </dependencies>
     <build>
