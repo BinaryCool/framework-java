@@ -2,8 +2,10 @@ package pers.binaryhunter.framework.bean.vo;
 
 import com.alibaba.fastjson.JSON;
 import org.apache.catalina.connector.ClientAbortException;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.util.StreamUtils;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 import pers.binaryhunter.framework.exception.BusinessCheckedException;
@@ -11,7 +13,9 @@ import pers.binaryhunter.framework.exception.BusinessException;
 import pers.binaryhunter.framework.exception.SessionOutException;
 
 import javax.servlet.http.HttpServletRequest;
+import java.io.IOException;
 import java.io.Serializable;
+import java.nio.charset.Charset;
 
 /**
  * 返回客户端对象
@@ -68,11 +72,7 @@ public class R<T> implements Serializable {
             msg = ex.getMessage();
         } else {
             msg = R.CodeEnum.ERR_UNKOWN.getMsg();
-            HttpServletRequest request = ((ServletRequestAttributes) RequestContextHolder.getRequestAttributes()).getRequest();
-            log.error("==> " + request.getRequestURI());
-            log.error(JSON.toJSONString(request.getParameterMap()));
-            log.error("", ex);
-
+            errorLog(ex);
             if(50 < msg.length()) {
                 msg = msg.substring(0, 50);
             }
@@ -80,6 +80,30 @@ public class R<T> implements Serializable {
 
         return toResponse(msg, code);
     }
+
+    public static void errorLog(Exception ex) {
+        HttpServletRequest request = ((ServletRequestAttributes) RequestContextHolder.getRequestAttributes()).getRequest();
+        log.error("==> " + request.getRequestURI());
+        String contentType = request.getContentType();
+        if (StringUtils.isNotBlank(contentType)) {
+            log.error("==> " + contentType);
+            // json
+            if (contentType.toLowerCase().contains("json")) {
+                try {
+                    String json = StreamUtils.copyToString(request.getInputStream(), Charset.forName("UTF-8"));
+                    log.error(json);
+                } catch (IOException e) {
+                    log.error(e.getMessage());
+                }
+            } else {
+                // map
+                log.error(JSON.toJSONString(request.getParameterMap()));
+            }
+        }
+        log.error("", ex);
+    }
+
+
 
     /**
      * 把返回对象进行封装
