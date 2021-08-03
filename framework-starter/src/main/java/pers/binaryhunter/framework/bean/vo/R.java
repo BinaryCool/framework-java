@@ -87,16 +87,7 @@ public class R<T> implements Serializable {
         String contentType = request.getContentType();
         if (StringUtils.isNotBlank(contentType)) {
             log.error("==> " + contentType);
-            // json
-            if (contentType.toLowerCase().contains("json")) {
-                try {
-                    String json = StreamUtils.copyToString(request.getInputStream(), Charset.forName("UTF-8"));
-                    log.error(json);
-                } catch (IOException e) {
-                    log.error(e.getMessage());
-                }
-            } else {
-                // map
+            if (!contentType.toLowerCase().contains("json")) {
                 log.error(JSON.toJSONString(request.getParameterMap()));
             }
         }
