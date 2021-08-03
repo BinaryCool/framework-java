@@ -1,5 +1,16 @@
 package pers.binaryhunter.framework.bean.vo;
 
+import com.alibaba.fastjson.JSON;
+import org.apache.catalina.connector.ClientAbortException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.web.context.request.RequestContextHolder;
+import org.springframework.web.context.request.ServletRequestAttributes;
+import pers.binaryhunter.framework.exception.BusinessCheckedException;
+import pers.binaryhunter.framework.exception.BusinessException;
+import pers.binaryhunter.framework.exception.SessionOutException;
+
+import javax.servlet.http.HttpServletRequest;
 import java.io.Serializable;
 
 /**
@@ -9,6 +20,7 @@ import java.io.Serializable;
  */
 public class R<T> implements Serializable {
     private static final long serialVersionUID = -3706325472006568883L;
+    private static final Logger log = LoggerFactory.getLogger(R.class);
 
     private String success;
 	/**
@@ -19,6 +31,79 @@ public class R<T> implements Serializable {
 	 * 返回对象
 	 */
 	private T data;
+
+
+    /**
+     * 把返回空对象
+     * @return json 串
+     */
+    public static <T> R<T> toResponse() {
+        return toResponse(null, R.CodeEnum.SUCC.getCode());
+    }
+
+    /**
+     * 把返回对象进行封装
+     * @param ex 错误对象
+     * @return json 串
+     */
+    public static R<String> toResponse(Exception ex) {
+        if (null == ex) {
+            return toResponse("", R.CodeEnum.SUCC.getCode());
+        }
+
+        int code = R.CodeEnum.ERR_UNKOWN.getCode();
+        String msg;
+        if (ex instanceof BusinessException) {
+            code = ((BusinessException) ex).getCode();
+            msg = ex.getMessage();
+        } else if (ex instanceof BusinessCheckedException) {
+            code = ((BusinessCheckedException) ex).getCode();
+            msg = ex.getMessage();
+        } else if (ex instanceof SessionOutException) {
+            code = ((SessionOutException) ex).getCode();
+            msg = ex.getMessage();
+        } else if (ex instanceof ClientAbortException) {
+            msg = R.CodeEnum.ERR_UNKOWN.getMsg();
+        } else if (ex instanceof IllegalArgumentException) {
+            msg = ex.getMessage();
+        } else {
+            msg = R.CodeEnum.ERR_UNKOWN.getMsg();
+            HttpServletRequest request = ((ServletRequestAttributes) RequestContextHolder.getRequestAttributes()).getRequest();
+            log.error("==> " + request.getRequestURI());
+            log.error(JSON.toJSONString(request.getParameterMap()));
+            log.error("", ex);
+
+            if(50 < msg.length()) {
+                msg = msg.substring(0, 50);
+            }
+        }
+
+        return toResponse(msg, code);
+    }
+
+    /**
+     * 把返回对象进行封装
+     * @param bean 返回对象
+     * @return json 串
+     */
+    public static <T> R<T> toResponse(T bean) {
+        return toResponse(bean, R.CodeEnum.SUCC.getCode());
+    }
+
+    /**
+     * 把返回对象进行封装
+     * @param bean 返回对象
+     * @param code 返回代码
+     * @return json 串
+     */
+    public static <T> R<T> toResponse(T bean, int code) {
+        R rb = new R();
+        rb.setSuccess("" + code);
+        rb.setCode(code);
+        rb.setData(bean);
+        return rb;
+    }
+
 
 	public int getCode() {
 		return code;

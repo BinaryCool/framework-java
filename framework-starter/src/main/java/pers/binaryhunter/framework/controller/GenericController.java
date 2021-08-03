@@ -40,7 +40,7 @@ public class GenericController {
      * @return json 串
      */
     protected <T> R<T> toResponse() {
-        return toResponse(null, R.CodeEnum.SUCC.getCode());
+        return R.toResponse();
     }
 
     /**
@@ -50,38 +50,7 @@ public class GenericController {
      * @return json 串
      */
     protected R<String> toResponse(Exception ex) {
-        if (null == ex) {
-            return toResponse("", R.CodeEnum.SUCC.getCode());
-        }
-
-        int code = R.CodeEnum.ERR_UNKOWN.getCode();
-        String msg;
-        if (ex instanceof BusinessException) {
-            code = ((BusinessException) ex).getCode();
-            msg = ex.getMessage();
-        } else if (ex instanceof BusinessCheckedException) {
-            code = ((BusinessCheckedException) ex).getCode();
-            msg = ex.getMessage();
-        } else if (ex instanceof SessionOutException) {
-            code = ((SessionOutException) ex).getCode();
-            msg = ex.getMessage();
-        } else if (ex instanceof ClientAbortException) {
-            msg = R.CodeEnum.ERR_UNKOWN.getMsg();
-        } else if (ex instanceof IllegalArgumentException) {
-            msg = ex.getMessage();
-        } else {
-            msg = R.CodeEnum.ERR_UNKOWN.getMsg();
-            HttpServletRequest request = ((ServletRequestAttributes) RequestContextHolder.getRequestAttributes()).getRequest();
-            log.error("==> " + request.getRequestURI());
-            log.error(JSON.toJSONString(request.getParameterMap()));
-            log.error("", ex);
-
-            if(50 < msg.length()) {
-                msg = msg.substring(0, 50);
-            }
-        }
-
-        return toResponse(msg, code);
+        return R.toResponse(ex);
     }
 
     /**
@@ -91,7 +60,7 @@ public class GenericController {
      * @return json 串
      */
     protected <T> R<T> toResponse(T bean) {
-        return toResponse(bean, R.CodeEnum.SUCC.getCode());
+        return R.toResponse(bean);
     }
 
     /**
@@ -101,11 +70,7 @@ public class GenericController {
      * @return json 串
      */
     private <T> R<T> toResponse(T bean, int code) {
-        R rb = new R();
-        rb.setSuccess("" + code);
-        rb.setCode(code);
-        rb.setData(bean);
-        return rb;
+        return R.toResponse(bean, code);
     }
 
     /**
