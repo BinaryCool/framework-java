@@ -5,7 +5,6 @@ import org.apache.catalina.connector.ClientAbortException;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.util.StreamUtils;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 import pers.binaryhunter.framework.exception.BusinessCheckedException;
@@ -13,9 +12,7 @@ import pers.binaryhunter.framework.exception.BusinessException;
 import pers.binaryhunter.framework.exception.SessionOutException;
 
 import javax.servlet.http.HttpServletRequest;
-import java.io.IOException;
 import java.io.Serializable;
-import java.nio.charset.Charset;
 
 /**
  * 返回客户端对象

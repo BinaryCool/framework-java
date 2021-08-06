@@ -25,50 +25,50 @@ import java.util.Properties;
 /**
  * 数据源读写分离路由
  */
-@Intercepts({ @Signature(type = StatementHandler.class, method = "prepare", args = {Connection.class, Integer.class}) })
+@Intercepts({@Signature(type = StatementHandler.class, method = "prepare", args = {Connection.class, Integer.class})})
 public class RWPlugin implements Interceptor {
     private static final Logger log = LoggerFactory.getLogger(RWPlugin.class);
-    
-	public Object intercept(Invocation invocation) throws Throwable {
 
-		Connection conn = (Connection) invocation.getArgs()[0];
-		conn = unwrapConnection(conn);
-		if (conn instanceof ConnectionProxy) {			
-			//强制走写库
-			if(ConnectionHolder.FORCE_WRITE.get() != null && ConnectionHolder.FORCE_WRITE.get()){
-				routeConnection(ConnectionHolder.WRITE, conn);
-				return invocation.proceed();
-			}	
-			StatementHandler statementHandler = (StatementHandler) invocation.getTarget();
-			MetaObject metaObject = MetaObject.forObject(statementHandler, new DefaultObjectFactory(), new DefaultObjectWrapperFactory(), new DefaultReflectorFactory());
-			MappedStatement mappedStatement;
-			if (statementHandler instanceof RoutingStatementHandler) {
-				mappedStatement = (MappedStatement) metaObject.getValue("delegate.mappedStatement");
-			} else {
-				mappedStatement = (MappedStatement) metaObject.getValue("mappedStatement");
-			}
-			String key = ConnectionHolder.WRITE;
+    public Object intercept(Invocation invocation) throws Throwable {
 
-			if (mappedStatement.getSqlCommandType() == SqlCommandType.SELECT
+        Connection conn = (Connection) invocation.getArgs()[0];
+        conn = unwrapConnection(conn);
+        if (conn instanceof ConnectionProxy) {
+            //强制走写库
+            if (ConnectionHolder.FORCE_WRITE.get() != null && ConnectionHolder.FORCE_WRITE.get()) {
+                routeConnection(ConnectionHolder.WRITE, conn);
+                return invocation.proceed();
+            }
+            StatementHandler statementHandler = (StatementHandler) invocation.getTarget();
+            MetaObject metaObject = MetaObject.forObject(statementHandler, new DefaultObjectFactory(), new DefaultObjectWrapperFactory(), new DefaultReflectorFactory());
+            MappedStatement mappedStatement;
+            if (statementHandler instanceof RoutingStatementHandler) {
+                mappedStatement = (MappedStatement) metaObject.getValue("delegate.mappedStatement");
+            } else {
+                mappedStatement = (MappedStatement) metaObject.getValue("mappedStatement");
+            }
+            String key = ConnectionHolder.WRITE;
+
+            if (mappedStatement.getSqlCommandType() == SqlCommandType.SELECT
                     && !mappedStatement.getId().endsWith("!selectKey")
                     && !mappedStatement.getId().endsWith("getSequence")
                     && !mappedStatement.getId().endsWith("getSequences")
-                    ) {
-				key = ConnectionHolder.READ;
-			} else {
-			    //写请求后, 后续请求都走写
-			    ConnectionHolder.FORCE_WRITE.set(Boolean.TRUE);
+            ) {
+                key = ConnectionHolder.READ;
+            } else {
+                //写请求后, 后续请求都走写
+                ConnectionHolder.FORCE_WRITE.set(Boolean.TRUE);
             }
-			routeConnection(key, conn);
-		} else {
-		    log.info("Connection is not instanceof ConnectionProxy, It's {}", conn);
+            routeConnection(key, conn);
+        } else {
+            log.info("Connection is not instanceof ConnectionProxy, It's {}", conn);
         }
 
-		return invocation.proceed();
+        return invocation.proceed();
 
-	}
-	
-	private void routeConnection(String key, Connection conn) {
+    }
+
+    private void routeConnection(String key, Connection conn) {
         ConnectionHolder.CURRENT_CONNECTION.set(key);
 
         Map<String, Connection> connectionMap = ConnectionHolder.CONNECTION_CONTEXT.get();
@@ -85,24 +85,25 @@ public class RWPlugin implements Interceptor {
             }
             connectionMap.put(key, conn);
         }
-	}
+    }
 
-	public Object plugin(Object target) {
-		if (target instanceof StatementHandler) {  
-            return Plugin.wrap(target, this);  
-        } else {  
-            return target;  
-        }  
-	}
+    public Object plugin(Object target) {
+        if (target instanceof StatementHandler) {
+            return Plugin.wrap(target, this);
+        } else {
+            return target;
+        }
+    }
 
-	public void setProperties(Properties properties) {
-		// NOOP
+    public void setProperties(Properties properties) {
+        // NOOP
 
-	}
+    }
+
     /**
      * MyBatis wraps the JDBC Connection with a logging proxy but Spring registers the original connection so it should
      * be unwrapped before calling {@code DataSourceUtils.isConnectionTransactional(Connection, DataSource)}
-     * 
+     *
      * @param connection May be a {@code ConnectionLogger} proxy
      * @return the original JDBC {@code Connection}
      */

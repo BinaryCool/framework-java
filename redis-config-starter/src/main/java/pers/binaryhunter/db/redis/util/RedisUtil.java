@@ -24,7 +24,7 @@ public class RedisUtil {
      * 有可能会锁死系统
      */
     public static RLock lock(RedissonClient redisson, String key) {
-        RLock lock = redisson.getFairLock(key);
+        RLock lock = redisson.getLock(key);
         boolean res = lock.tryLock();
         if (res) {
             return lock;
@@ -56,7 +56,7 @@ public class RedisUtil {
      * 获取锁 maxLockSeconds 后自动释放
      */
     public static RLock tryLock(RedissonClient redisson, String key, int maxLockSeconds, int maxWaitSeconds) throws InterruptedException {
-        RLock lock = redisson.getFairLock(key);
+        RLock lock = redisson.getLock(key);
         boolean res = lock.tryLock(maxWaitSeconds, maxLockSeconds, TimeUnit.SECONDS);
         if (res) {
             return lock;
@@ -108,7 +108,7 @@ public class RedisUtil {
      * scan 实现 查找keys
      * @param pattern       表达式，如：abc*，找出所有以abc开始的键
      */
-    private static Set<String> keysByScan(RedisTemplate<String, Object> redisTemplate, String pattern) {
+    public static Set<String> keysByScan(RedisTemplate<String, Object> redisTemplate, String pattern) {
         return redisTemplate.execute((RedisCallback<Set<String>>) connection -> {
             Set<String> keysTmp = new HashSet<>();
             try {
