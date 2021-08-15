@@ -77,16 +77,7 @@ public class GenericController {
      * 返回html
      */
     protected void toResponseHtml(HttpServletResponse response, String html) {
-        PrintWriter pw = null;
-        try {
-            response.setHeader("Content-Disposition", "");
-            response.setContentType("text/html;charset=utf-8");
-            pw = response.getWriter();
-            pw.append(html);
-            pw.flush();
-        } catch (Exception ex) {
-            IOUtils.closeQuietly(pw);
-        }
+        R.toResponseHtml(response, html);
     }
 
     /**
