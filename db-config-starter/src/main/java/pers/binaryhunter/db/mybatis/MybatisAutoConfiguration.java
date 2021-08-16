@@ -1,6 +1,5 @@
 package pers.binaryhunter.db.mybatis;
 
-import com.alibaba.druid.pool.DruidDataSource;
 import org.apache.ibatis.mapping.DatabaseIdProvider;
 import org.apache.ibatis.plugin.Interceptor;
 import org.apache.ibatis.session.ExecutorType;
@@ -9,7 +8,6 @@ import org.mybatis.spring.SqlSessionFactoryBean;
 import org.mybatis.spring.SqlSessionTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
@@ -23,19 +21,17 @@ import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
 import pers.binaryhunter.db.mybatis.datasource.DataSourceProxy;
 import pers.binaryhunter.db.mybatis.datasource.DataSourceRouter;
-import pers.binaryhunter.db.mybatis.datasource.MyDataSource;
+import pers.binaryhunter.db.mybatis.datasource.MyDataSourceGroup;
 import pers.binaryhunter.db.mybatis.datasource.impl.AbstractRWDataSourceRouter;
 import pers.binaryhunter.db.mybatis.datasource.impl.MyRandomRWDataSourceRouter;
+import pers.binaryhunter.db.mybatis.datasource.impl.UserDataSourceRouter;
 import pers.binaryhunter.db.mybatis.filter.ResetConnectionFilter;
 import pers.binaryhunter.db.mybatis.pulgin.RWPlugin;
 import pers.binaryhunter.db.mybatis.pulgin.ShardPlugin;
 
 import javax.annotation.PostConstruct;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Properties;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Configuration()
 @ConditionalOnClass({SqlSessionFactory.class, SqlSessionFactoryBean.class})
@@ -54,9 +50,7 @@ public class MybatisAutoConfiguration {
     @Autowired(required = false)
     private DatabaseIdProvider databaseIdProvider;
 
-    private List<MyDataSource> readDataSources = new ArrayList<>();
-
-    private DruidDataSource writeDataSource;
+    private Map<String, MyDataSourceGroup> dynamic = new LinkedHashMap();
 
     @PostConstruct
     public void checkConfigFileExists() {
@@ -84,7 +78,7 @@ public class MybatisAutoConfiguration {
         factory.setConfiguration(this.properties.getConfiguration());
 
         if (ObjectUtils.isEmpty(this.interceptors)) {
-            Interceptor[] plugins = null;
+            Interceptor[] plugins;
             if (isSeparateTale) {
                 Interceptor shardPlugin = getShardPlugin();
                 plugins = new Interceptor[]{rwplugin, shardPlugin};
@@ -93,13 +87,13 @@ public class MybatisAutoConfiguration {
             }
             factory.setPlugins(plugins);
         } else {
-            List<Interceptor> interceptorList = Arrays.asList(interceptors);
+            List<Interceptor> interceptorList = Arrays.stream(interceptors).collect(Collectors.toList());
             interceptorList.add(rwplugin);
             if (isSeparateTale) {
                 Interceptor shardPlugin = getShardPlugin();
                 interceptorList.add(shardPlugin);
             }
-            factory.setPlugins((Interceptor[]) interceptorList.toArray());
+            factory.setPlugins(interceptorList.toArray(new Interceptor[]{}));
         }
         if (this.databaseIdProvider != null) {
             factory.setDatabaseIdProvider(this.databaseIdProvider);
@@ -122,24 +116,25 @@ public class MybatisAutoConfiguration {
 
 
     @Bean
-    @ConditionalOnMissingBean
     public DataSourceRouter readRoutingDataSource() {
-        AbstractRWDataSourceRouter proxy = new MyRandomRWDataSourceRouter();
-        proxy.setReadDataSources(getReadDataSources());
-        proxy.setWriteDataSource(getWriteDataSource());
-        return proxy;
-    }
+        Map<String, AbstractRWDataSourceRouter> map = new HashMap<>();
 
-    public void setWriteDataSource(DruidDataSource writeDataSource) {
-        this.writeDataSource = writeDataSource;
-    }
+        AbstractRWDataSourceRouter router;
+        MyDataSourceGroup group;
+        String mainDataSourceName = null;
+        for (Map.Entry<String, MyDataSourceGroup> entry : dynamic.entrySet()) {
+            router = new MyRandomRWDataSourceRouter();
+            group = entry.getValue();
+            router.setReadDataSources(group.getReadDataSources());
+            router.setWriteDataSource(group.getWriteDataSource());
+            map.put(entry.getKey(), router);
 
-    public DruidDataSource getWriteDataSource() {
-        return this.writeDataSource;
-    }
+            if (StringUtils.isEmpty(mainDataSourceName)) {
+                mainDataSourceName = entry.getKey();
+            }
+        }
 
-    public List<MyDataSource> getReadDataSources() {
-        return readDataSources;
+        return new UserDataSourceRouter(map, mainDataSourceName);
     }
 
     @Bean
@@ -169,10 +164,8 @@ public class MybatisAutoConfiguration {
 
     /**
      * mybaits分表插件
-     *
-     * @return
      */
-    public ShardPlugin getShardPlugin() {
+    private ShardPlugin getShardPlugin() {
         ShardPlugin shardPlugin = new ShardPlugin();
         Properties properties = new Properties();
         properties.put("shardingConfig", "shard_config.xml");//文件加载--键值必须为shardingConfig，这是类的内部要求，否则加载失败
