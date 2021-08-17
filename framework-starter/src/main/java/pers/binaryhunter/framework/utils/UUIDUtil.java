@@ -15,7 +15,7 @@ public class UUIDUtil {
     }
 
 	public static String get16UUID(){
-		StringBuffer shortBuffer = new StringBuffer();
+		StringBuilder shortBuffer = new StringBuilder();
 		String uuid = get32UUID();
 	    for (int i = 0; i < 16; i++) {
 	        String str = uuid.substring(i * 2, i * 2 + 2);
@@ -26,7 +26,7 @@ public class UUIDUtil {
 	}
 
 	public static String get8UUID(){
-		StringBuffer shortBuffer = new StringBuffer();
+		StringBuilder shortBuffer = new StringBuilder();
         String uuid = get32UUID();
 	    for (int i = 0; i < 8; i++) {
 	        String str = uuid.substring(i * 4, i * 4 + 4);

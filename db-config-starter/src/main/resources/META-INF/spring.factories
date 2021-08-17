@@ -1,3 +1,4 @@
 # Auto Configure
 org.springframework.boot.autoconfigure.EnableAutoConfiguration=\
-pers.binaryhunter.db.mybatis.MybatisAutoConfiguration
+pers.binaryhunter.db.mybatis.MybatisAutoConfiguration,\
+pers.binaryhunter.db.mybatis.aop.DataSourceAspect

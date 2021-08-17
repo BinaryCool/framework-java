@@ -19,8 +19,11 @@ public class ResetConnectionFilter extends OncePerRequestFilter {
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
-        filterChain.doFilter(request, response);
-        if(log.isDebugEnabled()) log.debug("Reset ConnectionHolder.FORCE_WRITE to false");
-        ConnectionHolder.FORCE_WRITE.set(Boolean.FALSE);
+        try {
+            filterChain.doFilter(request, response);
+        } finally {
+            if (log.isDebugEnabled()) log.debug("Reset ConnectionHolder.FORCE_WRITE to false");
+            ConnectionHolder.FORCE_WRITE.remove();
+        }
     }
 }

@@ -277,7 +277,7 @@ public class GenericServiceImpl<B, K> extends GenericAbstractServiceImpl<B> impl
             throw new BusinessException();
         }
 
-        StringBuffer setSql = new StringBuffer();
+        StringBuilder setSql = new StringBuilder();
         for (int index = 0; index < setArr.length / 2; index++) {
             Object key = setArr[index * 2];
             Object value = setArr[index * 2 + 1];
