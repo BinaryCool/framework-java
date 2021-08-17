@@ -2,8 +2,8 @@ package pers.binaryhunter.db.mybatis.aop;
 
 import org.apache.commons.lang3.StringUtils;
 import org.aspectj.lang.ProceedingJoinPoint;
+import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
-import org.aspectj.lang.annotation.Pointcut;
 import org.aspectj.lang.reflect.MethodSignature;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -20,7 +20,7 @@ import java.lang.reflect.Method;
 public class DataSourceAspect {
     private static final Logger log = LoggerFactory.getLogger(DataSourceAspect.class);
 
-    @Pointcut("@annotation(pers.binaryhunter.db.mybatis.aop.DataSource) || @within(pers.binaryhunter.db.mybatis.aop.DataSource)")
+    @Around("@annotation(pers.binaryhunter.db.mybatis.aop.DataSource) || @within(pers.binaryhunter.db.mybatis.aop.DataSource)")
     public Object around(ProceedingJoinPoint proceedingJoinPoint) throws Throwable {
         String value = null;
         try {
