@@ -2,13 +2,14 @@ package pers.binaryhunter.framework.service.logic;
 
 import org.springframework.cache.annotation.Cacheable;
 import pers.binaryhunter.framework.bean.dto.paging.Page;
+import pers.binaryhunter.framework.bean.po.PO;
 import pers.binaryhunter.framework.bean.vo.paging.PageResult;
 
 import java.util.List;
 import java.util.Map;
 
 @Cacheable(value = "cache", condition = "#root.methodName matches '^(get|query|page|count|select).*'")
-public class GenericCacheableServiceImpl<B, K> extends GenericServiceImpl<B, K> {
+public class GenericCacheableServiceImpl<B extends PO, K> extends GenericServiceImpl<B, K> {
     @Override
     public PageResult<B> pageByArgs(Map<String, Object> params, Page page) {
         return super.pageByArgs(params, page);

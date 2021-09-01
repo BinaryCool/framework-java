@@ -1,6 +1,5 @@
 package pers.binaryhunter.framework.controller;
 
-import org.apache.commons.lang3.StringUtils;
 import pers.binaryhunter.framework.bean.dto.paging.Page;
 import pers.binaryhunter.framework.bean.po.PO;
 import pers.binaryhunter.framework.bean.vo.R;
@@ -8,10 +7,9 @@ import pers.binaryhunter.framework.bean.vo.paging.PageResult;
 import pers.binaryhunter.framework.exception.BusinessException;
 import pers.binaryhunter.framework.service.GenericService;
 import pers.binaryhunter.framework.utils.MapConverter;
+import pers.binaryhunter.framework.utils.SqlUtil;
 
 import javax.servlet.http.HttpServletResponse;
-import java.util.Date;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -20,7 +18,9 @@ import java.util.Map;
  *
  * @author BinaryHunter
  */
-public class GenericController {
+public class GenericBaseController<B extends PO, K> extends GenericAbstractController<B> {
+    private GenericService<B, K> service;
+
     /**
      * 把返回空对象
      *
@@ -69,117 +69,104 @@ public class GenericController {
 
     /**
      * 分页查询
-     * @param service service
      * @param bean 参数
      * @param page 分页
      * @return 分页结果
      */
-    protected <B> PageResult<B> retrieve(GenericService service, Object bean, Page page, Map<String, Object> params) {
+    protected PageResult<B> retrieve(Object bean, Page page, Map<String, Object> params) {
         params = MapConverter.convertByField(params, bean);
-        return service.pageByArgs(params, page);
+        return service.queryByPage(params, page);
     }
 
     /**
      * 分页查询
-     * @param service service
      * @param bean 参数
      * @param page 分页
      * @return 分页结果
      */
-    protected <B> PageResult<B> retrieve(GenericService service, Object bean, Page page, Object... args) {
+    protected PageResult<B> retrieve(Object bean, Page page, Object... args) {
         Map<String, Object> params = MapConverter.arr2Map(args);
-        return retrieve(service, bean, page, params);
+        return retrieve(bean, page, params);
     }
 
     /**
      * 查询
-     * @param service service
      * @return 结果
      */
-    protected <B> List<B> select(GenericService service, Object... args) {
+    protected List<B> select(Object... args) {
         Map<String, Object> params = MapConverter.arr2Map(args);
         return select(service, params);
     }
 
     /**
      * 查询
-     * @param service service
      * @return 结果
      */
-    protected <B> List<B> select(GenericService service, Map<String, Object> args) {
+    protected List<B> select(Map<String, Object> args) {
         return service.queryByArgs(args);
     }
 
     /**
      * 新增
-     * @param service service
      * @param bean 参数
      * @return 返回对象
      */
-    protected <B extends PO> B create(GenericService service, B bean) {
+    protected B create(B bean) {
         if(null == bean) {
             throw new BusinessException();
         }
 
-        bean.setCreateTime(new Date());
-        bean.setStatus(PO.STATUS_ENABLE);
         service.add(bean);
-
         return bean;
     }
 
     /**
      * 新增
-     * @param service service
      * @param bean 参数
      * @return 返回对象
      */
-    protected <B extends PO> B createDB(GenericService service, B bean) {
-        this.create(service, bean);
-
-        bean = (B) service.getById(bean.getId());
+    protected B createDB(B bean) {
+        this.create(bean);
+        bean = this.get((K) bean.getId());
         return bean;
     }
 
     /**
      * 修改
-     * @param service service
      * @param bean 参数
      * @return 返回对象
      */
-    protected <B extends PO> B updateNotNull(GenericService service, B bean) {
+    protected B updateNotNull(B bean) {
         if(null ==  bean.getId() || bean.getId() <= 0) {
             throw new BusinessException();
         }
         service.updateNotNull(bean);
 
-        bean = (B) service.getById(bean.getId());
+        bean = this.get((K) bean.getId());
         return bean;
     }
 
     /**
      * 修改
-     * @param service service
      * @param bean 参数
      * @return 返回对象
      */
-    protected <B extends PO> B update(GenericService service, B bean) {
+    protected B update(B bean) {
         if(null ==  bean.getId() || bean.getId() <= 0) {
             throw new BusinessException();
         }
         service.update(bean);
 
-        bean = (B) service.getById(bean.getId());
+        bean = this.get((K) bean.getId());
         return bean;
     }
 
     /**
      * 删除
-     * @param service service
      * @param ids 删除的ID
      * @return 返回删除的ID
      */
-    protected Long[] deletePhysics(GenericService service, Long[] ids) {
+    protected K[] deletePhysics(K[] ids) {
         if (null == ids || ids.length <= 0) {
             throw new BusinessException();
         }
@@ -190,142 +177,134 @@ public class GenericController {
 
     /**
      * 删除(物理删除)
-     * @param service service
      * @param ids 删除的ID
      * @return 返回删除的ID
      */
-    protected Long[] delete(GenericService service, Long[] ids) {
+    protected K[] delete(K[] ids) {
         if (null == ids || ids.length <= 0) {
             throw new BusinessException();
         }
 
-        Map<String, Object> params = new HashMap<>();
-        params.put("idIn", StringUtils.join(ids, ","));
-        service.updateByArgs("t.status = " + PO.STATUS_DISABLE, params);
+        service.updateByArgs(MapConverter.arr2Map("idIn", SqlUtil.toSqlIn(ids)),"status", PO.STATUS_DISABLE);
         return ids;
     }
 
     /**
      * 通过ID获取
-     * @param service service
      * @param id ID
      * @return 返回对象
      */
-    protected <B extends PO> B get(GenericService service, Long id) {
-        if(null == id || id <= 0) {
+    protected B get(K id) {
+        if(null == id) {
             throw new BusinessException();
         }
 
-        return (B) service.getById(id);
+        return service.queryById(id);
     }
 
     /**
      * 分页查询
-     * @param service service
      * @param bean 参数
      * @param page 分页
      * @return 分页结果
      */
-    protected <B> R<PageResult<B>> retrieveResponse(GenericService service, Object bean, Page page, Map<String, Object> params) {
-        return toResponse(retrieve(service, bean, page, params));
+    protected R<PageResult<B>> retrieveResponse(Object bean, Page page, Map<String, Object> params) {
+        return toResponse(retrieve(bean, page, params));
     }
 
     /**
      * 分页查询
-     * @param service service
      * @param bean 参数
      * @param page 分页
      * @return 分页结果
      */
-    protected <B> R<PageResult<B>> retrieveResponse(GenericService service, Object bean, Page page, Object... args) {
-        return toResponse(retrieve(service, bean, page, args));
+    protected R<PageResult<B>> retrieveResponse(Object bean, Page page, Object... args) {
+        return toResponse(retrieve(bean, page, args));
     }
 
     /**
      * 查询
-     * @param service service
      * @return 结果
      */
-    protected <B> R<List<B>> selectResponse(GenericService service, Object... args) {
-        return toResponse(select(service, args));
+    protected R<List<B>> selectResponse(Object... args) {
+        return toResponse(select(args));
     }
 
     /**
      * 查询
-     * @param service service
      * @return 结果
      */
-    protected <B> R<List<B>> selectResponse(GenericService service, Map<String, Object> args) {
-        return toResponse(select(service, args));
+    protected R<List<B>> selectResponse(Map<String, Object> args) {
+        return toResponse(select(args));
     }
 
     /**
      * 新增
-     * @param service service
      * @param bean 参数
      * @return 返回对象
      */
-    protected <B extends PO> R<B> createResponse(GenericService service, B bean) {
-        return toResponse(create(service, bean));
+    protected R<B> createResponse(B bean) {
+        return toResponse(create(bean));
     }
 
     /**
      * 新增
-     * @param service service
      * @param bean 参数
      * @return 返回对象
      */
-    protected <B extends PO> R<B> createResponseDB(GenericService service, B bean) {
-        return toResponse(createDB(service, bean));
+    protected R<B> createResponseDB(B bean) {
+        return toResponse(createDB(bean));
     }
 
     /**
      * 修改
-     * @param service service
      * @param bean 参数
      * @return 返回对象
      */
-    protected <B extends PO> R<B> updateNotNullResponse(GenericService service, B bean) {
-        return toResponse(updateNotNull(service, bean));
+    protected R<B> updateNotNullResponse(B bean) {
+        return toResponse(updateNotNull(bean));
     }
 
     /**
      * 修改
-     * @param service service
      * @param bean 参数
      * @return 返回对象
      */
-    protected <B extends PO> R<B> updateResponse(GenericService service, B bean) {
-        return toResponse(update(service, bean));
+    protected R<B> updateResponse(B bean) {
+        return toResponse(update(bean));
     }
 
     /**
      * 删除
-     * @param service service
      * @param ids 删除的ID
      * @return 返回删除的ID
      */
-    protected R<Long[]> deleteResponse(GenericService service, Long[] ids) {
-        return toResponse(delete(service, ids));
+    protected R<K[]> deleteResponse(K[] ids) {
+        return toResponse(delete(ids));
     }
 
     /**
      * 删除
-     * @param service service
      * @param ids 删除的ID
      * @return 返回删除的ID
      */
-    protected R<Long[]> deletePhysicsResponse(GenericService service, Long[] ids) {
-        return toResponse(deletePhysics(service, ids));
+    protected R<K[]> deletePhysicsResponse(K[] ids) {
+        return toResponse(deletePhysics(ids));
     }
 
     /**
      * 通过ID获取
-     * @param service service
      * @param id ID
      * @return 返回对象
      */
-    protected <B extends PO> R<B> getResponse(GenericService service, Long id) {
-        return toResponse(get(service, id));
+    protected R<B> getResponse(K id) {
+        return toResponse(get(id));
+    }
+
+    /**
+     * 获取DAO
+     */
+    protected <T> T getService(Class<T> clazz) {
+        return clazz.cast(service);
     }
 }

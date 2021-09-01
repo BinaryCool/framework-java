@@ -1,6 +1,7 @@
 package pers.binaryhunter.framework.dao.redis;
 
 import org.springframework.data.redis.core.RedisTemplate;
+import pers.binaryhunter.framework.bean.po.PO;
 import pers.binaryhunter.framework.dao.GenericNosqlDAO;
 
 import javax.annotation.PostConstruct;
@@ -16,7 +17,7 @@ import java.util.concurrent.TimeUnit;
 /**
  * Created by BinaryHunter on 2019/3/1.
  */
-public class GenericRedis4MapDAOImpl<B, K> implements GenericNosqlDAO<B, K> {
+public class GenericRedis4MapDAOImpl<B extends PO, K> implements GenericNosqlDAO<B, K> {
     protected static final Long TIME_OUT_IN_MIN = -1L;
 
     protected String beanName;

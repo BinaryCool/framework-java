@@ -9,6 +9,7 @@ import org.aspectj.lang.reflect.MethodSignature;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.aop.support.AopUtils;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
@@ -20,6 +21,7 @@ import java.lang.reflect.Type;
 @Aspect
 @Order(Ordered.HIGHEST_PRECEDENCE)
 @Configuration()
+@ConditionalOnProperty(name = "spring.datasource.multiple", havingValue = "true")
 public class DataSourceAspect {
     private static final Logger log = LoggerFactory.getLogger(DataSourceAspect.class);
 

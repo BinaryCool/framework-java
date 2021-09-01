@@ -162,6 +162,14 @@ public class MybatisAutoConfiguration {
         return new ResetConnectionFilter();
     }
 
+    public Map<String, MyDataSourceGroup> getDynamic() {
+        return dynamic;
+    }
+
+    public void setDynamic(Map<String, MyDataSourceGroup> dynamic) {
+        this.dynamic = dynamic;
+    }
+
     /**
      * mybaits分表插件
      */

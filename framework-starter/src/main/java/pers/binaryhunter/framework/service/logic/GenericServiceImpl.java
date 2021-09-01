@@ -33,7 +33,7 @@ import java.util.*;
  *
  * @author Liyw -- 2014-5-22
  */
-public class GenericServiceImpl<B, K> extends GenericAbstractServiceImpl<B> implements GenericService<B, K> {
+public class GenericServiceImpl<B extends PO, K> extends GenericAbstractServiceImpl<B> implements GenericService<B, K> {
     private static final Logger log = LoggerFactory.getLogger(GenericServiceImpl.class);
     private static final int COUNT_BATCH = 1000;
 
@@ -42,31 +42,33 @@ public class GenericServiceImpl<B, K> extends GenericAbstractServiceImpl<B> impl
     private DataSourceTransactionManager transactionManager;
 
     @Override
-    public PageResult<B> pageByArgs(Map<String, Object> params, Page page) {
-        PageResult<B> pageResult = new PageResult<>();
+    public PageResult<B> queryByPage(Map<String, Object> params, Page page) {
+        return this.queryByPage(params, page, true);
+    }
+
+    @Override
+    public PageResult<B> queryByPage(Page page, Object... params) {
+        return queryByPage(MapConverter.arr2Map(params), page);
+    }
+
+    @Override
+    public List<B> queryByPageSkipCount(Map<String, Object> params, Page page) {
         params = this.doStatusParams(params);
-        Long count = dao.countByArgs(params);
-        if (null != count) {
-            page.setTotalCount(count);
-            if (count > 0L) {
-                if (page.getPageNum() > page.getPageCount()) { //如果当前页面大于总页面
-                    page.setPageNum(1);
-                }
-                params = MapConverter.convertPage(params, page);
-
-                List<B> results = dao.pageByArgs(params);
-
-                if (null == results) {
-                    results = new ArrayList<>();
-                }
-
-                pageResult.setResults(results);
-            }
+        if (page.getPageNum() > page.getPageCount()) { //如果当前页面大于总页面
+            return null;
         }
+        params = MapConverter.convertPage(params, page);
+        return dao.queryByArgs(params);
+    }
 
-        pageResult.setPage(page);
-
-        return pageResult;
+    @Override
+    public List<B> queryByPageSkipCount(Page page, Object... params) {
+        return pageSkipCount(MapConverter.arr2Map(params), page);
+    }
+    
+    @Override
+    public PageResult<B> pageByArgs(Map<String, Object> params, Page page) {
+        return this.queryByPage(params, page, false);
     }
 
     @Override
@@ -132,24 +134,6 @@ public class GenericServiceImpl<B, K> extends GenericAbstractServiceImpl<B> impl
         return exists(MapConverter.arr2Map(params));
     }
 
-    private B queryFirstPrivate(Map<String, Object> params, String args2) {
-        if (null == params) {
-            params = new HashMap<>();
-        }
-
-        params.put("limit", 1);
-        List<B> list;
-        if (StringUtils.isBlank(args2)) {
-            list = this.queryByArgs(params);
-        } else {
-            list = this.queryByField(args2, params);
-        }
-        if (null == list || 0 >= list.size()) {
-            return null;
-        }
-        return list.get(0);
-    }
-
     @Override
     public List<B> queryByArgs(Map<String, Object> params) {
         params = doStatusParams(params);
@@ -182,26 +166,6 @@ public class GenericServiceImpl<B, K> extends GenericAbstractServiceImpl<B> impl
     @Override
     public void deleteByArgs(Object... params) {
         deleteByArgs(MapConverter.arr2Map(params));
-    }
-
-    private void appendAdd(B bean) {
-        UserPO userPO = getLoginedUser();
-        if (null == userPO) {
-            return;
-        }
-
-        PO po = (PO) bean;
-        po.setCreateBy(userPO.getName());
-    }
-
-    private void appendUpdate(B bean) {
-        UserPO userPO = getLoginedUser();
-        if (null == userPO) {
-            return;
-        }
-
-        PO po = (PO) bean;
-        po.setUpdateBy(userPO.getName());
     }
 
     @Override
@@ -330,12 +294,12 @@ public class GenericServiceImpl<B, K> extends GenericAbstractServiceImpl<B> impl
     }
 
     @Override
-    public B getById(K id) {
-        return dao.getById(id);
+    public B queryById(K id) {
+        return this.queryFirst("id", id);
     }
 
     @Override
-    public List<B> getByIds(Collection<K> ids) {
+    public List<B> queryByIds(Collection<K> ids) {
         if (CollectionUtils.isEmpty(ids)) {
             return null;
         }
@@ -343,11 +307,26 @@ public class GenericServiceImpl<B, K> extends GenericAbstractServiceImpl<B> impl
     }
 
     @Override
-    public List<B> getByIds(K[] ids) {
+    public List<B> queryByIds(K[] ids) {
         if (ArrayUtils.isEmpty(ids)) {
             return null;
         }
         return queryByArgs("idIn", SqlUtil.toSqlIn(ids));
+    }
+    
+    @Override
+    public B getById(K id) {
+        return dao.getById(id);
+    }
+
+    @Override
+    public List<B> getByIds(Collection<K> ids) {
+        return this.queryByIds(ids);
+    }
+
+    @Override
+    public List<B> getByIds(K[] ids) {
+        return this.queryByIds(ids);
     }
 
     @Override
@@ -361,6 +340,76 @@ public class GenericServiceImpl<B, K> extends GenericAbstractServiceImpl<B> impl
         return countByArgs(MapConverter.arr2Map(params));
     }
 
+    private PageResult<B> queryByPage(Map<String, Object> params, Page page, boolean isQuery) {
+        PageResult<B> pageResult = new PageResult<>();
+        params = this.doStatusParams(params);
+        Long count = dao.countByArgs(params);
+        if (null != count) {
+            page.setTotalCount(count);
+            if (count > 0L) {
+                if (page.getPageNum() > page.getPageCount()) { //如果当前页面大于总页面
+                    page.setPageNum(1);
+                }
+                params = MapConverter.convertPage(params, page);
+
+                List<B> results = null;
+                if (isQuery) {
+                    results = dao.queryByArgs(params);
+                } else {
+                    results = dao.pageByArgs(params);
+                }
+
+                if (null == results) {
+                    results = new ArrayList<>();
+                }
+
+                pageResult.setResults(results);
+            }
+        }
+
+        pageResult.setPage(page);
+
+        return pageResult;
+    }
+    
+    private void appendAdd(B bean) {
+        UserPO userPO = getLoginedUser();
+        if (null == userPO) {
+            return;
+        }
+
+        PO po = bean;
+        po.setCreateBy(userPO.getName());
+    }
+
+    private void appendUpdate(B bean) {
+        UserPO userPO = getLoginedUser();
+        if (null == userPO) {
+            return;
+        }
+
+        PO po = bean;
+        po.setUpdateBy(userPO.getName());
+    }
+    
+    private B queryFirstPrivate(Map<String, Object> params, String args2) {
+        if (null == params) {
+            params = new HashMap<>();
+        }
+
+        params.put("limit", 1);
+        List<B> list;
+        if (StringUtils.isBlank(args2)) {
+            list = this.queryByArgs(params);
+        } else {
+            list = this.queryByField(args2, params);
+        }
+        if (null == list || 0 >= list.size()) {
+            return null;
+        }
+        return list.get(0);
+    }
+    
     private String replaceUpdate4SqlInjection(String value) {
         if (StringUtils.isBlank(value)) {
             return value;

@@ -35,9 +35,9 @@ public class SqlUtil {
             return "''";
         }
         if (objArr[0] instanceof Number) {
-            return Stream.of(objArr).map(Object::toString).collect(Collectors.joining(","));
+            return Stream.of(objArr).filter(item -> null != item).map(Object::toString).collect(Collectors.joining(","));
         }
-        return Stream.of(objArr).map(Object::toString).collect(Collectors.joining("','", "'", "'"));
+        return Stream.of(objArr).filter(item -> null != item).map(Object::toString).collect(Collectors.joining("','", "'", "'"));
     }
 
     /**

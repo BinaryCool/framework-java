@@ -23,7 +23,7 @@
     </modules>
 
     <properties>
-        <framework.version>3.1.7</framework.version>
+        <framework.version>3.2.2</framework.version>
 
         <java.version>1.8</java.version>
         <commons.lang.version>3.9</commons.lang.version>
