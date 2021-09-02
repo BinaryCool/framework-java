@@ -95,7 +95,7 @@ public class GenericBaseController<B extends PO, K> extends GenericAbstractContr
      */
     protected List<B> select(Object... args) {
         Map<String, Object> params = MapConverter.arr2Map(args);
-        return select(service, params);
+        return select(params);
     }
 
     /**
@@ -116,7 +116,7 @@ public class GenericBaseController<B extends PO, K> extends GenericAbstractContr
             throw new BusinessException();
         }
 
-        service.add(bean);
+        service.addSingle(bean);
         return bean;
     }
 
@@ -140,7 +140,7 @@ public class GenericBaseController<B extends PO, K> extends GenericAbstractContr
         if(null ==  bean.getId() || bean.getId() <= 0) {
             throw new BusinessException();
         }
-        service.updateNotNull(bean);
+        service.updateSingleNotNull(bean);
 
         bean = this.get((K) bean.getId());
         return bean;
@@ -171,7 +171,7 @@ public class GenericBaseController<B extends PO, K> extends GenericAbstractContr
             throw new BusinessException();
         }
 
-        service.deleteByIds(ids);
+        service.removeByIds(ids);
         return ids;
     }
 

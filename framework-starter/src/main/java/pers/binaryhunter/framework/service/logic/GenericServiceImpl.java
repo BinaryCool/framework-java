@@ -26,6 +26,8 @@ import pers.binaryhunter.framework.utils.SqlUtil;
 
 import javax.annotation.Resource;
 import java.util.*;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 
 /**
@@ -36,6 +38,7 @@ import java.util.*;
 public class GenericServiceImpl<B extends PO, K> extends GenericAbstractServiceImpl<B> implements GenericService<B, K> {
     private static final Logger log = LoggerFactory.getLogger(GenericServiceImpl.class);
     private static final int COUNT_BATCH = 1000;
+    private static final int MAX_LIMIT = 1000;
 
     protected GenericDAO<B, K> dao;
     @Resource
@@ -58,6 +61,7 @@ public class GenericServiceImpl<B extends PO, K> extends GenericAbstractServiceI
             return null;
         }
         params = MapConverter.convertPage(params, page);
+        this.maxLimit(params);
         return dao.queryByArgs(params);
     }
 
@@ -65,7 +69,7 @@ public class GenericServiceImpl<B extends PO, K> extends GenericAbstractServiceI
     public List<B> queryByPageSkipCount(Page page, Object... params) {
         return pageSkipCount(MapConverter.arr2Map(params), page);
     }
-    
+
     @Override
     public PageResult<B> pageByArgs(Map<String, Object> params, Page page) {
         return this.queryByPage(params, page, false);
@@ -83,6 +87,7 @@ public class GenericServiceImpl<B extends PO, K> extends GenericAbstractServiceI
             return null;
         }
         params = MapConverter.convertPage(params, page);
+        this.maxLimit(params);
         return dao.pageByArgs(params);
     }
 
@@ -95,6 +100,7 @@ public class GenericServiceImpl<B extends PO, K> extends GenericAbstractServiceI
     public List<B> queryByField(String fieldSQL, Map<String, Object> params) {
         params = doStatusParams(params);
         params.put("fieldSQL", fieldSQL);
+        this.maxLimit(params);
         return dao.queryByField(params);
     }
 
@@ -137,6 +143,7 @@ public class GenericServiceImpl<B extends PO, K> extends GenericAbstractServiceI
     @Override
     public List<B> queryByArgs(Map<String, Object> params) {
         params = doStatusParams(params);
+        this.maxLimit(params);
         return dao.queryByArgs(params);
     }
 
@@ -151,8 +158,23 @@ public class GenericServiceImpl<B extends PO, K> extends GenericAbstractServiceI
     }
 
     @Override
+    public void removeById(K id) {
+        this.removeByIds(Stream.of(id).collect(Collectors.toList()));
+    }
+
+    @Override
     public void deleteByIds(K[] ids) {
         deleteByArgs("idIn", SqlUtil.toSqlIn(ids));
+    }
+
+    @Override
+    public void removeByIds(K[] ids) {
+        dao.deleteByIds(SqlUtil.toSqlIn(ids));
+    }
+
+    @Override
+    public void removeByIds(Collection<K> ids) {
+        dao.deleteByIds(SqlUtil.toSqlIn(ids));
     }
 
     @Override
@@ -181,6 +203,11 @@ public class GenericServiceImpl<B extends PO, K> extends GenericAbstractServiceI
     }
 
     @Override
+    public void updateSingleNotNull(B bean) {
+        this.updateBatch(Stream.of(bean).collect(Collectors.toList()));
+    }
+
+    @Override
     public void updateBatch(List<B> beans) {
         if (CollectionUtils.isEmpty(beans)) {
             log.warn("List is empty while update batch");
@@ -188,27 +215,10 @@ public class GenericServiceImpl<B extends PO, K> extends GenericAbstractServiceI
         }
         beans.forEach(bean -> this.appendUpdate(bean));
 
-        int times = (int) (Math.ceil(beans.size() * 1.0 / COUNT_BATCH));
-        //获得事务状态
-        TransactionStatus transactionStatus = null;
-        try {
-            //获取事务定义
-            DefaultTransactionDefinition def = new DefaultTransactionDefinition();
-            //设置事务隔离级别，开启新事务
-            def.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRED);
-            transactionStatus = transactionManager.getTransaction(def);
-
-            for (int i = 0; i < times; i++) {
-                dao.updateBatch(beans.subList(COUNT_BATCH * i, Math.min(COUNT_BATCH * (i + 1), beans.size())));
-            }
-        } catch (Exception e) {
-            transactionManager.rollback(transactionStatus);
-            throw e;
-        } finally {
-            if (transactionStatus != null && transactionStatus.isNewTransaction()
-                    && !transactionStatus.isCompleted()) {
-                transactionManager.commit(transactionStatus);
-            }
+        if (COUNT_BATCH >= beans.size()) {
+            dao.updateBatch(beans);
+        } else {
+            this.doTransactionBatch(beans, i -> dao.updateBatch(beans.subList(COUNT_BATCH * i, Math.min(COUNT_BATCH * (i + 1), beans.size()))));
         }
     }
 
@@ -280,6 +290,11 @@ public class GenericServiceImpl<B extends PO, K> extends GenericAbstractServiceI
         dao.create(bean);
     }
 
+    @Override
+    public void addSingle(B bean) {
+        this.addBatch(Stream.of(bean).collect(Collectors.toList()));
+    }
+
     /**
      * @param beans 实体列表
      */
@@ -313,7 +328,7 @@ public class GenericServiceImpl<B extends PO, K> extends GenericAbstractServiceI
         }
         return queryByArgs("idIn", SqlUtil.toSqlIn(ids));
     }
-    
+
     @Override
     public B getById(K id) {
         return dao.getById(id);
@@ -338,112 +353,6 @@ public class GenericServiceImpl<B extends PO, K> extends GenericAbstractServiceI
     @Override
     public long countByArgs(Object... params) {
         return countByArgs(MapConverter.arr2Map(params));
-    }
-
-    private PageResult<B> queryByPage(Map<String, Object> params, Page page, boolean isQuery) {
-        PageResult<B> pageResult = new PageResult<>();
-        params = this.doStatusParams(params);
-        Long count = dao.countByArgs(params);
-        if (null != count) {
-            page.setTotalCount(count);
-            if (count > 0L) {
-                if (page.getPageNum() > page.getPageCount()) { //如果当前页面大于总页面
-                    page.setPageNum(1);
-                }
-                params = MapConverter.convertPage(params, page);
-
-                List<B> results = null;
-                if (isQuery) {
-                    results = dao.queryByArgs(params);
-                } else {
-                    results = dao.pageByArgs(params);
-                }
-
-                if (null == results) {
-                    results = new ArrayList<>();
-                }
-
-                pageResult.setResults(results);
-            }
-        }
-
-        pageResult.setPage(page);
-
-        return pageResult;
-    }
-    
-    private void appendAdd(B bean) {
-        UserPO userPO = getLoginedUser();
-        if (null == userPO) {
-            return;
-        }
-
-        PO po = bean;
-        po.setCreateBy(userPO.getName());
-    }
-
-    private void appendUpdate(B bean) {
-        UserPO userPO = getLoginedUser();
-        if (null == userPO) {
-            return;
-        }
-
-        PO po = bean;
-        po.setUpdateBy(userPO.getName());
-    }
-    
-    private B queryFirstPrivate(Map<String, Object> params, String args2) {
-        if (null == params) {
-            params = new HashMap<>();
-        }
-
-        params.put("limit", 1);
-        List<B> list;
-        if (StringUtils.isBlank(args2)) {
-            list = this.queryByArgs(params);
-        } else {
-            list = this.queryByField(args2, params);
-        }
-        if (null == list || 0 >= list.size()) {
-            return null;
-        }
-        return list.get(0);
-    }
-    
-    private String replaceUpdate4SqlInjection(String value) {
-        if (StringUtils.isBlank(value)) {
-            return value;
-        }
-
-        return value.replaceAll("'|\\\"", "");
-    }
-
-    private void doAddBatch(List<B> beans) {
-        int times = (int) (Math.ceil(beans.size() * 1.0 / COUNT_BATCH));
-
-        beans.forEach(bean -> appendAdd(bean));
-
-        //获得事务状态
-        TransactionStatus transactionStatus = null;
-        try {
-            //获取事务定义
-            DefaultTransactionDefinition def = new DefaultTransactionDefinition();
-            //设置事务隔离级别，开启新事务
-            def.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRED);
-            transactionStatus = transactionManager.getTransaction(def);
-
-            for (int i = 0; i < times; i++) {
-                dao.createBatch(beans.subList(COUNT_BATCH * i, Math.min(COUNT_BATCH * (i + 1), beans.size())));
-            }
-        } catch (Exception e) {
-            transactionManager.rollback(transactionStatus);
-            throw e;
-        } finally {
-            if (transactionStatus != null && transactionStatus.isNewTransaction()
-                    && !transactionStatus.isCompleted()) {
-                transactionManager.commit(transactionStatus);
-            }
-        }
     }
 
     /**
@@ -498,5 +407,163 @@ public class GenericServiceImpl<B extends PO, K> extends GenericAbstractServiceI
      */
     protected <T> T getDAO(Class<T> clazz) {
         return clazz.cast(dao);
+    }
+
+    /**
+     * 批量事务
+     */
+    private void doTransactionBatch(List<B> beans, TransactionBatchable batchable) {
+        int times = (int) (Math.ceil(beans.size() * 1.0 / COUNT_BATCH));
+        //获得事务状态
+        TransactionStatus transactionStatus = null;
+        try {
+            //获取事务定义
+            DefaultTransactionDefinition def = new DefaultTransactionDefinition();
+            //设置事务隔离级别，开启新事务
+            def.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRED);
+            transactionStatus = transactionManager.getTransaction(def);
+
+            for (int i = 0; i < times; i++) {
+                batchable.transactionBatch(i);
+            }
+        } catch (Exception e) {
+            transactionManager.rollback(transactionStatus);
+            throw e;
+        } finally {
+            if (transactionStatus != null && transactionStatus.isNewTransaction()
+                    && !transactionStatus.isCompleted()) {
+                transactionManager.commit(transactionStatus);
+            }
+        }
+    }
+
+    /**
+     * 分页查询
+     */
+    private PageResult<B> queryByPage(Map<String, Object> params, Page page, boolean isQuery) {
+        PageResult<B> pageResult = new PageResult<>();
+        params = this.doStatusParams(params);
+        Long count = dao.countByArgs(params);
+        if (null != count) {
+            page.setTotalCount(count);
+            if (count > 0L) {
+                if (page.getPageNum() > page.getPageCount()) { //如果当前页面大于总页面
+                    page.setPageNum(1);
+                }
+                params = MapConverter.convertPage(params, page);
+                this.maxLimit(params);
+                List<B> results = null;
+                if (isQuery) {
+                    results = dao.queryByArgs(params);
+                } else {
+                    results = dao.pageByArgs(params);
+                }
+
+                if (null == results) {
+                    results = new ArrayList<>();
+                }
+
+                pageResult.setResults(results);
+            }
+        }
+
+        pageResult.setPage(page);
+
+        return pageResult;
+    }
+
+    /**
+     * 添加时添加默认字段
+     */
+    private void appendAdd(B bean) {
+        UserPO userPO = getLoginedUser();
+        if (null == userPO) {
+            return;
+        }
+
+        PO po = bean;
+        po.setCreateBy(userPO.getName());
+    }
+
+    /**
+     * 修改时添加默认字段
+     */
+    private void appendUpdate(B bean) {
+        UserPO userPO = getLoginedUser();
+        if (null == userPO) {
+            return;
+        }
+
+        PO po = bean;
+        po.setUpdateBy(userPO.getName());
+    }
+
+    /**
+     * 查询首个逻辑
+     */
+    private B queryFirstPrivate(Map<String, Object> params, String fieldSQL) {
+        if (null == params) {
+            params = new HashMap<>();
+        }
+
+        params.put("limit", 1);
+        List<B> list;
+        if (StringUtils.isBlank(fieldSQL)) {
+            list = this.queryByArgs(params);
+        } else {
+            list = this.queryByField(fieldSQL, params);
+        }
+        if (null == list || 0 >= list.size()) {
+            return null;
+        }
+        return list.get(0);
+    }
+
+    /**
+     * 更新时预防SQL注入
+     */
+    private String replaceUpdate4SqlInjection(String value) {
+        if (StringUtils.isBlank(value)) {
+            return value;
+        }
+
+        return value.replaceAll("'|\\\"", "");
+    }
+
+    /**
+     * 批量添加逻辑
+     */
+    private void doAddBatch(List<B> beans) {
+        beans.forEach(bean -> appendAdd(bean));
+
+        if (COUNT_BATCH >= beans.size()) {
+            dao.createBatch(beans);
+        } else {
+            this.doTransactionBatch(beans, (i) -> {
+                dao.createBatch(beans.subList(COUNT_BATCH * i, Math.min(COUNT_BATCH * (i + 1), beans.size())));
+            });
+        }
+    }
+
+    /**
+     * 添加最大limit限制
+     */
+    private void maxLimit(Map<String, Object> params) {
+        if (null == params) {
+            params = new HashMap<>();
+        }
+
+        Object limitObj = params.get("limit");
+        Integer limit = null;
+        if (null != limitObj) {
+            try {
+                limit = Integer.parseInt(limitObj.toString());
+            } catch (NumberFormatException ex) {
+                log.error("Parse limit", ex);
+            }
+        }
+        if (null == limit || limit.intValue() > MAX_LIMIT) {
+            params.put("limit", MAX_LIMIT);
+        }
     }
 }

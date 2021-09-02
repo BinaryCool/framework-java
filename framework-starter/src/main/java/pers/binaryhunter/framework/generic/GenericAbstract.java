@@ -25,7 +25,7 @@ public class GenericAbstract<B> {
 
             Object obj = context.getBean(daoName);
 
-            //多继承下, 查找对应的积累
+            //多继承下, 查找对应的基类
             Field baseDaoNameField = null;
             Class clazz = this.getClass();
             while (true) {

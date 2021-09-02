@@ -1,21 +1,18 @@
 package pers.binaryhunter.framework.utils;
 
-import java.io.UnsupportedEncodingException;
+import org.apache.commons.lang3.ArrayUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import pers.binaryhunter.framework.bean.dto.paging.Page;
+
 import java.lang.reflect.Field;
-import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.net.URLDecoder;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.stream.Stream;
-
-import org.apache.commons.lang3.ArrayUtils;
-import org.apache.commons.lang3.StringUtils;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import pers.binaryhunter.framework.bean.dto.paging.Page;
 
 public class MapConverter {
     private static final Logger log = LoggerFactory.getLogger(MapConverter.class);
@@ -86,7 +83,7 @@ public class MapConverter {
      * By Yuwen on 2017年6月22日
      */
     public static Map<String, Object> convertByField(Object obj) {
-        Map<String, Object> map = new HashMap<String, Object>();
+        Map<String, Object> map = new HashMap<>();
         return convertByField(map, obj);
     }
 
@@ -100,7 +97,7 @@ public class MapConverter {
      */
     public static Map<String, Object> convertPage(Map<String, Object> map, Page page) {
         if (null == map) {
-            map = new HashMap<>();
+            map = new HashMap<>(2);
         }
 
         map.put("start", (page.getPageNum() - 1) * page.getNumPerPage());
@@ -123,7 +120,6 @@ public class MapConverter {
 
     /**
      * 解码UTF8
-     *
      * @return
      */
     public static void decodeByField(Object obj, String... fieldNames) {
@@ -173,7 +169,7 @@ public class MapConverter {
      */
     public static Map<String, Object> arr2Map(Map<String, Object> params, Object... args) {
         if (null == params) {
-            params = new HashMap<>();
+            params = new HashMap<>(args.length / 2);
         }
 
         if (ArrayUtils.isNotEmpty(args)) {

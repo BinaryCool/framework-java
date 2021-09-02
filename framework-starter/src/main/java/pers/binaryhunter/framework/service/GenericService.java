@@ -22,6 +22,7 @@ public interface GenericService<B extends PO, K> {
     /**
      * 分页查询
      * 已弃用, 使用queryByPage代替, 相关page下同
+     *
      * @param params 参数
      * @param page   分页参数
      * @return 分页结果
@@ -32,6 +33,7 @@ public interface GenericService<B extends PO, K> {
     /**
      * 分页查询
      * 已弃用, 使用queryByPage代替, 相关page下同
+     *
      * @param params 参数
      * @param page   分页参数
      * @return 分页结果
@@ -42,6 +44,7 @@ public interface GenericService<B extends PO, K> {
     /**
      * 分页查询
      * 已弃用, 使用queryByPageSkipCount代替, 相关page下同
+     *
      * @param params 参数
      * @param page   分页参数
      * @return 分页结果
@@ -52,15 +55,18 @@ public interface GenericService<B extends PO, K> {
     /**
      * 分页查询
      * 已弃用, 使用queryByPageSkipCount代替, 相关page下同
+     *
      * @param params 参数
      * @param page   分页参数
      * @return 分页结果
      * By Yuwen on 2017年6月22日
      */
     List<B> queryByPageSkipCount(Page page, Object... params);
+
     /**
      * 分页查询
      * 已弃用, 使用queryByPage代替, 相关page下同
+     *
      * @param params 参数
      * @param page   分页参数
      * @return 分页结果
@@ -72,6 +78,7 @@ public interface GenericService<B extends PO, K> {
     /**
      * 分页查询
      * 已弃用, 使用queryByPage代替, 相关page下同
+     *
      * @param params 参数
      * @param page   分页参数
      * @return 分页结果
@@ -83,6 +90,7 @@ public interface GenericService<B extends PO, K> {
     /**
      * 分页查询
      * 已弃用, 使用queryByPageSkipCount代替, 相关page下同
+     *
      * @param params 参数
      * @param page   分页参数
      * @return 分页结果
@@ -94,6 +102,7 @@ public interface GenericService<B extends PO, K> {
     /**
      * 分页查询
      * 已弃用, 使用queryByPageSkipCount代替, 相关page下同
+     *
      * @param params 参数
      * @param page   分页参数
      * @return 分页结果
@@ -171,21 +180,45 @@ public interface GenericService<B extends PO, K> {
      * 通过id删除
      *
      * @param id id
-     * By Yuwen on 2017年6月22日
+     *           By Yuwen on 2017年6月22日
      */
+    @Deprecated
     void deleteById(K id);
+
+    /**
+     * 通过id删除
+     *
+     * @param id id
+     */
+    void removeById(K id);
 
     /**
      * 通过ids删除
      *
      * @param ids ids
-     * By Yuwen on 2017年6月22日
+     *            By Yuwen on 2017年6月22日
      */
+    @Deprecated
     void deleteByIds(K[] ids);
+
+    /**
+     * 通过ids删除
+     *
+     * @param ids ids
+     */
+    void removeByIds(K[] ids);
+
+    /**
+     * 通过ids删除
+     *
+     * @param ids ids
+     */
+    void removeByIds(Collection<K> ids);
 
     /**
      * 通过参数删除
      * 注意: 使用此方法要非常小心, 如无法命中where条件, 会删除整张表数据
+     *
      * @param params 参数
      */
     void deleteByArgs(Map<String, Object> params);
@@ -193,6 +226,7 @@ public interface GenericService<B extends PO, K> {
     /**
      * 通过参数删除
      * 注意: 使用此方法要非常小心, 如无法命中where条件, 会删除整张表数据
+     *
      * @param params 参数
      */
     void deleteByArgs(Object... params);
@@ -211,7 +245,16 @@ public interface GenericService<B extends PO, K> {
      * @param bean 实体
      *             By Yuwen on 2017年6月22日
      */
+    @Deprecated
     void updateNotNull(B bean);
+
+    /**
+     * 更新 (为空的不更新)
+     *
+     * @param bean 实体
+     *             By Yuwen on 2017年6月22日
+     */
+    void updateSingleNotNull(B bean);
 
     /**
      * 批量更新
@@ -245,7 +288,15 @@ public interface GenericService<B extends PO, K> {
      * @param bean 实体
      *             By Yuwen on 2017年6月22日
      */
+    @Deprecated
     void add(B bean);
+
+    /**
+     * 新增
+     *
+     * @param bean 实体
+     */
+    void addSingle(B bean);
 
     /**
      * 批量新增
@@ -257,6 +308,7 @@ public interface GenericService<B extends PO, K> {
     /**
      * 通过编号获取
      * 已弃用, 请使用queryById
+     *
      * @param id 编号
      * @return 实体
      * By Yuwen on 2017年6月22日
@@ -266,6 +318,7 @@ public interface GenericService<B extends PO, K> {
     /**
      * 通过编号获取
      * 已弃用, 请使用queryByIds
+     *
      * @param ids 编号
      * @return 实体
      * By Yuwen on 2017年6月22日
@@ -275,15 +328,17 @@ public interface GenericService<B extends PO, K> {
     /**
      * 通过编号获取
      * 已弃用, 请使用queryByIds
+     *
      * @param ids 编号
      * @return 实体
      * By Yuwen on 2017年6月22日
      */
     List<B> queryByIds(K[] ids);
-    
+
     /**
      * 通过编号获取
      * 已弃用, 请使用queryById
+     *
      * @param id 编号
      * @return 实体
      * By Yuwen on 2017年6月22日
@@ -293,6 +348,7 @@ public interface GenericService<B extends PO, K> {
     /**
      * 通过编号获取
      * 已弃用, 请使用queryByIds
+     *
      * @param ids 编号
      * @return 实体
      * By Yuwen on 2017年6月22日
@@ -302,6 +358,7 @@ public interface GenericService<B extends PO, K> {
     /**
      * 通过编号获取
      * 已弃用, 请使用queryByIds
+     *
      * @param ids 编号
      * @return 实体
      * By Yuwen on 2017年6月22日
