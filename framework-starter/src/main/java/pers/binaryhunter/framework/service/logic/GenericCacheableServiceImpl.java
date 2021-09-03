@@ -87,23 +87,23 @@ public class GenericCacheableServiceImpl<B extends PO, K> extends GenericService
     }
 
     @Override
-    public List<B> queryByField(String fieldSQL, Map<String, Object> params) {
-        return super.queryByField(fieldSQL, params);
+    public List<B> queryField(String fieldSQL, Map<String, Object> params) {
+        return super.queryField(fieldSQL, params);
     }
 
     @Override
-    public List<B> queryByField(String fieldSQL, Object... params) {
-        return super.queryByField(fieldSQL, params);
+    public List<B> queryField(String fieldSQL, Object... params) {
+        return super.queryField(fieldSQL, params);
     }
 
     @Override
-    public B queryFirstByField(String fieldSQL, Map<String, Object> params) {
-        return super.queryFirstByField(fieldSQL, params);
+    public B queryFieldFirst(String fieldSQL, Map<String, Object> params) {
+        return super.queryFieldFirst(fieldSQL, params);
     }
 
     @Override
-    public B queryFirstByField(String fieldSQL, Object... params) {
-        return super.queryFirstByField(fieldSQL, params);
+    public B queryFieldFirst(String fieldSQL, Object... params) {
+        return super.queryFieldFirst(fieldSQL, params);
     }
 
     @Override
@@ -124,6 +124,21 @@ public class GenericCacheableServiceImpl<B extends PO, K> extends GenericService
     @Override
     public List<B> queryByArgs(Object... params) {
         return super.queryByArgs(params);
+    }
+
+    @Override
+    public B queryFieldById(String fieldSQL, K id) {
+        return super.queryFieldById(fieldSQL, id);
+    }
+
+    @Override
+    public List<B> queryFieldByIds(String fieldSQL, Collection<K> ids) {
+        return super.queryFieldByIds(fieldSQL, ids);
+    }
+
+    @Override
+    public List<B> queryFieldByIds(String fieldSQL, K[] ids) {
+        return super.queryFieldByIds(fieldSQL, ids);
     }
 
     @Override

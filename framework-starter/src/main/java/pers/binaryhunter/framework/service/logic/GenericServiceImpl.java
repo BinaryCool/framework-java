@@ -97,7 +97,7 @@ public class GenericServiceImpl<B extends PO, K> extends GenericAbstractServiceI
     }
 
     @Override
-    public List<B> queryByField(String fieldSQL, Map<String, Object> params) {
+    public List<B> queryField(String fieldSQL, Map<String, Object> params) {
         params = doStatusParams(params);
         params.put("fieldSQL", fieldSQL);
         this.maxLimit(params);
@@ -105,18 +105,18 @@ public class GenericServiceImpl<B extends PO, K> extends GenericAbstractServiceI
     }
 
     @Override
-    public List<B> queryByField(String fieldSQL, Object... params) {
-        return queryByField(fieldSQL, MapConverter.arr2Map(params));
+    public List<B> queryField(String fieldSQL, Object... params) {
+        return queryField(fieldSQL, MapConverter.arr2Map(params));
     }
 
     @Override
-    public B queryFirstByField(String fieldSQL, Map<String, Object> params) {
+    public B queryFieldFirst(String fieldSQL, Map<String, Object> params) {
         return this.queryFirstPrivate(params, fieldSQL);
     }
 
     @Override
-    public B queryFirstByField(String fieldSQL, Object... params) {
-        return queryFirstByField(fieldSQL, MapConverter.arr2Map(params));
+    public B queryFieldFirst(String fieldSQL, Object... params) {
+        return queryFieldFirst(fieldSQL, MapConverter.arr2Map(params));
     }
 
     @Override
@@ -130,17 +130,6 @@ public class GenericServiceImpl<B extends PO, K> extends GenericAbstractServiceI
     }
 
     @Override
-    public boolean exists(Map<String, Object> params) {
-        B bean = queryFirstByField("id", params);
-        return null != bean;
-    }
-
-    @Override
-    public boolean exists(Object... params) {
-        return exists(MapConverter.arr2Map(params));
-    }
-
-    @Override
     public List<B> queryByArgs(Map<String, Object> params) {
         params = doStatusParams(params);
         this.maxLimit(params);
@@ -150,6 +139,17 @@ public class GenericServiceImpl<B extends PO, K> extends GenericAbstractServiceI
     @Override
     public List<B> queryByArgs(Object... params) {
         return queryByArgs(MapConverter.arr2Map(params));
+    }
+
+    @Override
+    public boolean exists(Map<String, Object> params) {
+        B bean = queryFieldFirst("id", params);
+        return null != bean;
+    }
+
+    @Override
+    public boolean exists(Object... params) {
+        return exists(MapConverter.arr2Map(params));
     }
 
     @Override
@@ -318,7 +318,7 @@ public class GenericServiceImpl<B extends PO, K> extends GenericAbstractServiceI
         if (CollectionUtils.isEmpty(ids)) {
             return null;
         }
-        return queryByArgs("idIn", SqlUtil.toSqlIn(ids));
+        return this.queryByArgs("idIn", SqlUtil.toSqlIn(ids));
     }
 
     @Override
@@ -326,12 +326,27 @@ public class GenericServiceImpl<B extends PO, K> extends GenericAbstractServiceI
         if (ArrayUtils.isEmpty(ids)) {
             return null;
         }
-        return queryByArgs("idIn", SqlUtil.toSqlIn(ids));
+        return this.queryByArgs("idIn", SqlUtil.toSqlIn(ids));
+    }
+
+    @Override
+    public B queryFieldById(String fieldSQL, K id) {
+        return this.queryFieldFirst(fieldSQL, "id", id);
+    }
+
+    @Override
+    public List<B> queryFieldByIds(String fieldSQL, Collection<K> ids) {
+        return this.queryField(fieldSQL, "idIn", SqlUtil.toSqlIn(ids));
+    }
+
+    @Override
+    public List<B> queryFieldByIds(String fieldSQL, K[] ids) {
+        return this.queryField(fieldSQL, "idIn", SqlUtil.toSqlIn(ids));
     }
 
     @Override
     public B getById(K id) {
-        return dao.getById(id);
+        return this.dao.getById(id);
     }
 
     @Override
@@ -347,12 +362,12 @@ public class GenericServiceImpl<B extends PO, K> extends GenericAbstractServiceI
     @Override
     public long countByArgs(Map<String, Object> params) {
         params = this.doStatusParams(params);
-        return dao.countByArgs(params);
+        return this.dao.countByArgs(params);
     }
 
     @Override
     public long countByArgs(Object... params) {
-        return countByArgs(MapConverter.arr2Map(params));
+        return this.countByArgs(MapConverter.arr2Map(params));
     }
 
     /**
@@ -511,7 +526,7 @@ public class GenericServiceImpl<B extends PO, K> extends GenericAbstractServiceI
         if (StringUtils.isBlank(fieldSQL)) {
             list = this.queryByArgs(params);
         } else {
-            list = this.queryByField(fieldSQL, params);
+            list = this.queryField(fieldSQL, params);
         }
         if (null == list || 0 >= list.size()) {
             return null;

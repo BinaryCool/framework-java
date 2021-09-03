@@ -114,22 +114,22 @@ public interface GenericService<B extends PO, K> {
     /**
      * 查询部分字段
      */
-    List<B> queryByField(String fieldSQL, Map<String, Object> params);
+    List<B> queryField(String fieldSQL, Map<String, Object> params);
 
     /**
      * 查询部分字段
      */
-    List<B> queryByField(String fieldSQL, Object... params);
+    List<B> queryField(String fieldSQL, Object... params);
 
     /**
      * 查询部分字段(第一个)
      */
-    B queryFirstByField(String fieldSQL, Map<String, Object> params);
+    B queryFieldFirst(String fieldSQL, Map<String, Object> params);
 
     /**
      * 查询部分字段(第一个)
      */
-    B queryFirstByField(String fieldSQL, Object... params);
+    B queryFieldFirst(String fieldSQL, Object... params);
 
     /**
      * 查询第一个
@@ -144,20 +144,6 @@ public interface GenericService<B extends PO, K> {
      * @return 查询结果
      */
     B queryFirst(Object... params);
-
-    /**
-     * 判断是否存在
-     *
-     * @return 是否存在
-     */
-    boolean exists(Map<String, Object> params);
-
-    /**
-     * 判断是否存在
-     *
-     * @return 判断是否存在
-     */
-    boolean exists(Object... params);
 
     /**
      * 查询
@@ -175,6 +161,20 @@ public interface GenericService<B extends PO, K> {
      * @return 查询结果
      */
     List<B> queryByArgs(Object... params);
+
+    /**
+     * 判断是否存在
+     *
+     * @return 是否存在
+     */
+    boolean exists(Map<String, Object> params);
+
+    /**
+     * 判断是否存在
+     *
+     * @return 判断是否存在
+     */
+    boolean exists(Object... params);
 
     /**
      * 通过id删除
@@ -307,7 +307,6 @@ public interface GenericService<B extends PO, K> {
 
     /**
      * 通过编号获取
-     * 已弃用, 请使用queryById
      *
      * @param id 编号
      * @return 实体
@@ -317,7 +316,6 @@ public interface GenericService<B extends PO, K> {
 
     /**
      * 通过编号获取
-     * 已弃用, 请使用queryByIds
      *
      * @param ids 编号
      * @return 实体
@@ -327,7 +325,6 @@ public interface GenericService<B extends PO, K> {
 
     /**
      * 通过编号获取
-     * 已弃用, 请使用queryByIds
      *
      * @param ids 编号
      * @return 实体
@@ -337,12 +334,40 @@ public interface GenericService<B extends PO, K> {
 
     /**
      * 通过编号获取
+     *
+     * @param id 编号
+     * @return 实体
+     * By Yuwen on 2017年6月22日
+     */
+    B queryFieldById(String fieldSQL, K id);
+
+    /**
+     * 通过编号获取
+     *
+     * @param ids 编号
+     * @return 实体
+     * By Yuwen on 2017年6月22日
+     */
+    List<B> queryFieldByIds(String fieldSQL, Collection<K> ids);
+
+    /**
+     * 通过编号获取
+     *
+     * @param ids 编号
+     * @return 实体
+     * By Yuwen on 2017年6月22日
+     */
+    List<B> queryFieldByIds(String fieldSQL, K[] ids);
+
+    /**
+     * 通过编号获取
      * 已弃用, 请使用queryById
      *
      * @param id 编号
      * @return 实体
      * By Yuwen on 2017年6月22日
      */
+    @Deprecated
     B getById(K id);
 
     /**
@@ -353,6 +378,7 @@ public interface GenericService<B extends PO, K> {
      * @return 实体
      * By Yuwen on 2017年6月22日
      */
+    @Deprecated
     List<B> getByIds(Collection<K> ids);
 
     /**
@@ -363,6 +389,7 @@ public interface GenericService<B extends PO, K> {
      * @return 实体
      * By Yuwen on 2017年6月22日
      */
+    @Deprecated
     List<B> getByIds(K[] ids);
 
     /**
