@@ -61,8 +61,7 @@ public class GenericServiceImpl<B extends PO, K> extends GenericAbstractServiceI
             return null;
         }
         params = MapConverter.convertPage(params, page);
-        this.maxLimit(params);
-        return dao.queryByArgs(params);
+        return this.queryByArgs(params);
     }
 
     @Override
@@ -466,11 +465,11 @@ public class GenericServiceImpl<B extends PO, K> extends GenericAbstractServiceI
                     page.setPageNum(1);
                 }
                 params = MapConverter.convertPage(params, page);
-                this.maxLimit(params);
                 List<B> results = null;
                 if (isQuery) {
-                    results = dao.queryByArgs(params);
+                    results = this.queryByArgs(params);
                 } else {
+                    this.maxLimit(params);
                     results = dao.pageByArgs(params);
                 }
 
