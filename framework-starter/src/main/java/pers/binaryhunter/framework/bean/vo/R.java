@@ -26,6 +26,50 @@ public class R<T> implements Serializable {
     private static final long serialVersionUID = -3706325472006568883L;
     private static final Logger log = LoggerFactory.getLogger(R.class);
 
+    public enum CodeEnum {
+        SUCC(0, "成功", "成功"),
+        ERR_UNKOWN(1, "未知错误", "未知错误, 请联系管理员"),
+        SESSION_OUT(2, "会话过期", "你的会话已过期, 请重新登陆"),
+        ERR_BUSS(3, "业务异常", "参数或业务出错"),
+        PERMISSION_DENIED(4, "业务异常", "请求参数错误"),
+        ERR_BUSS_CHECKED(5, "业务异常", "业务逻辑错误"),
+        ;
+
+        private int code;
+        private String name;
+        private String msg;
+
+        CodeEnum(int code, String name, String msg) {
+            this.code = code;
+            this.name = name;
+            this.msg = msg;
+        }
+
+        public int getCode() {
+            return code;
+        }
+
+        public void setCode(int code) {
+            this.code = code;
+        }
+
+        public String getMsg() {
+            return msg;
+        }
+
+        public void setMsg(String msg) {
+            this.msg = msg;
+        }
+
+        public String getName() {
+            return name;
+        }
+
+        public void setName(String name) {
+            this.name = name;
+        }
+    }
+    
 	/**
 	 * 返回代码
 	 */
@@ -34,6 +78,10 @@ public class R<T> implements Serializable {
 	 * 返回对象
 	 */
 	private T data;
+    /**
+     * 返回消息
+     */
+	private String message;
 
 
     /**
@@ -51,7 +99,7 @@ public class R<T> implements Serializable {
      */
     public static R<String> toResponse(Exception ex) {
         if (null == ex) {
-            return toResponse("", R.CodeEnum.SUCC.getCode());
+            return toResponse();
         }
 
         int code = R.CodeEnum.ERR_UNKOWN.getCode();
@@ -77,7 +125,7 @@ public class R<T> implements Serializable {
             }
         }
 
-        return toResponse(msg, code);
+        return toResponseError(msg, code);
     }
 
     /**
@@ -96,10 +144,17 @@ public class R<T> implements Serializable {
      * @return json 串
      */
     public static <T> R<T> toResponse(T bean, int code) {
-        R rb = new R();
-        rb.setCode(code);
-        rb.setData(bean);
-        return rb;
+        return toResponse(bean, CodeEnum.SUCC.getMsg(), code);
+    }
+
+    /**
+     * 把返回对象进行封装
+     * @param message 错误信息
+     * @param code 返回代码
+     * @return json 串
+     */
+    public static <T> R<T> toResponseError(String message, int code) {
+        return toResponse(null, message, code);
     }
 
     /**
@@ -133,6 +188,22 @@ public class R<T> implements Serializable {
 	public void setData(T data) {
 		this.data = data;
 	}
+
+    public String getMessage() {
+        return message;
+    }
+
+    public void setMessage(String message) {
+        this.message = message;
+    }
+
+    private static <T> R<T> toResponse(T bean, String message, int code) {
+        R rb = new R();
+        rb.setCode(code);
+        rb.setData(bean);
+        rb.setMessage(message);
+        return rb;
+    }
 	
     private static void errorLog(Exception ex) {
         HttpServletRequest request = ((ServletRequestAttributes) RequestContextHolder.getRequestAttributes()).getRequest();
@@ -145,49 +216,5 @@ public class R<T> implements Serializable {
             }
         }
         log.error("", ex);
-    }
-
-    public enum CodeEnum {
-	    SUCC(0, "成功", "成功"),
-        ERR_UNKOWN(1, "未知错误", "未知错误, 请联系管理员"),
-        SESSION_OUT(2, "会话过期", "你的会话已过期, 请重新登陆"),
-        ERR_BUSS(3, "业务异常", "参数或业务出错"),
-        PERMISSION_DENIED(4, "业务异常", "请求参数错误"),
-        ERR_BUSS_CHECKED(5, "业务异常", "业务逻辑错误"),
-        ;
-
-        private int code;
-        private String name;
-        private String msg;
-
-	    CodeEnum(int code, String name, String msg) {
-	        this.code = code;
-	        this.name = name;
-	        this.msg = msg;
-        }
-
-        public int getCode() {
-            return code;
-        }
-
-        public void setCode(int code) {
-            this.code = code;
-        }
-
-        public String getMsg() {
-            return msg;
-        }
-
-        public void setMsg(String msg) {
-            this.msg = msg;
-        }
-
-        public String getName() {
-            return name;
-        }
-
-        public void setName(String name) {
-            this.name = name;
-        }
     }
 }

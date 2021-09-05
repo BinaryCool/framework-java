@@ -51,13 +51,13 @@ public class GenericController {
     }
 
     /**
-     * 把返回对象进行封装
-     * @param bean 返回对象
+     * 把返回错误信息进行封装
+     * @param message 返回对象
      * @param code 返回代码
      * @return json 串
      */
-    private <T> R<T> toResponse(T bean, int code) {
-        return R.toResponse(bean, code);
+    protected <T> R<T> toResponseError(String message, int code) {
+        return R.toResponseError(message, code);
     }
 
     /**
