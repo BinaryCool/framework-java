@@ -99,8 +99,9 @@ public class MapConverter {
         if (null == map) {
             map = new HashMap<>(2);
         }
-
-        map.put("start", (page.getPageNum() - 1) * page.getNumPerPage());
+        if (null != page.getPageNum()) {
+            map.put("start", (page.getPageNum() - 1) * page.getNumPerPage());
+        }
         map.put("limit", page.getNumPerPage());
 
         if (StringUtils.isNotEmpty(page.getOrderField())) {

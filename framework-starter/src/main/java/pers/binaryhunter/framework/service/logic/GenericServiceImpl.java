@@ -46,48 +46,93 @@ public class GenericServiceImpl<B extends PO, K> extends GenericAbstractServiceI
 
     @Override
     public PageResult<B> queryByPage(Map<String, Object> params, Page page) {
-        return this.queryByPage(params, page, true);
+        PageResult<B> pageResult = new PageResult<>();
+        Long count = null;
+        // 如果传递请求页数, 表示需要分页
+        if (page.isPaging()) {
+            count = this.dao.countByArgs(params);
+        }
+
+        // 如果分页, 但总数量为空, 直接返回
+        if (page.isPaging() && (null == count || 0 >= count)) {
+            page.setTotalCount(count);
+            pageResult.setPage(page);
+            return pageResult;
+        }
+
+        if (null == page.getPageNum() || page.getPageNum() > page.getPageCount()) { //如果未设置当前页或当前页面大于总页面
+            page.setPageNum(1);
+        }
+        params = MapConverter.convertPage(params, page);
+        params = this.maxLimit(params);
+        List<B> results = this.queryByArgs(params);
+
+        if (page.isPaging()) {
+            page.setTotalCount(count);
+        } else if (null != results) {
+            page.setTotalCount(new Long(results.size()), false);
+        }
+
+        pageResult.setResults(results);
+        pageResult.setPage(page);
+        return pageResult;
     }
 
     @Override
     public PageResult<B> queryByPage(Page page, Object... params) {
-        return queryByPage(MapConverter.arr2Map(params), page);
+        return this.queryByPage(MapConverter.arr2Map(params), page);
     }
 
     @Override
     public List<B> queryByPageSkipCount(Map<String, Object> params, Page page) {
-        params = this.doStatusParams(params);
-        if (page.getPageNum() > page.getPageCount()) { //如果当前页面大于总页面
+        if (null == page.getPageNum() || page.getPageNum() > page.getPageCount()) { //如果未设置当前页或当前页面大于总页面
             return null;
         }
         params = MapConverter.convertPage(params, page);
+        params = this.maxLimit(params);
         return this.queryByArgs(params);
     }
 
     @Override
     public List<B> queryByPageSkipCount(Page page, Object... params) {
-        return pageSkipCount(MapConverter.arr2Map(params), page);
+        return this.pageSkipCount(MapConverter.arr2Map(params), page);
     }
 
     @Override
     public PageResult<B> pageByArgs(Map<String, Object> params, Page page) {
-        return this.queryByPage(params, page, false);
+        PageResult<B> pageResult = new PageResult<>();
+        params = this.doStatusParams(params);
+        Long count = this.dao.countByArgs(params);
+        if (null != count) {
+            page.setTotalCount(count);
+            if (count > 0L) {
+                if (null == page.getPageNum() || page.getPageNum() > page.getPageCount()) { //如果未设置当前页或当前页面大于总页面
+                    page.setPageNum(1);
+                }
+                params = MapConverter.convertPage(params, page);
+                params = this.maxLimit(params);
+                List<B> results = this.dao.pageByArgs(params);
+                pageResult.setResults(results);
+            }
+        }
+
+        pageResult.setPage(page);
+        return pageResult;
     }
 
     @Override
     public PageResult<B> pageByArgs(Page page, Object... params) {
-        return pageByArgs(MapConverter.arr2Map(params), page);
+        return this.pageByArgs(MapConverter.arr2Map(params), page);
     }
 
     @Override
     public List<B> pageSkipCount(Map<String, Object> params, Page page) {
         params = this.doStatusParams(params);
-        if (page.getPageNum() > page.getPageCount()) { //如果当前页面大于总页面
+        if (null == page.getPageNum() || page.getPageNum() > page.getPageCount()) { //如果未设置当前页或当前页面大于总页面
             return null;
         }
         params = MapConverter.convertPage(params, page);
-        this.maxLimit(params);
-        return dao.pageByArgs(params);
+        return this.dao.pageByArgs(params);
     }
 
     @Override
@@ -99,8 +144,7 @@ public class GenericServiceImpl<B extends PO, K> extends GenericAbstractServiceI
     public List<B> queryField(String fieldSQL, Map<String, Object> params) {
         params = doStatusParams(params);
         params.put("fieldSQL", fieldSQL);
-        this.maxLimit(params);
-        return dao.queryByField(params);
+        return this.dao.queryByField(params);
     }
 
     @Override
@@ -131,24 +175,23 @@ public class GenericServiceImpl<B extends PO, K> extends GenericAbstractServiceI
     @Override
     public List<B> queryByArgs(Map<String, Object> params) {
         params = doStatusParams(params);
-        this.maxLimit(params);
-        return dao.queryByArgs(params);
+        return this.dao.queryByArgs(params);
     }
 
     @Override
     public List<B> queryByArgs(Object... params) {
-        return queryByArgs(MapConverter.arr2Map(params));
+        return this.queryByArgs(MapConverter.arr2Map(params));
     }
 
     @Override
     public boolean exists(Map<String, Object> params) {
-        B bean = queryFieldFirst("id", params);
+        B bean = this.queryFieldFirst("id", params);
         return null != bean;
     }
 
     @Override
     public boolean exists(Object... params) {
-        return exists(MapConverter.arr2Map(params));
+        return this.exists(MapConverter.arr2Map(params));
     }
 
     @Override
@@ -163,17 +206,17 @@ public class GenericServiceImpl<B extends PO, K> extends GenericAbstractServiceI
 
     @Override
     public void deleteByIds(K[] ids) {
-        deleteByArgs("idIn", SqlUtil.toSqlIn(ids));
+        this.deleteByArgs("idIn", SqlUtil.toSqlIn(ids));
     }
 
     @Override
     public void removeByIds(K[] ids) {
-        dao.deleteByIds(SqlUtil.toSqlIn(ids));
+        this.dao.deleteByIds(SqlUtil.toSqlIn(ids));
     }
 
     @Override
     public void removeByIds(Collection<K> ids) {
-        dao.deleteByIds(SqlUtil.toSqlIn(ids));
+        this.dao.deleteByIds(SqlUtil.toSqlIn(ids));
     }
 
     @Override
@@ -181,24 +224,24 @@ public class GenericServiceImpl<B extends PO, K> extends GenericAbstractServiceI
         if (isParamsEmpty(params)) {
             throw new BusinessException();
         }
-        dao.deleteByArgs(params);
+        this.dao.deleteByArgs(params);
     }
 
     @Override
     public void deleteByArgs(Object... params) {
-        deleteByArgs(MapConverter.arr2Map(params));
+        this.deleteByArgs(MapConverter.arr2Map(params));
     }
 
     @Override
     public void update(B bean) {
         this.appendUpdate(bean);
-        dao.update(bean);
+        this.dao.update(bean);
     }
 
     @Override
     public void updateNotNull(B bean) {
         this.appendUpdate(bean);
-        dao.updateNotNull(bean);
+        this.dao.updateNotNull(bean);
     }
 
     @Override
@@ -215,7 +258,7 @@ public class GenericServiceImpl<B extends PO, K> extends GenericAbstractServiceI
         beans.forEach(bean -> this.appendUpdate(bean));
 
         if (COUNT_BATCH >= beans.size()) {
-            dao.updateBatch(beans);
+            this.dao.updateBatch(beans);
         } else {
             this.doTransactionBatch(beans, i -> dao.updateBatch(beans.subList(COUNT_BATCH * i, Math.min(COUNT_BATCH * (i + 1), beans.size()))));
         }
@@ -452,41 +495,6 @@ public class GenericServiceImpl<B extends PO, K> extends GenericAbstractServiceI
     }
 
     /**
-     * 分页查询
-     */
-    private PageResult<B> queryByPage(Map<String, Object> params, Page page, boolean isQuery) {
-        PageResult<B> pageResult = new PageResult<>();
-        params = this.doStatusParams(params);
-        Long count = dao.countByArgs(params);
-        if (null != count) {
-            page.setTotalCount(count);
-            if (count > 0L) {
-                if (page.getPageNum() > page.getPageCount()) { //如果当前页面大于总页面
-                    page.setPageNum(1);
-                }
-                params = MapConverter.convertPage(params, page);
-                List<B> results = null;
-                if (isQuery) {
-                    results = this.queryByArgs(params);
-                } else {
-                    this.maxLimit(params);
-                    results = dao.pageByArgs(params);
-                }
-
-                if (null == results) {
-                    results = new ArrayList<>();
-                }
-
-                pageResult.setResults(results);
-            }
-        }
-
-        pageResult.setPage(page);
-
-        return pageResult;
-    }
-
-    /**
      * 添加时添加默认字段
      */
     private void appendAdd(B bean) {
@@ -562,7 +570,7 @@ public class GenericServiceImpl<B extends PO, K> extends GenericAbstractServiceI
     /**
      * 添加最大limit限制
      */
-    private void maxLimit(Map<String, Object> params) {
+    private Map<String, Object> maxLimit(Map<String, Object> params) {
         if (null == params) {
             params = new HashMap<>();
         }
@@ -579,5 +587,6 @@ public class GenericServiceImpl<B extends PO, K> extends GenericAbstractServiceI
         if (null == limit || limit.intValue() > MAX_LIMIT) {
             params.put("limit", MAX_LIMIT);
         }
+        return params;
     }
 }

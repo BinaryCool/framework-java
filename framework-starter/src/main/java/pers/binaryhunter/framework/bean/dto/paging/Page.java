@@ -1,5 +1,7 @@
 package pers.binaryhunter.framework.bean.dto.paging;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import java.io.Serializable;
 
 /**
@@ -11,7 +13,7 @@ public class Page implements Serializable {
 	/**
 	 * 当前页数
 	 */
-	private Integer pageNum = 1;
+	private Integer pageNum;
 	/**
 	 * 每页条数
 	 */
@@ -19,10 +21,12 @@ public class Page implements Serializable {
 	/**
 	 * 排序字段
 	 */
+	@JsonIgnore
 	private String orderField;
 	/**
 	 * 排序方向
 	 */
+    @JsonIgnore
 	private String orderDirection;
 	/**
 	 * 总数量
@@ -41,10 +45,10 @@ public class Page implements Serializable {
 		if(null == pageNum) {
 			return;
 		}
-		
+
 		this.pageNum = pageNum;
 	}
-
+    @JsonIgnore
 	public String getOrderField() {
 		return orderField;
 	}
@@ -52,7 +56,7 @@ public class Page implements Serializable {
 	public void setOrderField(String orderField) {
 		this.orderField = orderField;
 	}
-
+    @JsonIgnore
 	public String getOrderDirection() {
 		return orderDirection;
 	}
@@ -73,13 +77,20 @@ public class Page implements Serializable {
 		return totalCount;
 	}
 
-	public void setTotalCount(Long totalCount) {
+    public void setTotalCount(Long totalCount) {
+        this.setTotalCount(totalCount, true);
+    }
+
+	public void setTotalCount(Long totalCount, boolean calcPageCount) {
 		this.totalCount = totalCount;
-		
+		if (!calcPageCount) {
+		    return;
+        }
+
 		if(null == this.totalCount || null == this.numPerPage) {
 			return;
 		}
-		
+
 		this.pageCount = (int)(this.totalCount / this.numPerPage);
 		if(0 < this.totalCount % this.numPerPage) {
 			this.pageCount ++;
@@ -97,15 +108,10 @@ public class Page implements Serializable {
 		this.numPerPage = numPerPage;
 	}
 
-    @Override
-    public String toString() {
-        return "Page{" +
-                "pageNum=" + pageNum +
-                ", numPerPage=" + numPerPage +
-                ", orderField='" + orderField + '\'' +
-                ", orderDirection='" + orderDirection + '\'' +
-                ", totalCount=" + totalCount +
-                ", pageCount=" + pageCount +
-                '}';
+    /**
+     * 是否需要分页
+     */
+	public boolean isPaging() {
+	    return null != this.getPageNum() && 0 < this.getPageNum();
     }
 }
