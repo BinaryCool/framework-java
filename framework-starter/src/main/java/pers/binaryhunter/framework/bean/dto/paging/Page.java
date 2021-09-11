@@ -9,7 +9,10 @@ import java.io.Serializable;
  * @author Yuwen on 2017年6月22日
  */
 public class Page implements Serializable {
+    public static final int MAX_LIMIT = 1000;
+    
     private static final long serialVersionUID = 2L;
+    private static final int DEFAULT_NUM_PER_PAGE = 50;
 	/**
 	 * 当前页数
 	 */
@@ -17,7 +20,7 @@ public class Page implements Serializable {
 	/**
 	 * 每页条数
 	 */
-	private Integer numPerPage = 50;
+	private Integer numPerPage;
 	/**
 	 * 排序字段
 	 */
@@ -87,24 +90,29 @@ public class Page implements Serializable {
 		    return;
         }
 
-		if(null == this.totalCount || null == this.numPerPage) {
+		if(null == this.totalCount) {
 			return;
 		}
 
-		this.pageCount = (int)(this.totalCount / this.numPerPage);
-		if(0 < this.totalCount % this.numPerPage) {
+		this.pageCount = (int)(this.totalCount / this.getNumPerPage());
+		if(0 < this.totalCount % this.getNumPerPage()) {
 			this.pageCount ++;
 		}
 	}
 
 	public Integer getNumPerPage() {
-		return numPerPage;
+		if (null != numPerPage) {
+		    return numPerPage;
+        } 
+		
+		if (isPaging()) {
+		    return DEFAULT_NUM_PER_PAGE;
+        }
+		
+	    return MAX_LIMIT;
 	}
 
 	public void setNumPerPage(Integer numPerPage) {
-		if(null == numPerPage) {
-			return;
-		}
 		this.numPerPage = numPerPage;
 	}
 

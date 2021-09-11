@@ -38,7 +38,6 @@ import java.util.stream.Stream;
 public class GenericServiceImpl<B extends PO, K> extends GenericAbstractServiceImpl<B> implements GenericService<B, K> {
     private static final Logger log = LoggerFactory.getLogger(GenericServiceImpl.class);
     private static final int COUNT_BATCH = 1000;
-    private static final int MAX_LIMIT = 1000;
 
     protected GenericDAO<B, K> dao;
     @Resource
@@ -584,8 +583,8 @@ public class GenericServiceImpl<B extends PO, K> extends GenericAbstractServiceI
                 log.error("Parse limit", ex);
             }
         }
-        if (null == limit || limit.intValue() > MAX_LIMIT) {
-            params.put("limit", MAX_LIMIT);
+        if (null == limit || limit.intValue() > Page.MAX_LIMIT) {
+            params.put("limit", Page.MAX_LIMIT);
         }
         return params;
     }
