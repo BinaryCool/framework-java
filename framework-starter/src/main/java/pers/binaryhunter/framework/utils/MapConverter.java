@@ -47,6 +47,10 @@ public class MapConverter {
                     log.error("", e);
                 }
             }
+            // 转化继承属性
+            if (obj.getClass().getSuperclass() != null && !obj.getClass().getSuperclass().getName().equals("java.lang.Object")) {
+                convertByField(obj.getClass().getSuperclass(), obj, map);
+            }
         }
     }
 
@@ -67,10 +71,6 @@ public class MapConverter {
         if (obj != null) {
             Class c = obj.getClass();
             convertByField(c, obj, map);
-            // 转化继承属性
-            if (obj.getClass().getSuperclass() != null && !obj.getClass().getSuperclass().getName().equals("java.lang.Object")) {
-                convertByField(obj.getClass().getSuperclass(), obj, map);
-            }
         }
         return map;
     }
@@ -121,6 +121,7 @@ public class MapConverter {
 
     /**
      * 解码UTF8
+     *
      * @return
      */
     public static void decodeByField(Object obj, String... fieldNames) {
