@@ -48,8 +48,8 @@ public class MapConverter {
                 }
             }
             // 转化继承属性
-            if (obj.getClass().getSuperclass() != null && !obj.getClass().getSuperclass().getName().equals("java.lang.Object")) {
-                convertByField(obj.getClass().getSuperclass(), obj, map);
+            if (c.getSuperclass() != null && !c.getSuperclass().getName().equals("java.lang.Object")) {
+                convertByField(c.getSuperclass(), obj, map);
             }
         }
     }
