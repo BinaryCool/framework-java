@@ -7,26 +7,34 @@ import java.util.Date;
  * @author Yuwen
  */
 public class PO {
-	/**
-	 * 不可用或删除
-	 */
-	public static final int STATUS_DISABLE = 0;
-	/**
-	 * 可用
-	 */
-	public static final int STATUS_ENABLE = 1;
+    /**
+     * 不可用或删除
+     */
+    public static final int STATUS_DISABLE = 0;
+    /**
+     * 可用
+     */
+    public static final int STATUS_ENABLE = 1;
 
-	private Long id;
+    private Long id;
 
-	private Integer status;
+    private Integer status;
+    /**
+     * 创建人ID
+     */
+    private String createBy;
+    /**
+     * 创建人名称
+     */
+    private String createName;
 
-	private String createBy;
+    private Date createTime;
 
-	private Date createTime;
+    private String updateBy;
 
-	private String updateBy;
+    private String updateName;
 
-	private Date updateTime;
+    private Date updateTime;
 
     public Long getId() {
         return id;
@@ -74,5 +82,21 @@ public class PO {
 
     public void setUpdateTime(Date updateTime) {
         this.updateTime = updateTime;
+    }
+
+    public String getCreateName() {
+        return createName;
+    }
+
+    public void setCreateName(String createName) {
+        this.createName = createName;
+    }
+
+    public String getUpdateName() {
+        return updateName;
+    }
+
+    public void setUpdateName(String updateName) {
+        this.updateName = updateName;
     }
 }

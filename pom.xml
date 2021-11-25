@@ -23,7 +23,7 @@
     </modules>
 
     <properties>
-        <framework.version>3.2.10</framework.version>
+        <framework.version>3.2.11</framework.version>
 
         <java.version>1.8</java.version>
         <commons.lang.version>3.9</commons.lang.version>
@@ -31,7 +31,7 @@
         <commons.collections.version>3.2.2</commons.collections.version>
         <slf4j.version>1.7.21</slf4j.version>
         <fastjson.version>1.2.73</fastjson.version>
-        <lombok.version>1.16.20</lombok.version>
+        <lombok.version>1.18.22</lombok.version>
         <redis.clients.version>2.9.0</redis.clients.version>
         <redisson.version>3.16.0</redisson.version>
         <javaee.version>7.0</javaee.version>

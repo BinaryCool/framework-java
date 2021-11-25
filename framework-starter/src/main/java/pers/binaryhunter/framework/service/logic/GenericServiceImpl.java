@@ -49,7 +49,7 @@ public class GenericServiceImpl<B extends PO, K> extends GenericAbstractServiceI
         Long count = null;
         // 如果传递请求页数, 表示需要分页
         if (page.isPaging()) {
-            count = this.dao.countByArgs(params);
+            count = this.countByArgs(params);
         }
 
         // 如果分页, 但总数量为空, 直接返回
@@ -59,7 +59,7 @@ public class GenericServiceImpl<B extends PO, K> extends GenericAbstractServiceI
             return pageResult;
         }
 
-        if (null == page.getPageNum() || page.getPageNum() > page.getPageCount()) { //如果未设置当前页或当前页面大于总页面
+        if (page.isPaging() && page.getPageNum() > page.getPageCount()) { //如果未设置当前页或当前页面大于总页面
             page.setPageNum(1);
         }
         params = MapConverter.convertPage(params, page);
@@ -69,7 +69,7 @@ public class GenericServiceImpl<B extends PO, K> extends GenericAbstractServiceI
         if (page.isPaging()) {
             page.setTotalCount(count);
         } else if (null != results) {
-            page.setTotalCount(new Long(results.size()), false);
+            page.setTotalCount((long) results.size(), false);
         }
 
         pageResult.setResults(results);
@@ -143,7 +143,7 @@ public class GenericServiceImpl<B extends PO, K> extends GenericAbstractServiceI
     public List<B> queryField(String fieldSQL, Map<String, Object> params) {
         params = doStatusParams(params);
         params.put("fieldSQL", fieldSQL);
-        return this.dao.queryByField(params);
+        return dao.queryByField(params);
     }
 
     @Override
@@ -174,7 +174,7 @@ public class GenericServiceImpl<B extends PO, K> extends GenericAbstractServiceI
     @Override
     public List<B> queryByArgs(Map<String, Object> params) {
         params = doStatusParams(params);
-        return this.dao.queryByArgs(params);
+        return dao.queryByArgs(params);
     }
 
     @Override
@@ -257,7 +257,7 @@ public class GenericServiceImpl<B extends PO, K> extends GenericAbstractServiceI
         beans.forEach(bean -> this.appendUpdate(bean));
 
         if (COUNT_BATCH >= beans.size()) {
-            this.dao.updateBatch(beans);
+            dao.updateBatch(beans);
         } else {
             this.doTransactionBatch(beans, i -> dao.updateBatch(beans.subList(COUNT_BATCH * i, Math.min(COUNT_BATCH * (i + 1), beans.size()))));
         }
@@ -273,9 +273,14 @@ public class GenericServiceImpl<B extends PO, K> extends GenericAbstractServiceI
             throw new BusinessException();
         }
 
-        UserPO userPO = getLoginedUser();
-        if (null != userPO && StringUtils.isNotBlank(userPO.getName())) {
-            setSql += ", t.update_by = '" + userPO.getName() + "'";
+        UserPO userPO = getLoginUser();
+        if (null != userPO) {
+            if (StringUtils.isNotBlank(userPO.getModifyBy())) {
+                setSql += ", t.update_by = '" + userPO.getModifyBy() + "'";
+            }
+            if (StringUtils.isNotBlank(userPO.getModifyName())) {
+                setSql += ", t.update_name = '" + userPO.getModifyName() + "'";
+            }
         }
 
         params.put("setSql", setSql);
@@ -454,7 +459,7 @@ public class GenericServiceImpl<B extends PO, K> extends GenericAbstractServiceI
     /**
      * 获取登录用户
      */
-    protected UserPO getLoginedUser() {
+    protected UserPO getLoginUser() {
         return null;
     }
 
@@ -497,26 +502,28 @@ public class GenericServiceImpl<B extends PO, K> extends GenericAbstractServiceI
      * 添加时添加默认字段
      */
     private void appendAdd(B bean) {
-        UserPO userPO = getLoginedUser();
+        UserPO userPO = getLoginUser();
         if (null == userPO) {
             return;
         }
 
         PO po = bean;
-        po.setCreateBy(userPO.getName());
+        po.setCreateBy(userPO.getModifyBy());
+        po.setCreateName(userPO.getModifyName());
     }
 
     /**
      * 修改时添加默认字段
      */
     private void appendUpdate(B bean) {
-        UserPO userPO = getLoginedUser();
+        UserPO userPO = getLoginUser();
         if (null == userPO) {
             return;
         }
 
         PO po = bean;
-        po.setUpdateBy(userPO.getName());
+        po.setUpdateBy(userPO.getModifyBy());
+        po.setUpdateName(userPO.getModifyName());
     }
 
     /**

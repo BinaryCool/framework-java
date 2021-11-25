@@ -7,15 +7,107 @@ import org.slf4j.LoggerFactory;
 import pers.binaryhunter.framework.bean.dto.paging.Page;
 
 import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.net.URLDecoder;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.stream.Stream;
 
 public class MapConverter {
     private static final Logger log = LoggerFactory.getLogger(MapConverter.class);
+
+    /**
+     * 验证串 属性名:提示信息:(属性类型)
+     */
+    private static void validateForm(Class c, Object obj, String rule) {
+        if (null == obj || StringUtils.isBlank(rule)) {
+            return;
+        }
+
+        Field[] filedArr = c.getDeclaredFields();
+        for (Field f : filedArr) {
+            if (Modifier.isStatic(f.getModifiers())) { // 跳过静态属性
+                continue;
+            }
+            String[] ruleArr = rule.split(":");
+
+            String name = f.getName();
+            if (!ruleArr[0].equals(name)) {
+                continue;
+            }
+
+            String shortName = name.substring(0, 1).toUpperCase() + name.substring(1);
+            Method method;
+            try {
+                method = c.getMethod("get" + shortName);
+
+                if (method == null) {
+                    continue;
+                }
+                Object value = method.invoke(obj);
+
+                String validateType = null;
+                if (2 < ruleArr.length) {
+                    validateType = ruleArr[2].trim();
+                }
+                if (null == validateType) {
+                    validateType = "";
+                }
+
+                String message = null;
+                if (1 < ruleArr.length) {
+                    message = ruleArr[1].trim();
+                }
+
+                if ("notNull".equals(validateType)) {
+                    AssertUtil.notNull(value, message);
+                } else {
+                    String returnTypeName = method.getReturnType().getSimpleName();
+                    if ("String".equals(returnTypeName)) {
+                        AssertUtil.notBlank((String) value, message);
+                    } else if ("Integer".equals(returnTypeName) || "Long".equals(returnTypeName)
+                            || "Float".equals(returnTypeName) || "Double".equals(returnTypeName)) {
+                        AssertUtil.notNullPositive((Number) value, message);
+                    } else if ("Integer[]".equals(returnTypeName) || "Long[]".equals(returnTypeName)
+                            || "Float[]".equals(returnTypeName) || "Double[]".equals(returnTypeName)) {
+                        AssertUtil.notEmpty((Object[]) value, message);
+                    } else if ("List".equals(returnTypeName) || "Set".equals(returnTypeName)) {
+                        AssertUtil.notEmpty((Collection) value, message);
+                    }
+                }
+            } catch (NoSuchMethodException e) {
+                log.error("", e);
+            } catch (IllegalAccessException e) {
+                log.error("", e);
+            } catch (InvocationTargetException e) {
+                log.error("", e);
+            }
+        }
+
+        // 转化继承属性
+        if (c.getSuperclass() != null && !c.getSuperclass().getName().equals("java.lang.Object")) {
+            validateForm(c.getSuperclass(), obj, rule);
+        }
+    }
+
+    /**
+     * 验证串 属性名:提示信息:(属性类型)
+     */
+    public static void validateForm(Object obj, String... rules) {
+        if (null == obj || ArrayUtils.isEmpty(rules)) {
+            return;
+        }
+
+        if (obj != null) {
+            Class c = obj.getClass();
+            for(String rule : rules) {
+                validateForm(c, obj, rule);
+            }
+        }
+    }
 
     @SuppressWarnings({"unchecked", "rawtypes"})
     private static void convertByField(Class c, Object obj, Map<String, Object> map) {
@@ -47,6 +139,7 @@ public class MapConverter {
                     log.error("", e);
                 }
             }
+
             // 转化继承属性
             if (c.getSuperclass() != null && !c.getSuperclass().getName().equals("java.lang.Object")) {
                 convertByField(c.getSuperclass(), obj, map);
@@ -121,7 +214,6 @@ public class MapConverter {
 
     /**
      * 解码UTF8
-     *
      * @return
      */
     public static void decodeByField(Object obj, String... fieldNames) {
