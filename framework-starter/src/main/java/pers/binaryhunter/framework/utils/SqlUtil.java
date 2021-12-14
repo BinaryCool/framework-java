@@ -30,7 +30,7 @@ public class SqlUtil {
     /**
      * 把数组转为sql in
      */
-    public static String toSqlIn(Object[] objArr) {
+    public static String toSqlIn(Object... objArr) {
         if (ArrayUtils.isEmpty(objArr)) {
             return "''";
         }
