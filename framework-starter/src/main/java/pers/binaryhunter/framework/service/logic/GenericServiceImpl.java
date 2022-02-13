@@ -272,7 +272,7 @@ public class GenericServiceImpl<B extends PO, K> extends GenericAbstractServiceI
         if (isParamsEmpty(params)) {
             throw new BusinessException();
         }
-
+        /*
         UserPO userPO = getLoginUser();
         if (null != userPO) {
             if (StringUtils.isNotBlank(userPO.getModifyBy())) {
@@ -282,6 +282,7 @@ public class GenericServiceImpl<B extends PO, K> extends GenericAbstractServiceI
                 setSql += ", t.update_name = '" + userPO.getModifyName() + "'";
             }
         }
+        */
 
         params.put("setSql", setSql);
         dao.updateByArgs(params);
