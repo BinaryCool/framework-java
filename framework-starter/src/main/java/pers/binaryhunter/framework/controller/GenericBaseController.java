@@ -137,7 +137,7 @@ public class GenericBaseController<B extends PO, K> extends GenericAbstractContr
      * @return 返回对象
      */
     protected B updateNotNull(B bean) {
-        if(null ==  bean.getId() || bean.getId() <= 0) {
+        if(null ==  bean.getId()) {
             throw new BusinessException();
         }
         service.updateSingleNotNull(bean);
@@ -152,7 +152,7 @@ public class GenericBaseController<B extends PO, K> extends GenericAbstractContr
      * @return 返回对象
      */
     protected B update(B bean) {
-        if(null ==  bean.getId() || bean.getId() <= 0) {
+        if(null ==  bean.getId()) {
             throw new BusinessException();
         }
         service.update(bean);

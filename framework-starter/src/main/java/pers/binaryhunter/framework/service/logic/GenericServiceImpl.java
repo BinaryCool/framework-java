@@ -143,7 +143,7 @@ public class GenericServiceImpl<B extends PO, K> extends GenericAbstractServiceI
     public List<B> queryField(String fieldSQL, Map<String, Object> params) {
         params = doStatusParams(params);
         params.put("fieldSQL", fieldSQL);
-        return dao.queryByField(params);
+        return dao.queryByArgs(params);
     }
 
     @Override

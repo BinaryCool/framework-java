@@ -6,7 +6,7 @@ import java.util.Date;
  * 定义数据库pojo的一些状态
  * @author Yuwen
  */
-public class PO {
+public class PO<T> {
     /**
      * 不可用或删除
      */
@@ -16,7 +16,7 @@ public class PO {
      */
     public static final int STATUS_ENABLE = 1;
 
-    private Long id;
+    private T id;
 
     private Integer status;
     /**
@@ -36,11 +36,11 @@ public class PO {
 
     private Date updateTime;
 
-    public Long getId() {
+    public T getId() {
         return id;
     }
 
-    public void setId(Long id) {
+    public void setId(T id) {
         this.id = id;
     }
 

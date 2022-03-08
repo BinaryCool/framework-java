@@ -148,7 +148,7 @@ public class GenericController {
      * @return 返回对象
      */
     protected <B extends PO> B updateNotNull(GenericService service, B bean) {
-        if(null ==  bean.getId() || bean.getId() <= 0) {
+        if(null ==  bean.getId()) {
             throw new BusinessException();
         }
         service.updateNotNull(bean);
@@ -164,7 +164,7 @@ public class GenericController {
      * @return 返回对象
      */
     protected <B extends PO> B update(GenericService service, B bean) {
-        if(null ==  bean.getId() || bean.getId() <= 0) {
+        if(null ==  bean.getId()) {
             throw new BusinessException();
         }
         service.update(bean);

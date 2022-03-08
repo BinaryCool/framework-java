@@ -255,21 +255,35 @@ public class MapConverter {
      * 将数组转换为
      */
     public static Map<String, Object> arr2Map(Object... args) {
-        return arr2Map(null, args);
+        return arr2Map(Object.class, null, args);
+    }
+
+    /**
+     * 将数组转换为
+     */
+    public static <T> Map<String, T> arr2Map(Class<T> clazz, Object... args) {
+        return arr2Map(clazz, null, args);
     }
 
     /**
      * 将数组转换为
      */
     public static Map<String, Object> arr2Map(Map<String, Object> params, Object... args) {
+        return arr2Map(Object.class, params, args);
+    }
+
+    /**
+     * 将数组转换为
+     */
+    public static <T> Map<String, T> arr2Map(Class<T> clazz, Map<String, T> params, Object... args) {
         if (null == params) {
-            params = new HashMap<>(args.length / 2);
+            params = new HashMap(args.length / 2);
         }
 
         if (ArrayUtils.isNotEmpty(args)) {
             for (int i = 0; i < args.length; i += 2) {
                 if (null != args[i] && (i + 1) < args.length && null != args[i + 1]) {
-                    params.put(args[i].toString(), args[i + 1]);
+                    params.put(args[i].toString(), (T) args[i + 1]);
                 }
             }
         }
