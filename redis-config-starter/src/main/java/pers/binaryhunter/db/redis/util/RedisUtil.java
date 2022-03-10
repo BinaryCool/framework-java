@@ -125,4 +125,23 @@ public class RedisUtil {
             return keysTmp;
         });
     }
+
+    /**
+     * 锁住 process 流程
+     */
+    public static void lock(RedissonClient redisson, String redisKeyLock, LockProcess process) {
+        RLock lock = null;
+        try {
+            lock = tryLock(redisson, redisKeyLock);
+            process.run();
+        } catch (InterruptedException e) {
+            log.error("", e);
+        } finally {
+            unlock(lock);
+        }
+    }
+
+    public interface LockProcess {
+        void run();
+    }
 }
