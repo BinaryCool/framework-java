@@ -50,11 +50,11 @@ public class GenericServiceImpl<B extends PO, K> extends GenericAbstractServiceI
         // 如果传递请求页数, 表示需要分页
         if (page.isPaging()) {
             count = this.countByArgs(params);
+            page.setTotalCount(count);
         }
 
         // 如果分页, 但总数量为空, 直接返回
         if (page.isPaging() && (null == count || 0 >= count)) {
-            page.setTotalCount(count);
             pageResult.setPage(page);
             return pageResult;
         }
@@ -66,9 +66,7 @@ public class GenericServiceImpl<B extends PO, K> extends GenericAbstractServiceI
         params = this.maxLimit(params);
         List<B> results = this.queryByArgs(params);
 
-        if (page.isPaging()) {
-            page.setTotalCount(count);
-        } else if (null != results) {
+        if (!page.isPaging() && null != results) {
             page.setTotalCount((long) results.size(), false);
         }
 
