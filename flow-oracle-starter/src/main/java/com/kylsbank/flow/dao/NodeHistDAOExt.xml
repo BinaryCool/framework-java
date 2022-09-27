@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+	PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+	"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.kylsbank.flow.dao.NodeHistDAO">
+	<sql id="whereClauseExt">
+		<if test="null != idBillIn and '' != idBillIn">
+			<![CDATA[
+				and t.id_bill in (${idBillIn})
+			]]>
+		</if>
+	</sql>
+	
+	<!-- 在此处添加自定义的sql -->
+	
+</mapper>

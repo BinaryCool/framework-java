@@ -1,0 +1,285 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+	PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+	"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.kylsbank.flow.dao.NodeTemplateRefDAO">
+	<sql id="whereClause">
+		<if test="null != id">			
+			<![CDATA[
+				and t.ID = #{id}
+			]]>
+		</if>
+		<if test="null != flowCode">			
+			<![CDATA[
+				and t.FLOW_CODE = #{flowCode}
+			]]>
+		</if>
+		<if test="null != currCode">			
+			<![CDATA[
+				and t.CURR_CODE = #{currCode}
+			]]>
+		</if>
+		<if test="null != nextCode">			
+			<![CDATA[
+				and t.NEXT_CODE = #{nextCode}
+			]]>
+		</if>
+		<if test="null != actionKey">			
+			<![CDATA[
+				and t.ACTION_KEY = #{actionKey}
+			]]>
+		</if>
+		<if test="null != calc">			
+			<![CDATA[
+				and t.CALC = #{calc}
+			]]>
+		</if>
+		<if test="null != actionDesc">			
+			<![CDATA[
+				and t.ACTION_DESC = #{actionDesc}
+			]]>
+		</if>
+		<if test="null != status">			
+			<![CDATA[
+				and t.STATUS = #{status}
+			]]>
+		</if>
+		<if test="null != id and '' != id">
+			<![CDATA[
+				and t.ID = #{id}
+			]]>
+		</if>	
+		<if test="null != idIn and '' != idIn">
+			<![CDATA[
+				and t.ID in (${idIn})
+			]]>
+		</if>
+
+		<include refid="whereClauseExt"></include>
+	</sql>
+
+	<sql id="selectColumn">
+		<trim suffixOverrides=",">
+		<![CDATA[
+			t.ID as id,t.FLOW_CODE as flowCode,t.CURR_CODE as currCode,t.NEXT_CODE as nextCode,t.ACTION_KEY as actionKey,t.CALC as calc,t.ACTION_DESC as actionDesc,t.CREATE_TIME as createTime,t.UPDATE_TIME as updateTime,t.STATUS as status,
+		]]>
+		</trim>
+	</sql>
+
+	<select id="getSequence" resultType="long" useCache="false" flushCache="true">
+		select F_NODE_TEMPLATE_REF_seq.nextval from dual
+	</select>
+
+	<!-- 新增 -->
+	<insert id="createBatch" parameterType="java.util.List">
+		<![CDATA[
+			insert all  
+		]]>
+	    <foreach collection="list" item="item"> 
+	    	<![CDATA[
+	    		into F_NODE_TEMPLATE_REF ( 
+	    	]]>
+	    	<trim suffixOverrides=",">
+			<![CDATA[
+				ID,FLOW_CODE,CURR_CODE,NEXT_CODE,ACTION_KEY,CALC,ACTION_DESC,
+			]]>
+			</trim>
+			<![CDATA[	
+				 ) values (
+			]]>
+			<trim suffixOverrides=",">
+			<![CDATA[
+				#{item.id, jdbcType=NUMERIC},#{item.flowCode, jdbcType=NVARCHAR},#{item.currCode, jdbcType=NUMERIC},#{item.nextCode, jdbcType=NUMERIC},#{item.actionKey, jdbcType=NVARCHAR},#{item.calc, jdbcType=NVARCHAR},#{item.actionDesc, jdbcType=NVARCHAR},	
+			]]>
+			</trim>
+			<![CDATA[	
+				 )
+			]]>
+	    </foreach>
+	    <![CDATA[
+	    	select 1 from dual
+	    ]]>
+	</insert>
+
+	<!-- 修改 -->
+	<update id="update" parameterType="com.kylsbank.flow.bean.po.NodeTemplateRef">
+		<![CDATA[
+			update F_NODE_TEMPLATE_REF set
+		]]>	
+		<trim suffixOverrides=",">
+		<![CDATA[
+			ID=#{id},						
+			FLOW_CODE=#{flowCode},						
+			CURR_CODE=#{currCode},						
+			NEXT_CODE=#{nextCode},						
+			ACTION_KEY=#{actionKey},						
+			CALC=#{calc},						
+			ACTION_DESC=#{actionDesc},						
+			UPDATE_TIME=sysdate,						
+		]]>
+		</trim>
+		<![CDATA[
+			where ID = #{id}
+		]]>
+	</update>
+	
+	<!-- 更改(多个) -->
+	<update id="updateBatch" parameterType="java.util.List">
+		<foreach collection="list" item="item" separator=";"> 
+			<![CDATA[
+				update "F_NODE_TEMPLATE_REF"
+			]]>
+			<set>
+				<trim suffixOverrides=",">
+					<if test="null != item.id">	
+						ID=#{item.id},
+					</if>								
+					<if test="null != item.flowCode">	
+						FLOW_CODE=#{item.flowCode},
+					</if>								
+					<if test="null != item.currCode">	
+						CURR_CODE=#{item.currCode},
+					</if>								
+					<if test="null != item.nextCode">	
+						NEXT_CODE=#{item.nextCode},
+					</if>								
+					<if test="null != item.actionKey">	
+						ACTION_KEY=#{item.actionKey},
+					</if>								
+					<if test="null != item.calc">	
+						CALC=#{item.calc},
+					</if>								
+					<if test="null != item.actionDesc">	
+						ACTION_DESC=#{item.actionDesc},
+					</if>								
+					UPDATE_TIME=sysdate,						
+					<if test="null != item.status">	
+						STATUS=#{item.status},
+					</if>								
+				</trim>
+			</set>
+			<![CDATA[
+				where ID = #{item.id}
+			]]>
+		</foreach>
+	</update>
+	
+	<!-- 更新 (通过参数) -->
+	<update id="updateByArgs">
+		<![CDATA[
+			update F_NODE_TEMPLATE_REF t
+		]]>
+		<set>
+		<![CDATA[
+			${setSql}
+		]]>	
+		UPDATE_TIME=sysdate,						
+		</set>
+		<where>
+		<include refid="whereClause"></include>
+		</where>
+	</update>
+	
+	<!-- 删除 -->
+	<delete id="deleteByIds">
+		<![CDATA[
+			delete from F_NODE_TEMPLATE_REF 
+			where ID in (${idIn})
+		]]>
+	</delete>
+	
+	<!-- 删除 (通过参数) -->
+	<delete id="deleteByArgs" parameterType="map">
+		<![CDATA[
+			delete from F_NODE_TEMPLATE_REF t
+		]]>
+		<where>
+		<include refid="whereClause"></include>
+		</where>
+	</delete>
+
+	<sql id="queryClause">
+		<where>
+		<include refid="whereClause"></include>
+		</where>
+        <choose>
+	        <when test="null != orderField and '' != orderField">
+	            <![CDATA[
+					 order by ${orderField}
+				]]>
+	            <if test="null != orderDirection and '' != orderDirection">
+	                <![CDATA[
+						 ${orderDirection}
+					]]>
+	            </if>
+	        </when>
+	        <when test="null == noOrderField or '' == noOrderField">
+	            <![CDATA[
+				 order by t.ID
+			    ]]>
+			    <choose>
+					<when test="null != orderDirection and '' != orderDirection">
+					<![CDATA[
+						 ${orderDirection}
+					]]>
+					</when>
+					<otherwise>
+					<![CDATA[
+						 desc
+					]]>
+					</otherwise>
+				</choose>
+	        </when>   
+	    </choose>
+    </sql>
+
+	
+	<!-- 获取全部 -->
+	<select id="queryByArgs" parameterType="java.util.Map" resultType="com.kylsbank.flow.bean.po.NodeTemplateRef">
+		<if test="null != limit">
+            <![CDATA[
+			  SELECT * FROM (SELECT A.*, ROWNUM RN FROM ( 
+		    ]]>
+        </if>
+		<![CDATA[
+			select
+		]]>
+		<choose>
+			<when test="null != fieldSQL and '' != fieldSQL">
+				${fieldSQL}
+			</when>
+			<otherwise>
+				<include refid="selectColumn"></include>
+			</otherwise>
+		</choose>		
+		<![CDATA[	 
+			from F_NODE_TEMPLATE_REF t  
+		]]>
+		<include refid="queryClause"></include>
+		<if test="null != limit">
+            <![CDATA[
+			  	) A WHERE ROWNUM <= (#{start} + #{limit})) WHERE RN > #{start}
+		    ]]>
+        </if>
+        <if test="null != sqlTail and '' != sqlTail">
+            <![CDATA[
+                ${sqlTail}
+            ]]>
+        </if>
+	</select>
+	
+	<!-- 获取数目 -->
+	<select id="countByArgs" parameterType="java.util.Map" resultType="long">
+		<![CDATA[
+			select count(1) from F_NODE_TEMPLATE_REF t  
+		]]>
+		<where>
+		<include refid="whereClause"></include>
+		</where>
+		<if test="null != sqlTail and '' != sqlTail">
+            <![CDATA[
+                ${sqlTail}
+            ]]>
+        </if>
+	</select>
+</mapper>
