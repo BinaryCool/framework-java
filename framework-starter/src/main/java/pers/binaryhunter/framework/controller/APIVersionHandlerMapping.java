@@ -6,13 +6,17 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.core.annotation.AnnotatedElementUtils;
 import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.stereotype.Controller;
+import org.springframework.util.CollectionUtils;
 import org.springframework.web.servlet.mvc.condition.PatternsRequestCondition;
 import org.springframework.web.servlet.mvc.method.RequestMappingInfo;
 import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping;
 
 import java.lang.reflect.Method;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class APIVersionHandlerMapping extends RequestMappingHandlerMapping {
 
@@ -47,7 +51,15 @@ public class APIVersionHandlerMapping extends RequestMappingHandlerMapping {
                         }
                         return p;
                     }).collect(Collectors.toList());
-            updatedFinalPattern = new PatternsRequestCondition(apiVersion.value()).combine(new PatternsRequestCondition(patterns.toArray(new String[patterns.size()])));
+            String[] versionArr = apiVersion.value();
+            if (versionArr[0].startsWith("/")) {
+                versionArr[0] = versionArr[0].substring(1);
+            }
+            if (!versionArr[0].toLowerCase().startsWith("api")) {
+                versionArr[0] = "/api/" + versionArr[0];
+            }
+
+            updatedFinalPattern = new PatternsRequestCondition(versionArr).combine(new PatternsRequestCondition(patterns.toArray(new String[patterns.size()])));
         } else {
             updatedFinalPattern = oldPattern;
         }
