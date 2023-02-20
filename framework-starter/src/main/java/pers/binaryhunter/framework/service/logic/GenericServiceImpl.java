@@ -253,12 +253,7 @@ public class GenericServiceImpl<B extends PO, K> extends GenericAbstractServiceI
             return;
         }
         beans.forEach(bean -> this.appendUpdate(bean));
-
-        if (COUNT_BATCH >= beans.size()) {
-            dao.updateBatch(beans);
-        } else {
-            this.doTransactionBatch(beans, i -> dao.updateBatch(beans.subList(COUNT_BATCH * i, Math.min(COUNT_BATCH * (i + 1), beans.size()))));
-        }
+        this.doTransactionBatch(beans, i -> dao.updateBatch(beans.subList(COUNT_BATCH * i, Math.min(COUNT_BATCH * (i + 1), beans.size()))));
     }
 
     @Override
@@ -563,13 +558,9 @@ public class GenericServiceImpl<B extends PO, K> extends GenericAbstractServiceI
     private void doAddBatch(List<B> beans) {
         beans.forEach(bean -> appendAdd(bean));
 
-        if (COUNT_BATCH >= beans.size()) {
-            dao.createBatch(beans);
-        } else {
-            this.doTransactionBatch(beans, (i) -> {
-                dao.createBatch(beans.subList(COUNT_BATCH * i, Math.min(COUNT_BATCH * (i + 1), beans.size())));
-            });
-        }
+        this.doTransactionBatch(beans, (i) -> {
+            dao.createBatch(beans.subList(COUNT_BATCH * i, Math.min(COUNT_BATCH * (i + 1), beans.size())));
+        });
     }
 
     /**
