@@ -1,5 +1,6 @@
 package pers.binaryhunter.framework.utils;
 
+import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.util.CollectionUtils;
 
@@ -45,5 +46,21 @@ public class NullUtil {
 
     public static boolean isNotNullNegative(Number num) {
         return !isNullNegative(num);
+    }
+
+    public static boolean isNullFalse(Boolean b) {
+        return null == b || !b;
+    }
+
+    public static boolean isNotNullFalse(Boolean b) {
+        return !isNullFalse(b);
+    }
+
+    public static boolean isEmpty(Object[] array) {
+        return ArrayUtils.isEmpty(array);
+    }
+
+    public static <T> boolean isNotEmpty(T[] array) {
+        return !isEmpty(array);
     }
 }
