@@ -40,20 +40,28 @@ public class NullUtil {
         return !isNull(obj);
     }
 
-    public static boolean isNullNegative(Number num) {
+    public static boolean isNullOrNegative(Number num) {
         return isNull(num) || 0 >= num.doubleValue();
     }
 
-    public static boolean isNotNullNegative(Number num) {
-        return !isNullNegative(num);
+    public static boolean isNotNullAndPositive(Number num) {
+        return !isNullOrNegative(num);
     }
 
-    public static boolean isNullFalse(Boolean b) {
+    public static boolean isNullOrFalse(Boolean b) {
         return null == b || !b;
     }
 
-    public static boolean isNotNullFalse(Boolean b) {
-        return !isNullFalse(b);
+    public static boolean isNotNullAndTrue(Boolean b) {
+        return !isNullOrFalse(b);
+    }
+
+    public static boolean isNullOrTrue(Boolean b) {
+        return null == b || b;
+    }
+
+    public static boolean isNotNullAndFalse(Boolean b) {
+        return !isNullOrFalse(b);
     }
 
     public static boolean isEmpty(Object[] array) {
