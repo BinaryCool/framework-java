@@ -13,7 +13,7 @@ public class AssertUtil {
         notBlank(str, null);
     }
 
-    private static String ifnull(String msg) {
+    private static String ifNull(String msg) {
         if (StringUtils.isBlank(msg)) {
             return R.CodeEnum.ERR_BUSS.getMsg();
         }
@@ -22,7 +22,7 @@ public class AssertUtil {
 
     public static void notBlank(String str, String msg) {
         if (StringUtils.isBlank(str)) {
-            throw new BusinessException(ifnull(msg));
+            throw new BusinessException(ifNull(msg));
         }
     }
 
@@ -32,7 +32,7 @@ public class AssertUtil {
 
     public static void notEmpty(Collection collection, String msg) {
         if (CollectionUtils.isEmpty(collection)) {
-            throw new BusinessException(ifnull(msg));
+            throw new BusinessException(ifNull(msg));
         }
     }
 
@@ -42,7 +42,7 @@ public class AssertUtil {
 
     public static void notEmpty(Object[] arr, String msg) {
         if (ArrayUtils.isEmpty(arr)) {
-            throw new BusinessException(ifnull(msg));
+            throw new BusinessException(ifNull(msg));
         }
     }
 
@@ -52,7 +52,7 @@ public class AssertUtil {
 
     public static void notNull(Object object, String msg) {
         if (object == null) {
-            throw new BusinessException(ifnull(msg));
+            throw new BusinessException(ifNull(msg));
         }
     }
 
@@ -62,7 +62,7 @@ public class AssertUtil {
 
     public static void notNullPositive(Number object, String msg) {
         if (object == null || 0 >= object.doubleValue()) {
-            throw new BusinessException(ifnull(msg));
+            throw new BusinessException(ifNull(msg));
         }
     }
 
@@ -72,7 +72,7 @@ public class AssertUtil {
 
     public static void isTrue(boolean expression, String msg) {
         if (!expression) {
-            throw new BusinessException(ifnull(msg));
+            throw new BusinessException(ifNull(msg));
         }
     }
 
