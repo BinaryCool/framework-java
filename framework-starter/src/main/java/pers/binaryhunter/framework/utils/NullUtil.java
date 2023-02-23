@@ -39,11 +39,11 @@ public class NullUtil {
         return !isNull(obj);
     }
 
-    public static boolean isNullPositive(Number num) {
+    public static boolean isNullNegative(Number num) {
         return isNull(num) || 0 >= num.doubleValue();
     }
 
-    public static boolean isNotNullPositive(Number num) {
-        return !isNullPositive(num);
+    public static boolean isNotNullNegative(Number num) {
+        return !isNullNegative(num);
     }
 }
