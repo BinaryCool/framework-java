@@ -101,7 +101,7 @@ public class Page implements Serializable {
 	}
 
 	public Integer getNumPerPage() {
-		if (null != numPerPage) {
+		if (null != numPerPage && 0 < numPerPage) {
 		    return numPerPage;
         } 
 		
