@@ -27,7 +27,7 @@ public class AssertUtil {
     }
 
     public static void notEmpty(Collection collection) {
-        notNull(collection, null);
+        notEmpty(collection, null);
     }
 
     public static void notEmpty(Collection collection, String msg) {
@@ -37,7 +37,7 @@ public class AssertUtil {
     }
 
     public static void notEmpty(Object[] arr) {
-        notNull(arr, null);
+        notEmpty(arr, null);
     }
 
     public static void notEmpty(Object[] arr, String msg) {
