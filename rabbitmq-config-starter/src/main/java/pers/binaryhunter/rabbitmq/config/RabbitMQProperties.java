@@ -1,4 +1,4 @@
-package pers.binaryhunter.db.es.config;
+package pers.binaryhunter.rabbitmq.config;
 
 import lombok.Getter;
 import lombok.Setter;
@@ -11,7 +11,7 @@ import java.util.List;
  */
 @Getter
 @Setter
-@ConfigurationProperties(prefix = "binaryhunter.es")
-public class EsProperties {
-    private List<String> hosts;
+@ConfigurationProperties(prefix = "spring.rabbitmq")
+public class RabbitMQProperties {
+    private List<RabbitMQQueue> queues;
 }

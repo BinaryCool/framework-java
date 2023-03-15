@@ -20,6 +20,7 @@
         <module>redis-config-starter</module>
         <module>wechat-starter</module>
         <module>es-config-starter</module>
+        <module>rabbitmq-config-starter</module>
     </modules>
 
     <properties>

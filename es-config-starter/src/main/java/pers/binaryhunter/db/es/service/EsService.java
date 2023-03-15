@@ -4,9 +4,7 @@ import org.elasticsearch.action.bulk.BulkResponse;
 import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.search.builder.SearchSourceBuilder;
 import pers.binaryhunter.db.es.bean.po.EsPO;
-import pers.binaryhunter.framework.bean.po.PO;
 
-import java.io.IOException;
 import java.util.List;
 
 /**
