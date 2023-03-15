@@ -12,11 +12,17 @@ public class RabbitMQUtil {
     }
 
     public static void convertAndSend(RabbitTemplate rabbitTemplate, String env, String queueName, Object params, Integer delayInMillis) {
+        String json;
+        if (params instanceof String) {
+            json = params.toString();
+        } else {
+            json = JSON.toJSONString(params);
+        }
         if (null == delayInMillis || 0 >= delayInMillis) {
-            rabbitTemplate.convertAndSend(queueName + ".Exchange-" + env, queueName + ".message", JSON.toJSONString(params),
+            rabbitTemplate.convertAndSend(queueName + ".Exchange-" + env, queueName + ".message", json,
                     new CorrelationData(UUIDUtil.get32UUID()));
         } else {
-            rabbitTemplate.convertAndSend(queueName + ".Exchange-" + env, queueName + ".message", JSON.toJSONString(params),
+            rabbitTemplate.convertAndSend(queueName + ".Exchange-" + env, queueName + ".message", json,
                     message -> {
                         //设置消息持久化
                         message.getMessageProperties().setDeliveryMode(MessageDeliveryMode.PERSISTENT);
