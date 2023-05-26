@@ -61,7 +61,7 @@ public class NullUtil {
     }
 
     public static boolean isNotNullAndFalse(Boolean b) {
-        return !isNullOrFalse(b);
+        return !isNullOrTrue(b);
     }
 
     public static boolean isEmpty(Object[] array) {
