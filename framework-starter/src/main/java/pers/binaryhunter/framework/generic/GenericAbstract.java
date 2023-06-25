@@ -47,7 +47,7 @@ public class GenericAbstract<B> {
             baseDaoNameField.setAccessible(true);
             baseDaoNameField.set(this, obj);
         } catch (Exception ex) {
-            log.error("Notice! there's error in generic configuration!", ex);
+            log.warn("Notice! there's error in generic configuration! {}", ex.getMessage());
         }
     }
 }
