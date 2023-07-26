@@ -16,6 +16,8 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.PrintWriter;
 import java.io.Serializable;
+import org.springframework.web.util.ContentCachingRequestWrapper;
+import org.springframework.web.util.WebUtils;
 
 /**
  * 返回客户端对象
@@ -215,7 +217,9 @@ public class R<T> implements Serializable {
                 log.error(JSON.toJSONString(request.getParameterMap()));
             } else {
                 try {
-                    log.error(IoUtil.read(request.getReader()));
+                    ContentCachingRequestWrapper wrapper = WebUtils.getNativeRequest(request, ContentCachingRequestWrapper.class);
+                    String body = new String(wrapper.getContentAsByteArray());
+                    log.error(body);
                 } catch (Exception e) {
                     log.error("", e);
                 }
