@@ -59,7 +59,7 @@ public class GenericServiceImpl<B extends PO, K> extends GenericAbstractServiceI
             return pageResult;
         }
 
-        if (page.isPaging() && page.getPageNum() > page.getPageCount()) { //如果未设置当前页或当前页面大于总页面
+        if (page.isPaging() && page.getPageNum() > page.getPageCount()) { //如果未设置当前页R或当前页面大于总页面
             page.setPageNum(1);
         }
         params = MapConverter.convertPage(params, page);

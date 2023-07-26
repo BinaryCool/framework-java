@@ -1,9 +1,9 @@
 package pers.binaryhunter.framework.bean.vo;
 
+import cn.hutool.core.io.IoUtil;
 import com.alibaba.fastjson.JSON;
 import org.apache.catalina.connector.ClientAbortException;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.tomcat.util.http.fileupload.IOUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.web.context.request.RequestContextHolder;
@@ -169,7 +169,7 @@ public class R<T> implements Serializable {
             pw.append(html);
             pw.flush();
         } catch (Exception ex) {
-            IOUtils.closeQuietly(pw);
+            IoUtil.close(pw);
         }
     }
 
@@ -213,6 +213,12 @@ public class R<T> implements Serializable {
             log.error("==> " + contentType);
             if (!contentType.toLowerCase().contains("json")) {
                 log.error(JSON.toJSONString(request.getParameterMap()));
+            } else {
+                try {
+                    log.error(IoUtil.read(request.getReader()));
+                } catch (Exception e) {
+                    log.error("", e);
+                }
             }
         }
         log.error("", ex);
