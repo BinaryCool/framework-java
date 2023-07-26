@@ -214,12 +214,12 @@ public class R<T> implements Serializable {
         if (StringUtils.isNotBlank(contentType)) {
             log.error("==> " + contentType);
             if (!contentType.toLowerCase().contains("json")) {
-                log.error(JSON.toJSONString(request.getParameterMap()));
+                log.error("==> " + JSON.toJSONString(request.getParameterMap()));
             } else {
                 try {
                     ContentCachingRequestWrapper wrapper = WebUtils.getNativeRequest(request, ContentCachingRequestWrapper.class);
                     String body = new String(wrapper.getContentAsByteArray());
-                    log.error(body);
+                    log.error("==> " + body + " <==");
                 } catch (Exception e) {
                     log.error("", e);
                 }
