@@ -49,24 +49,22 @@ public class DataSourceAspect {
             Class<?>[] parameterTypes = ((MethodSignature) proceedingJoinPoint.getSignature()).getMethod().getParameterTypes();
             Method m1 = null;
             try {
-                m1 = genericInterface.getMethod(method, parameterTypes);
+                m1 = genericClass.getMethod(method, parameterTypes);
             } catch (Exception ex) {
                 log.warn(ex.getMessage());
             }
 
-            if (m1 != null) {
-                if (m1.isAnnotationPresent(DataSource.class)) {
-                    value = m1.getAnnotation(DataSource.class).value();
-                } else if (genericClass.isAnnotationPresent(DataSource.class)) {
-                    value = genericClass.getAnnotation(DataSource.class).value();
-                } else if (genericInterface.isAnnotationPresent(DataSource.class)) {
-                    value = genericInterface.getAnnotation(DataSource.class).value();
-                }
+            if (null != m1 && m1.isAnnotationPresent(DataSource.class)) {
+                value = m1.getAnnotation(DataSource.class).value();
+            } else if (genericClass.isAnnotationPresent(DataSource.class)) {
+                value = genericClass.getAnnotation(DataSource.class).value();
+            } else if (genericInterface.isAnnotationPresent(DataSource.class)) {
+                value = genericInterface.getAnnotation(DataSource.class).value();
+            }
 
-                if (StringUtils.isNotEmpty(value)) {
-                    if (log.isDebugEnabled()) log.debug("Route data source to {}", value);
-                    DataSourceHolder.CURRENT_DATASOURCE.set(value);
-                }
+            if (StringUtils.isNotEmpty(value)) {
+                if (log.isDebugEnabled()) log.debug("Route data source to {}", value);
+                DataSourceHolder.CURRENT_DATASOURCE.set(value);
             }
 
             return proceedingJoinPoint.proceed();
