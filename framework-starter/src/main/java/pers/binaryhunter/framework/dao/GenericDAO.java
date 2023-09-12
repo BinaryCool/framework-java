@@ -12,7 +12,6 @@ import java.util.Map;
  * @author Liyw -- 2014-5-6
  */
 public interface GenericDAO<B,K> {
-    @Deprecated
     B getById(K id);
     /**
      * 新增
@@ -30,7 +29,6 @@ public interface GenericDAO<B,K> {
      * @param id 编号
      * Create by Liyw -- 2014-5-7
      */
-    @Deprecated
     void deleteById(K id);
     /**
      * 删除
@@ -55,7 +53,6 @@ public interface GenericDAO<B,K> {
      * @param bean 对象
      * Create by Liyw -- 2014-5-6
      */
-    @Deprecated
     void updateNotNull(B bean);
     /**
      * 批量修改
@@ -74,7 +71,6 @@ public interface GenericDAO<B,K> {
      * @return
      * Create by Liyw -- 2014-5-6
      */
-    @Deprecated
     Long getSequence();
 
     /**
@@ -82,7 +78,6 @@ public interface GenericDAO<B,K> {
      * @return
      * Create by Liyw -- 2014-5-6
      */
-    @Deprecated
     Long getSequences(int step);
 
     /**
@@ -103,7 +98,6 @@ public interface GenericDAO<B,K> {
      * @return 对象列表
      * Create by Liyw -- 2014-5-6
      */
-    @Deprecated
     List<B> pageByArgs(Map<String, Object> params);
 
     /**

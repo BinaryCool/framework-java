@@ -72,7 +72,6 @@ public interface GenericService<B extends PO, K> {
      * @return 分页结果
      * By Yuwen on 2017年6月22日
      */
-    @Deprecated
     PageResult<B> pageByArgs(Map<String, Object> params, Page page);
 
     /**
@@ -84,7 +83,6 @@ public interface GenericService<B extends PO, K> {
      * @return 分页结果
      * By Yuwen on 2017年6月22日
      */
-    @Deprecated
     PageResult<B> pageByArgs(Page page, Object... params);
 
     /**
@@ -96,7 +94,6 @@ public interface GenericService<B extends PO, K> {
      * @return 分页结果
      * By Yuwen on 2017年6月22日
      */
-    @Deprecated
     List<B> pageSkipCount(Map<String, Object> params, Page page);
 
     /**
@@ -108,7 +105,6 @@ public interface GenericService<B extends PO, K> {
      * @return 分页结果
      * By Yuwen on 2017年6月22日
      */
-    @Deprecated
     List<B> pageSkipCount(Page page, Object... params);
 
     /**
@@ -182,7 +178,6 @@ public interface GenericService<B extends PO, K> {
      * @param id id
      *           By Yuwen on 2017年6月22日
      */
-    @Deprecated
     void deleteById(K id);
 
     /**
@@ -198,7 +193,6 @@ public interface GenericService<B extends PO, K> {
      * @param ids ids
      *            By Yuwen on 2017年6月22日
      */
-    @Deprecated
     void deleteByIds(K[] ids);
 
     /**
@@ -245,7 +239,6 @@ public interface GenericService<B extends PO, K> {
      * @param bean 实体
      *             By Yuwen on 2017年6月22日
      */
-    @Deprecated
     void updateNotNull(B bean);
 
     /**
@@ -271,7 +264,6 @@ public interface GenericService<B extends PO, K> {
      *               有SQL注入分析, 谨慎使用
      * @see pers.binaryhunter.framework.service.GenericService#updateByArgs(Map, Object...)
      */
-    @Deprecated
     void updateByArgs(String setSql, Map<String, Object> params);
 
     /**
@@ -288,7 +280,6 @@ public interface GenericService<B extends PO, K> {
      * @param bean 实体
      *             By Yuwen on 2017年6月22日
      */
-    @Deprecated
     void add(B bean);
 
     /**
@@ -367,7 +358,6 @@ public interface GenericService<B extends PO, K> {
      * @return 实体
      * By Yuwen on 2017年6月22日
      */
-    @Deprecated
     B getById(K id);
 
     /**
@@ -378,7 +368,6 @@ public interface GenericService<B extends PO, K> {
      * @return 实体
      * By Yuwen on 2017年6月22日
      */
-    @Deprecated
     List<B> getByIds(Collection<K> ids);
 
     /**
@@ -389,7 +378,6 @@ public interface GenericService<B extends PO, K> {
      * @return 实体
      * By Yuwen on 2017年6月22日
      */
-    @Deprecated
     List<B> getByIds(K[] ids);
 
     /**
