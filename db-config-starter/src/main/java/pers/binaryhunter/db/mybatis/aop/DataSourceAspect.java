@@ -47,7 +47,12 @@ public class DataSourceAspect {
 
             String method = proceedingJoinPoint.getSignature().getName();
             Class<?>[] parameterTypes = ((MethodSignature) proceedingJoinPoint.getSignature()).getMethod().getParameterTypes();
-            Method m1 = genericInterface.getMethod(method, parameterTypes);
+            Method m1 = null;
+            try {
+                m1 = genericInterface.getMethod(method, parameterTypes);
+            } catch (Exception ex) {
+                log.warn(ex.getMessage());
+            }
 
             if (m1 != null) {
                 if (m1.isAnnotationPresent(DataSource.class)) {
