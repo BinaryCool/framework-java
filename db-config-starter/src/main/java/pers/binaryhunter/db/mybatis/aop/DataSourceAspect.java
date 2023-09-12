@@ -25,13 +25,16 @@ import java.lang.reflect.Type;
 public class DataSourceAspect {
     private static final Logger log = LoggerFactory.getLogger(DataSourceAspect.class);
 
-    @Around("@annotation(pers.binaryhunter.db.mybatis.aop.DataSource) || @within(pers.binaryhunter.db.mybatis.aop.DataSource) || (execution(public * *..dao..*(..)))")
+    @Around("execution(* pers.binaryhunter.framework.service.GenericService+.*(..)) || " +
+            "@annotation(pers.binaryhunter.db.mybatis.aop.DataSource) || @within(pers.binaryhunter.db.mybatis.aop.DataSource)")
     public Object around(ProceedingJoinPoint proceedingJoinPoint) throws Throwable {
+        var currentDataSource = DataSourceHolder.CURRENT_DATASOURCE.get();
+
         String value = null;
         try {
             Object target = proceedingJoinPoint.getTarget();
-            Class<?> genericInterface = target.getClass();
-
+            Class<?> genericClass = target.getClass();
+            Class<?> genericInterface = null;
             try {
                 // 如果是代理对象, 则获取实际代理对象
                 Type[] genericInterfaces = AopUtils.getTargetClass(target).getGenericInterfaces();
@@ -49,21 +52,21 @@ public class DataSourceAspect {
             if (m1 != null) {
                 if (m1.isAnnotationPresent(DataSource.class)) {
                     value = m1.getAnnotation(DataSource.class).value();
+                } else if (genericClass.isAnnotationPresent(DataSource.class)) {
+                    value = genericClass.getAnnotation(DataSource.class).value();
                 } else if (genericInterface.isAnnotationPresent(DataSource.class)) {
                     value = genericInterface.getAnnotation(DataSource.class).value();
                 }
 
                 if (StringUtils.isNotEmpty(value)) {
-                    if (log.isDebugEnabled()) log.debug("Route date source to {}", value);
+                    if (log.isDebugEnabled()) log.debug("Route data source to {}", value);
                     DataSourceHolder.CURRENT_DATASOURCE.set(value);
-                } else {
-                    DataSourceHolder.CURRENT_DATASOURCE.set(null);
                 }
             }
 
             return proceedingJoinPoint.proceed();
         } finally {
-            DataSourceHolder.CURRENT_DATASOURCE.remove();
+            DataSourceHolder.CURRENT_DATASOURCE.set(currentDataSource);
         }
     }
 }

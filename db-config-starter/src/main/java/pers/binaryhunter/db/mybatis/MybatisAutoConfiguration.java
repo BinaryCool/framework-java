@@ -19,6 +19,7 @@ import org.springframework.jdbc.datasource.DataSourceTransactionManager;
 import org.springframework.util.Assert;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
+import pers.binaryhunter.db.mybatis.datasource.DataSourceHolder;
 import pers.binaryhunter.db.mybatis.datasource.DataSourceProxy;
 import pers.binaryhunter.db.mybatis.datasource.DataSourceRouter;
 import pers.binaryhunter.db.mybatis.datasource.MyDataSourceGroup;
@@ -132,6 +133,10 @@ public class MybatisAutoConfiguration {
             if (StringUtils.isEmpty(mainDataSourceName)) {
                 mainDataSourceName = entry.getKey();
             }
+        }
+
+        if (!StringUtils.isEmpty(mainDataSourceName)) {
+            DataSourceHolder.DEFAULT = mainDataSourceName;
         }
 
         return new UserDataSourceRouter(map, mainDataSourceName);

@@ -1,16 +1,13 @@
 package pers.binaryhunter.db.mybatis.datasource.impl;
 
-import pers.binaryhunter.db.mybatis.datasource.DataSourceHolder;
-import pers.binaryhunter.db.mybatis.datasource.DataSourceRouter;
-import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.InitializingBean;
-
-import java.util.HashMap;
-import java.util.Map;
+import pers.binaryhunter.db.mybatis.datasource.DataSourceHolder;
+import pers.binaryhunter.db.mybatis.datasource.DataSourceRouter;
 
 import javax.sql.DataSource;
+import java.util.Map;
 /**
  * 数据库路由
  */
@@ -32,13 +29,7 @@ public class UserDataSourceRouter implements DataSourceRouter, InitializingBean 
 
 	@Override
 	public DataSource getTargetDataSource() {
-        String currentDataSourceName = DataSourceHolder.CURRENT_DATASOURCE.get();
-        if(StringUtils.isEmpty(currentDataSourceName)) {
-            currentDataSourceName = mainDataSourceName;
-        }
-        if (log.isDebugEnabled()) {
-            log.debug("Current data source name " + currentDataSourceName);
-        }
+        String currentDataSourceName = DataSourceHolder.getCurrentDataSourceName(this.mainDataSourceName);
 		AbstractRWDataSourceRouter currentDataSource = userDataSource.get(currentDataSourceName);
 		return currentDataSource.getTargetDataSource();
 	}

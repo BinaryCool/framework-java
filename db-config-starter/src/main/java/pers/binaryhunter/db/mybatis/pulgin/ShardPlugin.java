@@ -14,8 +14,6 @@ import org.apache.ibatis.reflection.DefaultReflectorFactory;
 import org.apache.ibatis.reflection.MetaObject;
 import org.apache.ibatis.reflection.factory.DefaultObjectFactory;
 import org.apache.ibatis.reflection.wrapper.DefaultObjectWrapperFactory;
-import org.springframework.aop.framework.AdvisedSupport;
-import org.springframework.aop.framework.AopProxy;
 import pers.binaryhunter.db.mybatis.shardbatis.builder.ShardConfigHolder;
 import pers.binaryhunter.db.mybatis.shardbatis.builder.ShardConfigParser;
 import pers.binaryhunter.db.mybatis.shardbatis.converter.SqlConverterFactory;

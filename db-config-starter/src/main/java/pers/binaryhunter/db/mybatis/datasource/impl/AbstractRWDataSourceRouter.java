@@ -1,18 +1,16 @@
 package pers.binaryhunter.db.mybatis.datasource.impl;
 
-import java.util.ArrayList;
-import java.util.List;
-
-import javax.sql.DataSource;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import pers.binaryhunter.db.mybatis.datasource.ConnectionHolder;
-import pers.binaryhunter.db.mybatis.datasource.DataSourceRouter;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.jdbc.datasource.lookup.DataSourceLookup;
 import org.springframework.jdbc.datasource.lookup.JndiDataSourceLookup;
-import pers.binaryhunter.db.mybatis.datasource.MyDataSource;
+import pers.binaryhunter.db.mybatis.datasource.ConnectionHolder;
+import pers.binaryhunter.db.mybatis.datasource.DataSourceRouter;
+
+import javax.sql.DataSource;
+import java.util.ArrayList;
+import java.util.List;
 
 public abstract class AbstractRWDataSourceRouter implements DataSourceRouter, InitializingBean {
     private static final Logger logger = LoggerFactory.getLogger(AbstractRWDataSourceRouter.class);

@@ -1,5 +1,12 @@
 package pers.binaryhunter.db.mybatis.datasource;
 
+import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.springframework.core.Constants;
+import org.springframework.jdbc.datasource.ConnectionProxy;
+
+import javax.sql.DataSource;
 import java.io.PrintWriter;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.InvocationTargetException;
@@ -7,17 +14,7 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
 import java.sql.Connection;
 import java.sql.SQLException;
-import java.util.Map;
 import java.util.logging.Logger;
-
-import javax.sql.DataSource;
-
-import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.springframework.core.Constants;
-import org.springframework.jdbc.datasource.ConnectionProxy;
-import org.springframework.util.CollectionUtils;
 
 public class DataSourceProxy implements DataSource {
 	/** Constants instance for TransactionDefinition */
@@ -48,7 +45,7 @@ public class DataSourceProxy implements DataSource {
 	 * Connection on startup. If that check fails, the default will be
 	 * determined lazily on first access of a Connection.
 	 * 
-	 * @see java.sql.Connection#setAutoCommit
+	 * @see Connection#setAutoCommit
 	 */
 	public void setDefaultAutoCommit(boolean defaultAutoCommit) {
 		this.defaultAutoCommit = defaultAutoCommit;
@@ -60,7 +57,7 @@ public class DataSourceProxy implements DataSource {
 	 * known yet).
 	 * <p>
 	 * This property accepts the int constant value (e.g. 8) as defined in the
-	 * {@link java.sql.Connection} interface; it is mainly intended for
+	 * {@link Connection} interface; it is mainly intended for
 	 * programmatic use. Consider using the "defaultTransactionIsolationName"
 	 * property for setting the value by name (e.g. "TRANSACTION_SERIALIZABLE").
 	 * <p>
@@ -69,7 +66,7 @@ public class DataSourceProxy implements DataSource {
 	 * determined lazily on first access of a Connection.
 	 * 
 	 * @see #setDefaultTransactionIsolationName
-	 * @see java.sql.Connection#setTransactionIsolation
+	 * @see Connection#setTransactionIsolation
 	 */
 	public void setDefaultTransactionIsolation(int defaultTransactionIsolation) {
 		this.defaultTransactionIsolation = defaultTransactionIsolation;
@@ -77,16 +74,16 @@ public class DataSourceProxy implements DataSource {
 
 	/**
 	 * Set the default transaction isolation level by the name of the
-	 * corresponding constant in {@link java.sql.Connection}, e.g.
+	 * corresponding constant in {@link Connection}, e.g.
 	 * "TRANSACTION_SERIALIZABLE".
 	 * 
 	 * @param constantName
 	 *            name of the constant
 	 * @see #setDefaultTransactionIsolation
-	 * @see java.sql.Connection#TRANSACTION_READ_UNCOMMITTED
-	 * @see java.sql.Connection#TRANSACTION_READ_COMMITTED
-	 * @see java.sql.Connection#TRANSACTION_REPEATABLE_READ
-	 * @see java.sql.Connection#TRANSACTION_SERIALIZABLE
+	 * @see Connection#TRANSACTION_READ_UNCOMMITTED
+	 * @see Connection#TRANSACTION_READ_COMMITTED
+	 * @see Connection#TRANSACTION_REPEATABLE_READ
+	 * @see Connection#TRANSACTION_SERIALIZABLE
 	 */
 	public void setDefaultTransactionIsolationName(String constantName) {
 		setDefaultTransactionIsolation(constants.asNumber(constantName).intValue());
@@ -253,36 +250,15 @@ public class DataSourceProxy implements DataSource {
 				}
 			} else {
 				if (method.getName().equals("commit")) {
-					Map<String, Connection> connectionMap = ConnectionHolder.CONNECTION_CONTEXT.get();
-					Connection writeCon = connectionMap.get(ConnectionHolder.WRITE);
-					if (writeCon != null) {
-					    try {
-                            writeCon.commit();
-                        } catch (Exception ex) {
-					        logger.error("", ex);
-                        }
-					}
+					ConnectionHolder.commitConnection();
 					return null;
 				}
 				if (method.getName().equals("rollback")) {
-					Map<String, Connection> connectionMap = ConnectionHolder.CONNECTION_CONTEXT.get();
-					Connection writeCon = connectionMap.get(ConnectionHolder.WRITE);
-					if (writeCon != null) {
-						writeCon.rollback();
-					}
+					ConnectionHolder.rollbackConnection();
 					return null;
 				}
 				if (method.getName().equals("close")) {
-					Map<String, Connection> connectionMap = ConnectionHolder.CONNECTION_CONTEXT.get();
-					Connection readCon = connectionMap.remove(ConnectionHolder.READ);
-					if (readCon != null) {
-					    readCon.close();
-                    }
-					
-					Connection writeCon = connectionMap.remove(ConnectionHolder.WRITE);
-					if (writeCon != null) {
-						writeCon.close();
-					}
+					ConnectionHolder.closeConnection();
 					this.closed = true;
 					return null;
 				}
@@ -303,15 +279,13 @@ public class DataSourceProxy implements DataSource {
                     currentConnection = ConnectionHolder.WRITE;
                 }
 
-                Map<String, Connection> currentContext = ConnectionHolder.CONNECTION_CONTEXT.get();
-                if(CollectionUtils.isEmpty(currentContext)) {
+				Connection conn = ConnectionHolder.getConnection(currentConnection);
+                if (null == conn) {
                     if (logger.isDebugEnabled()) logger.debug("Current context " + currentConnection + " is empty");
-                    Connection conn = getTargetConnection(method);
-                    currentContext.put(currentConnection, conn);
+                    conn = getTargetConnection(method);
+					ConnectionHolder.putConnection(currentConnection, conn);
                 }
                 
-
-                Connection conn = currentContext.get(currentConnection);
                 if(null == conn) {
                     logger.warn("Current conn is null");
                     return null;
@@ -328,7 +302,7 @@ public class DataSourceProxy implements DataSource {
 		 */
 		private boolean hasTargetConnection() {
 			return (ConnectionHolder.CONNECTION_CONTEXT.get() != null
-					&& ConnectionHolder.CONNECTION_CONTEXT.get().get(ConnectionHolder.CURRENT_CONNECTION.get()) != null);
+					&& ConnectionHolder.getConnection(ConnectionHolder.CURRENT_CONNECTION.get()) != null);
 		}
 
 		/**
