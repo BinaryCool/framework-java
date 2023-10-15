@@ -8,6 +8,7 @@ import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.jdbc.datasource.DataSourceTransactionManager;
 import org.springframework.transaction.TransactionDefinition;
 import org.springframework.transaction.TransactionStatus;
@@ -42,6 +43,9 @@ public class GenericServiceImpl<B extends PO, K> extends GenericAbstractServiceI
     protected GenericDAO<B, K> dao;
     @Resource
     private DataSourceTransactionManager transactionManager;
+    @Resource
+    private RedisTemplate redisTemplate;
+    
 
     @Override
     public PageResult<B> queryByPage(Map<String, Object> params, Page page) {
@@ -49,6 +53,7 @@ public class GenericServiceImpl<B extends PO, K> extends GenericAbstractServiceI
         Long count = null;
         // 如果传递请求页数, 表示需要分页
         if (page.isPaging()) {
+            
             count = this.countByArgs(params);
             page.setTotalCount(count);
         }

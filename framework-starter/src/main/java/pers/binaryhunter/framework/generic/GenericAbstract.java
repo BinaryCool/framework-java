@@ -9,6 +9,11 @@ import java.lang.reflect.ParameterizedType;
 
 public class GenericAbstract<B> {
     private static final Logger log = LoggerFactory.getLogger(GenericAbstract.class);
+    
+    protected String getGenericBeanName() {
+        Class<B> beanClass = (Class<B>) ((ParameterizedType) getClass().getGenericSuperclass()).getActualTypeArguments()[0];
+        return beanClass.getSimpleName();
+    }
 
     /**
      * 根据B实现类型初始化Service或者DAO
