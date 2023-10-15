@@ -70,22 +70,6 @@ public interface GenericDAO<B,K> {
      */
     void updateByArgs(Map<String, Object> params);
     /**
-     * 获取序列
-     * @return
-     * Create by Liyw -- 2014-5-6
-     */
-    @Deprecated
-    Long getSequence();
-
-    /**
-     * 获取序列
-     * @return
-     * Create by Liyw -- 2014-5-6
-     */
-    @Deprecated
-    Long getSequences(int step);
-
-    /**
      * 查找
      */
     List<B> queryByField(Map<String, Object> params);
