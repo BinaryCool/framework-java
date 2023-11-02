@@ -24,7 +24,7 @@
     </modules>
 
     <properties>
-        <framework.version>3.2.32</framework.version>
+        <framework.version>3.2.33</framework.version>
 
         <java.version>11</java.version>
         <commons.lang.version>3.9</commons.lang.version>
