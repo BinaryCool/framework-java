@@ -140,10 +140,14 @@ public class RedisUtil {
         }
     }
 
+    public interface LockProcess {
+        void run();
+    }
+
     /**
      * 锁住 process 流程
      */
-    public static <T> T lockReturn(RedissonClient redisson, String redisKeyLock, LockProcess<T> process) {
+    public static <T> T lockReturn(RedissonClient redisson, String redisKeyLock, LockProcessReturn<T> process) {
         RLock lock = null;
         try {
             lock = tryLock(redisson, redisKeyLock);
@@ -156,7 +160,7 @@ public class RedisUtil {
         return null;
     }
 
-    public interface LockProcess<T> {
+    public interface LockProcessReturn<T> {
         T run();
     }
 }
