@@ -129,19 +129,20 @@ public class RedisUtil {
     /**
      * 锁住 process 流程
      */
-    public static void lock(RedissonClient redisson, String redisKeyLock, LockProcess process) {
+    public static <T> T lock(RedissonClient redisson, String redisKeyLock, LockProcess<T> process) {
         RLock lock = null;
         try {
             lock = tryLock(redisson, redisKeyLock);
-            process.run();
+            return process.run();
         } catch (InterruptedException e) {
             log.error("", e);
         } finally {
             unlock(lock);
         }
+        return null;
     }
 
-    public interface LockProcess {
-        void run();
+    public interface LockProcess<T> {
+        T run();
     }
 }
