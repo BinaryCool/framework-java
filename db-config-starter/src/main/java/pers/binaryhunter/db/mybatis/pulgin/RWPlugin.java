@@ -50,6 +50,7 @@ public class RWPlugin implements Interceptor {
 
             if (mappedStatement.getSqlCommandType() == SqlCommandType.SELECT
                     && !mappedStatement.getId().endsWith("!selectKey")
+                    && !mappedStatement.getId().endsWith("getSequence")
             ) {
                 key = ConnectionHolder.READ;
             } else {
