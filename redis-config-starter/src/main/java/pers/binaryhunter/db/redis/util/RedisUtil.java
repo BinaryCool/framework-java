@@ -4,10 +4,7 @@ import org.redisson.api.RLock;
 import org.redisson.api.RedissonClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.data.redis.core.Cursor;
-import org.springframework.data.redis.core.RedisCallback;
-import org.springframework.data.redis.core.RedisTemplate;
-import org.springframework.data.redis.core.ScanOptions;
+import org.springframework.data.redis.core.*;
 import org.springframework.transaction.support.TransactionSynchronizationAdapter;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 
@@ -19,6 +16,19 @@ import java.util.concurrent.TimeUnit;
 public class RedisUtil {
     private static final Logger log = LoggerFactory.getLogger(RedisUtil.class);
 
+    /**
+     * 获取序列号
+     * @param stringRedisTemplate
+     * @param key
+     * @param timeout
+     * @param timeUnit
+     * @return
+     */
+    public static Long getSequence(StringRedisTemplate stringRedisTemplate, String key, long timeout, TimeUnit timeUnit) {
+        Long count = stringRedisTemplate.opsForValue().increment(key);
+        stringRedisTemplate.expire(key, timeout, timeUnit);
+        return count;
+    }
     /**
      * 分布式锁 (未设置等待时间和过期时间)
      * 有可能会锁死系统
