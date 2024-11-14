@@ -23,6 +23,7 @@ import pers.binaryhunter.framework.exception.BusinessException;
 import pers.binaryhunter.framework.service.GenericService;
 import pers.binaryhunter.framework.utils.DateUtil;
 import pers.binaryhunter.framework.utils.MapConverter;
+import pers.binaryhunter.framework.utils.NullUtil;
 import pers.binaryhunter.framework.utils.SqlUtil;
 
 import javax.annotation.Resource;
@@ -585,7 +586,7 @@ public class GenericServiceImpl<B extends PO, K> extends GenericAbstractServiceI
                 log.error("Parse limit", ex);
             }
         }
-        if (!params.containsKey("_unlimited")) {
+        if (!params.containsKey("_unlimited") || NullUtil.isNullOrFalse((Boolean) params.get("_unlimited"))) {
             if (null == limit || limit.intValue() > Page.MAX_LIMIT) {
                 params.put("limit", Page.MAX_LIMIT);
             }
