@@ -585,8 +585,10 @@ public class GenericServiceImpl<B extends PO, K> extends GenericAbstractServiceI
                 log.error("Parse limit", ex);
             }
         }
-        if (null == limit || limit.intValue() > Page.MAX_LIMIT) {
-            params.put("limit", Page.MAX_LIMIT);
+        if (!params.containsKey("_unlimited")) {
+            if (null == limit || limit.intValue() > Page.MAX_LIMIT) {
+                params.put("limit", Page.MAX_LIMIT);
+            }
         }
         return params;
     }
