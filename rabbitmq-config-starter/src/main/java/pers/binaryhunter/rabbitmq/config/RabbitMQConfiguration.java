@@ -110,12 +110,11 @@ public class RabbitMQConfiguration {
         }
 
         private void registerQueue(BeanDefinitionRegistry beanDefinitionRegistry, RabbitMQQueue queue) {
-            String delayStr = null != queue.getDelayed() && queue.getDelayed() ? "Delay" : "";
             String envSuffix = queue.getEnv();
             if (NullUtil.isBlank(envSuffix)) {
                 envSuffix = env;
             }
-            String name = queue.getName() + "." + delayStr + "Queue" + "-" + envSuffix;
+            String name = queue.getName() + "." + "Queue" + "-" + envSuffix;
 
             BeanDefinitionBuilder beanDefinitionBuilder = BeanDefinitionBuilder.genericBeanDefinition(Queue.class);
             beanDefinitionBuilder.addConstructorArgValue(name);
