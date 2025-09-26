@@ -90,12 +90,11 @@ public class RabbitMQConfiguration {
         }
 
         private void registerExchange(BeanDefinitionRegistry beanDefinitionRegistry, RabbitMQQueue queue) {
-            String delayStr = null != queue.getDelayed() && queue.getDelayed() ? "Delay" : "";
             String envSuffix = queue.getEnv();
             if (NullUtil.isBlank(envSuffix)) {
                 envSuffix = env;
             }
-            String name = queue.getName() + "." + delayStr + "Exchange" + "-" + envSuffix;
+            String name = queue.getName() + "." + "Exchange" + "-" + envSuffix;
 
             BeanDefinitionBuilder beanDefinitionBuilder = BeanDefinitionBuilder.genericBeanDefinition(TopicExchange.class);
             beanDefinitionBuilder.addConstructorArgValue(name);
