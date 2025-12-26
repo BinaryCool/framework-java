@@ -162,27 +162,27 @@ public class DateUtil {
             if (!CollectionUtils.isEmpty(queryList)) {
                 if (0 < queryList.size()) {
                     String startTimeStr = queryList.get(0);
-                    if(StringUtils.isNotBlank(startTimeStr)) {
-                        Date startTime = pers.binaryhunter.framework.utils.DateUtil.parse(startTimeStr, dateTypeEnum.getPatternType().getPattern());
+                    if (StringUtils.isNotBlank(startTimeStr)) {
+                        Date startTime = DateUtil.parse(startTimeStr, dateTypeEnum.getPatternType().getPattern());
                         if (StringUtils.isBlank(prefix)) {
-                            params.put("startTime", pers.binaryhunter.framework.utils.DateUtil.format(startTime, dateTypeEnum.getPatternType().getPattern()));
+                            params.put("startTime", formateDate(startTime, dateTypeEnum.getPatternType().getPattern()));
                         } else {
-                            params.put(prefix + "StartTime", pers.binaryhunter.framework.utils.DateUtil.format(startTime, dateTypeEnum.getPatternType().getPattern()));
+                            params.put(prefix + "StartTime", formateDate(startTime, dateTypeEnum.getPatternType().getPattern()));
                         }
                     }
                 }
                 if (1 < queryList.size()) {
                     String endTimeStr = queryList.get(1);
-                    if(StringUtils.isNotBlank(endTimeStr)) {
-                        Date endTime = pers.binaryhunter.framework.utils.DateUtil.parse(endTimeStr, dateTypeEnum.getPatternType().getPattern());
+                    if (StringUtils.isNotBlank(endTimeStr)) {
+                        Date endTime = DateUtil.parse(endTimeStr, dateTypeEnum.getPatternType().getPattern());
 
                         Calendar cal = Calendar.getInstance();
                         cal.setTime(endTime);
                         cal.add(dateTypeEnum.getDateType(), 1);
                         if (StringUtils.isBlank(prefix)) {
-                            params.put("endTime", pers.binaryhunter.framework.utils.DateUtil.format(cal.getTime(), dateTypeEnum.getPatternType().getPattern()));
+                            params.put("endTime", formateDate(cal.getTime(), dateTypeEnum.getPatternType().getPattern()));
                         } else {
-                            params.put(prefix + "EndTime", pers.binaryhunter.framework.utils.DateUtil.format(cal.getTime(), dateTypeEnum.getPatternType().getPattern()));
+                            params.put(prefix + "EndTime", formateDate(cal.getTime(), dateTypeEnum.getPatternType().getPattern()));
                         }
                     }
                 }
@@ -192,5 +192,17 @@ public class DateUtil {
         }
 
         return params;
+    }
+
+    private static String formateDate(Date time, String pattern) {
+        var timeStr = DateUtil.format(time, pattern);
+        var timeArr = timeStr.split("\\-");
+        if (timeArr.length == 1) {
+            return timeStr + "-01" + "-01";
+        }
+        if (timeArr.length == 2) {
+            return timeStr + "-01";
+        }
+        return timeStr;
     }
 }
