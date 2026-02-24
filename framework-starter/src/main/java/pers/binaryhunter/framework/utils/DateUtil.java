@@ -53,6 +53,7 @@ public class DateUtil {
         YEAR(Calendar.YEAR, PatternType.YYYY),
         MONTH(Calendar.MONTH, PatternType.YYYY_MM),
         DATE(Calendar.DATE, PatternType.YYYY_MM_DD),
+        DATETIME(Calendar.SECOND, PatternType.YYYY_MM_DD_HH_MM_SS),
         ;
         private Integer dateType;
         private PatternType patternType;
