@@ -53,7 +53,7 @@ public class DateUtil {
         YEAR(Calendar.YEAR, PatternType.YYYY),
         MONTH(Calendar.MONTH, PatternType.YYYY_MM),
         DATE(Calendar.DATE, PatternType.YYYY_MM_DD),
-        DATETIME(Calendar.SECOND, PatternType.YYYY_MM_DD_HH_MM_SS),
+        DATETIME(null, PatternType.YYYY_MM_DD_HH_MM_SS),
         ;
         private Integer dateType;
         private PatternType patternType;
@@ -179,7 +179,9 @@ public class DateUtil {
 
                         Calendar cal = Calendar.getInstance();
                         cal.setTime(endTime);
-                        cal.add(dateTypeEnum.getDateType(), 1);
+                        if (NullUtil.isNotNull(dateTypeEnum.getDateType())) {
+                            cal.add(dateTypeEnum.getDateType(), 1);
+                        }
                         if (StringUtils.isBlank(prefix)) {
                             params.put("endTime", formateDate(cal.getTime(), dateTypeEnum.getPatternType().getPattern()));
                         } else {
