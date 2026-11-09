@@ -1,0 +1,92 @@
+:root{color-scheme:light;--dudu-green:#4f974b;--dudu-ink:#243329;--dudu-muted:#7d8980;--dudu-surface:#f6f8f6;--dudu-line:#e8eee8;--dudu-font:"PingFang SC","Microsoft YaHei","Noto Sans SC",system-ui,-apple-system,sans-serif}
+*{box-sizing:border-box}
+body{margin:0;background:var(--dudu-surface);color:var(--dudu-ink);font:15px/1.6 var(--dudu-font);-webkit-font-smoothing:antialiased;-webkit-text-size-adjust:100%}
+button,input,textarea{font-family:inherit}
+.survey-shell{max-width:680px;margin:0 auto;padding:24px 20px max(24px,env(safe-area-inset-bottom))}
+.brand{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:24px}
+.brand-name{display:flex;align-items:center;gap:9px;color:var(--dudu-green);font-size:16px;font-weight:650;letter-spacing:.3px}
+.brand-mark{display:flex;align-items:center;justify-content:center;width:30px;height:30px;border-radius:9px;background:#e8f2e7}
+.brand-mark svg{width:21px;height:21px}
+.brand-label{font-size:11px;letter-spacing:1px;color:var(--dudu-muted)}
+#notice{padding:12px 14px;margin-bottom:16px;border:1px solid var(--dudu-line);border-radius:12px;background:#fff;font-size:13px;overflow-wrap:anywhere}
+#notice.error{background:#fff5f2;border-color:#f2ded7;color:#a34836}
+#notice:empty{display:none}
+.privacy{text-align:center;font-size:12px;line-height:1.9;color:#7c897f;margin:20px 0 0}
+.privacy span{font-size:11px;color:#98a29a}
+#retry{width:100%;min-height:48px;margin-top:12px;padding:12px 20px;border:0;border-radius:12px;background:var(--dudu-green);color:#fff;font-size:15px;font-weight:600;cursor:pointer}
+#retry:focus-visible{outline:3px solid #bdd8ba;outline-offset:3px}
+
+/* Preserve SurveyJS structure and native controls while replacing visual styles. */
+#survey *,#survey *::before,#survey *::after{box-sizing:border-box}
+#survey .sd-root-modern{background:transparent;font-family:var(--dudu-font);--sd-base-padding:18px;--sd-base-vertical-padding:18px;--sd-page-vertical-padding:0px}
+#survey .sv-string-viewer{font-family:var(--dudu-font)}
+#survey .sd-container-modern{width:100%;max-width:none}
+#survey .sd-container-modern__title{padding:0 0 22px;background:transparent;box-shadow:none;border:0}
+#survey .sd-header__text{gap:8px}
+#survey .sd-header__text .sd-title{font-family:var(--dudu-font);font-size:24px;font-weight:650;line-height:1.45;letter-spacing:-.4px;color:var(--dudu-ink);overflow-wrap:anywhere}
+#survey .sd-header__text .sd-description{font-family:var(--dudu-font);font-size:14px;font-weight:400;line-height:1.75;color:var(--dudu-muted)}
+#survey .sd-body{width:100%;max-width:none;margin:0;padding:0;background:transparent;row-gap:0}
+#survey .sd-page{padding:0;row-gap:12px;background:transparent}
+#survey .sd-page__content{padding:0;row-gap:12px}
+#survey .sd-element-wrapper{min-width:0}
+#survey .sd-row{margin:0;width:100%}
+#survey .sd-question{padding:18px;border:1px solid var(--dudu-line);border-radius:16px;background:#fff;box-shadow:0 2px 8px #24332903;min-width:0}
+#survey .sd-question__header-and-content-container{padding:0;row-gap:0;column-gap:0}
+#survey .sd-element__header{padding:0 0 14px;gap:0}
+#survey .sd-element__content{padding:0}
+#survey .sd-element__title{padding:0;line-height:1.6}
+#survey .sd-element__title .sv-string-viewer{font-family:var(--dudu-font);font-size:16px;font-weight:600;line-height:1.6;color:var(--dudu-ink);overflow-wrap:anywhere}
+#survey .sd-question__title{display:flex;align-items:baseline;font-size:16px}
+#survey .sd-question__title>.sv-string-viewer{flex:0 1 auto;min-width:0}
+/* Keep question numbers inside the card instead of SurveyJS's hanging gutter. */
+#survey .sd-question__title .sd-element__num{display:inline-flex;align-items:center;justify-content:center;flex:0 0 auto;float:none;width:auto;min-width:28px;height:28px;margin:0;margin-inline-end:10px;padding:0 6px;border-radius:8px;background:#edf5ec;color:var(--dudu-green);font-family:var(--dudu-font);font-size:14px;font-weight:600;line-height:28px;text-align:center;font-variant-numeric:tabular-nums}
+#survey .sd-question__title .sd-element__num+span{display:none;float:none;width:auto}
+#survey .sd-question__required-text{flex:0 0 auto}
+#survey .sd-question__required-text{color:var(--dudu-green);font-size:13px;font-weight:500}
+#survey .sd-question__description{font-size:13px;color:var(--dudu-muted);line-height:1.6}
+
+/* Five-point scales retain one row and generous touch targets on phones. */
+#survey .sd-rating{width:100%;min-height:44px;overflow:visible}
+#survey .sd-rating fieldset{width:100%;gap:8px;padding:0;margin:0}
+#survey .sd-rating__item{flex:1;min-width:0;height:44px;padding:0 4px;border:1px solid var(--dudu-line);border-radius:10px;background:#f8faf8;box-shadow:none;font-size:17px;font-weight:500;color:#506355}
+#survey .sd-rating__item-text{font-family:var(--dudu-font);font-size:17px;line-height:24px}
+#survey .sd-rating__item--selected{border-color:var(--dudu-green);background:var(--dudu-green);color:#fff;box-shadow:0 3px 8px #4f974b24}
+#survey .sd-rating__item--selected .sd-rating__item-text{color:#fff}
+#survey .sd-rating__item:focus-within{outline:2px solid #b8d4b5;outline-offset:2px;box-shadow:none}
+
+#survey .sd-selectbase{display:flex;flex-direction:column;gap:8px}
+#survey .sd-selectbase .sd-item{width:100%;margin:0;padding:0}
+#survey .sd-selectbase__label{display:flex;align-items:center;width:100%;max-width:100%;gap:10px;min-height:46px;padding:10px 12px;border:1px solid #edf1ed;border-radius:10px;background:#f8faf8;transition:background-color .15s,border-color .15s}
+#survey .sd-checkbox--checked .sd-selectbase__label,#survey .sd-radio--checked .sd-selectbase__label{background:#edf5ec;border-color:#b8d4b5}
+#survey .sd-item__control-label{font-family:var(--dudu-font);font-size:14px;line-height:1.6;color:#405346}
+#survey .sd-item__control-label .sv-string-viewer{white-space:normal;overflow-wrap:anywhere;overflow:visible}
+#survey .sd-item__decorator{width:20px;height:20px;margin:0;flex-shrink:0}
+#survey .sd-checkbox__decorator{border-radius:5px}
+#survey .sd-radio__decorator{border-radius:50%}
+#survey .sd-checkbox--checked .sd-item__decorator,#survey .sd-radio--checked .sd-item__decorator{background:var(--dudu-green)}
+#survey .sd-item__control:focus-visible+.sd-item__decorator{outline:2px solid #b8d4b5;outline-offset:3px}
+
+#survey .sd-input,#survey .sd-input__input,#survey .sd-text__input,#survey .sd-comment__input,#survey .sd-dropdown{font-family:var(--dudu-font);font-size:15px;line-height:1.6;color:var(--dudu-ink)}
+#survey .sd-input,#survey .sd-text,#survey .sd-comment,#survey .sd-dropdown{border-radius:10px}
+#survey .sd-text,#survey .sd-comment,#survey .sd-dropdown{background:#f8faf8;box-shadow:inset 0 0 0 1px var(--dudu-line)}
+#survey .sd-text__input,#survey .sd-comment__input{padding:12px;min-height:46px}
+#survey .sd-comment__input{min-height:110px}
+#survey .sd-formbox__input,#survey .sd-dropdown__filter-string-input{font-family:var(--dudu-font);font-size:16px}
+#survey .sd-text:focus-within,#survey .sd-comment:focus-within,#survey .sd-dropdown:focus-within{box-shadow:inset 0 0 0 1px var(--dudu-green),0 0 0 3px #4f974b12}
+#survey .sd-boolean{border-radius:10px}
+#survey .sd-boolean__label{font-size:14px}
+#survey .sd-question__erbox{margin-top:10px;border-radius:8px;padding:8px 10px;font-size:12px;line-height:1.6}
+#survey .sd-question--error{border-color:#e8c3b8}
+
+#survey .sd-body__navigation{display:flex;gap:10px;padding:22px 0 0}
+#survey .sd-body__navigation .sd-action{flex:1;max-width:none}
+#survey .sd-body__navigation .sd-action-bar__item{width:100%}
+#survey .sd-navigation__complete-btn,#survey .sd-navigation__next-btn,#survey .sd-navigation__prev-btn{width:100%;min-height:48px;padding:12px 20px;border:0;border-radius:12px;background:var(--dudu-green);box-shadow:0 4px 12px #4f974b1a;font-family:var(--dudu-font);font-size:15px;font-weight:600;line-height:24px;color:#fff;cursor:pointer}
+#survey .sd-navigation__prev-btn{background:#fff;color:var(--dudu-green);box-shadow:inset 0 0 0 1px var(--dudu-line)}
+#survey .sd-body__navigation .sd-action__title{padding:0;font-family:var(--dudu-font);font-size:15px;font-weight:600;line-height:24px}
+#survey .sd-navigation__complete-btn:focus-visible,#survey .sd-navigation__next-btn:focus-visible{outline:3px solid #bdd8ba;outline-offset:3px}
+#survey .sd-completedpage{margin:0;padding:40px 20px;border:1px solid var(--dudu-line);border-radius:16px;background:#fff;color:var(--dudu-ink);font:15px/1.8 var(--dudu-font)}
+#survey .sd-completedpage h3{font-size:22px;line-height:1.5;color:var(--dudu-green)}
+@media(hover:hover){#survey .sd-rating__item:not(.sd-rating__item--selected):hover,#survey .sd-selectbase__label:hover{background:#edf5ec;border-color:#b8d4b5}#survey .sd-navigation__complete-btn:hover,#survey .sd-navigation__next-btn:hover,#retry:hover{background:#43883f}}
+@media(max-width:480px){.survey-shell{padding:20px 16px max(24px,env(safe-area-inset-bottom))}.brand{margin-bottom:20px}#survey .sd-header__text .sd-title{font-size:23px}#survey .sd-question{padding:16px}#survey .sd-page,#survey .sd-page__content{row-gap:10px}}
+@media(prefers-reduced-motion:reduce){#survey *{transition:none!important;scroll-behavior:auto!important}}

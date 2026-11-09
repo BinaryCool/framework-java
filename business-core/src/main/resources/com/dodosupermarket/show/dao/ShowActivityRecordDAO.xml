@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.dodosupermarket.show.dao.ShowActivityRecordDAO">
+    <resultMap id="recordResult" type="com.dodosupermarket.show.bean.po.ShowActivityRecord">
+        <id column="id" property="id"/>
+        <result column="store_id" property="storeId"/>
+        <result column="sort_order" property="sortOrder"/>
+        <result column="start_time" property="startTime"/>
+        <result column="end_time" property="endTime"/>
+        <result column="ended" property="ended"/>
+        <result column="version" property="version"/>
+        <result column="payload" property="payload"/>
+        <result column="create_time" property="createMillis"/>
+        <result column="update_time" property="updateMillis"/>
+    </resultMap>
+    <sql id="whereClause">
+        <where>
+            <if test="id != null">AND id = #{id}</if>
+            <if test="storeId != null">AND store_id = #{storeId}</if>
+            <if test="activeAt != null">AND ended = 0 AND start_time &lt;= #{activeAt} AND (end_time IS NULL OR end_time &gt; #{activeAt})
+            </if>
+        </where>
+    </sql>
+    <insert id="create" parameterType="com.dodosupermarket.show.bean.po.ShowActivityRecord" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO dodo_show_activity (store_id, sort_order, start_time, end_time, ended, version, payload, create_time, update_time)
+        VALUES (#{storeId}, #{sortOrder}, #{startTime}, #{endTime}, #{ended}, #{version}, #{payload}, #{createMillis}, #{updateMillis})
+    </insert>
+    <update id="update" parameterType="com.dodosupermarket.show.bean.po.ShowActivityRecord">
+        UPDATE dodo_show_activity
+        SET sort_order = #{sortOrder},
+        start_time = #{startTime},
+        end_time = #{endTime},
+        ended = #{ended},
+        version = #{version},
+        payload = #{payload},
+        update_time = #{updateMillis}
+        WHERE id = #{id} AND store_id = #{storeId}
+    </update>
+    <select id="queryByArgs" parameterType="map" resultMap="recordResult" flushCache="true" useCache="false">
+        SELECT id, store_id, sort_order, start_time, end_time, ended, version, payload, create_time, update_time FROM dodo_show_activity
+        <include refid="whereClause"/>
+        ORDER BY sort_order ASC, id DESC
+        <if test="limit != null">LIMIT #{limit}
+            <if test="start != null">OFFSET #{start}</if>
+        </if>
+    </select>
+    <select id="countByArgs" parameterType="map" resultType="long" flushCache="true" useCache="false">
+        SELECT COUNT(*) FROM dodo_show_activity
+        <include refid="whereClause"/>
+    </select>
+    <!-- 行锁查询禁用缓存，审核必须读取等待锁之后的真实状态。 -->
+    <select id="lockById" resultMap="recordResult" flushCache="true" useCache="false">
+        SELECT id, store_id, sort_order, start_time, end_time, ended, version, payload, create_time, update_time FROM dodo_show_activity
+        WHERE id = #{id} AND store_id = #{storeId} FOR UPDATE
+    </select>
+    <resultMap id="statisticsResult" type="map">
+        <result column="submitted_count" property="submittedCount" javaType="java.lang.Long"/>
+        <result column="pending_count" property="pendingCount" javaType="java.lang.Long"/>
+        <result column="approved_count" property="approvedCount" javaType="java.lang.Long"/>
+        <result column="issued_amount" property="issuedAmount"/>
+        <result column="used_count" property="usedCount" javaType="java.lang.Long"/>
+    </resultMap>
+    <select id="statistics" resultMap="statisticsResult">
+        SELECT COUNT(*) AS submitted_count,
+        COALESCE(SUM(CASE WHEN s.audit_status = 'PENDING' THEN 1 ELSE 0 END), 0) AS pending_count,
+        COALESCE(SUM(CASE WHEN s.audit_status = 'APPROVED' THEN 1 ELSE 0 END), 0) AS approved_count,
+        COALESCE(SUM(s.reward_price), 0) AS issued_amount,
+        COALESCE(SUM(CASE WHEN c.status = 2 THEN 1 ELSE 0 END), 0) AS used_count
+        FROM dodo_show_submission s LEFT JOIN dodo_coupon c ON c.id = s.coupon_id
+        WHERE s.activity_id = #{activityId} AND s.store_id = #{storeId}
+    </select>
+</mapper>

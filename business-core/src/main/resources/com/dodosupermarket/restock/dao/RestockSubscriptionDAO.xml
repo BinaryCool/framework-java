@@ -1,0 +1,150 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.dodosupermarket.restock.dao.RestockSubscriptionDAO">
+    <resultMap id="recordResult" type="com.dodosupermarket.restock.bean.po.RestockSubscription">
+        <id column="id" property="id"/>
+        <result column="user_id" property="userId"/>
+        <result column="store_id" property="storeId"/>
+        <result column="shop_id" property="shopId"/>
+        <result column="scheme_id" property="schemeId"/>
+        <result column="goods_id" property="goodsId"/>
+        <result column="goods_name" property="goodsName"/>
+        <result column="goods_img" property="goodsImg"/>
+        <result column="state" property="state"/>
+        <result column="generation" property="generation"/>
+        <result column="version" property="version"/>
+        <result column="subscribed_at" property="subscribedAt" javaType="java.sql.Timestamp"/>
+        <result column="expires_at" property="expiresAt" javaType="java.sql.Timestamp"/>
+        <result column="next_check_at" property="nextCheckAt" javaType="java.sql.Timestamp"/>
+        <result column="updated_at" property="updatedAt" javaType="java.sql.Timestamp"/>
+    </resultMap>
+    <!-- 所有读取禁用一级/二级缓存，行锁等待后必须读取最新提交的状态。 -->
+    <insert id="create" parameterType="com.dodosupermarket.restock.bean.po.RestockSubscription">
+        INSERT INTO dodo_restock_subscription (id, user_id, store_id, shop_id, scheme_id, goods_id, goods_name, goods_img, state,
+            generation, version, subscribed_at, expires_at, next_check_at, updated_at)
+        VALUES (#{id,jdbcType=VARCHAR}, #{userId,jdbcType=BIGINT}, #{storeId,jdbcType=BIGINT}, #{shopId,jdbcType=BIGINT},
+            #{schemeId,jdbcType=BIGINT}, #{goodsId,jdbcType=BIGINT}, #{goodsName,jdbcType=VARCHAR}, #{goodsImg,jdbcType=VARCHAR},
+            #{state,jdbcType=VARCHAR}, #{generation,jdbcType=INTEGER}, #{version,jdbcType=INTEGER}, #{subscribedAt,jdbcType=TIMESTAMP},
+            #{expiresAt,jdbcType=TIMESTAMP}, #{nextCheckAt,jdbcType=TIMESTAMP}, #{updatedAt,jdbcType=TIMESTAMP})
+        ON DUPLICATE KEY UPDATE id = id
+    </insert>
+    <sql id="whereClause">
+        <where>
+            <if test="id != null">AND id = #{id}</if>
+            <if test="userId != null">AND user_id = #{userId}</if>
+            <if test="storeId != null">AND store_id = #{storeId}</if>
+            <if test="shopId != null">AND shop_id = #{shopId}</if>
+            <if test="goodsId != null">AND goods_id = #{goodsId}</if>
+        </where>
+    </sql>
+    <select id="queryByArgs" parameterType="map" resultMap="recordResult" flushCache="true" useCache="false">
+        SELECT id, user_id, store_id, shop_id, scheme_id, goods_id, goods_name, goods_img, state, generation, version, subscribed_at,
+            expires_at, next_check_at, updated_at FROM dodo_restock_subscription
+        <include refid="whereClause"/>
+        <if test="limit != null">
+            LIMIT #{limit}
+            <if test="start != null">OFFSET #{start}</if>
+        </if>
+    </select>
+    <select id="countByArgs" parameterType="map" resultType="long" flushCache="true" useCache="false">
+        SELECT COUNT(*) FROM dodo_restock_subscription
+        <include refid="whereClause"/>
+    </select>
+    <update id="update">
+        UPDATE dodo_restock_subscription
+        SET scheme_id = #{schemeId}, state = #{state}, generation = #{generation}, version = #{version},
+            subscribed_at = #{subscribedAt}, expires_at = #{expiresAt}, next_check_at = #{nextCheckAt}, updated_at = #{updatedAt}
+        WHERE id = #{id} AND user_id = #{userId} AND store_id = #{storeId} AND shop_id = #{shopId}
+    </update>
+    <select id="lockById" resultMap="recordResult" flushCache="true" useCache="false">
+        SELECT * FROM dodo_restock_subscription WHERE id = #{id}
+        <if test="userId != null">AND user_id = #{userId}</if>
+        <if test="storeId != null">AND store_id = #{storeId}</if>
+        <if test="shopId != null">AND shop_id = #{shopId}</if>
+        FOR UPDATE
+    </select>
+    <select id="lockIdentity" resultMap="recordResult" flushCache="true" useCache="false">
+        SELECT * FROM dodo_restock_subscription
+        WHERE user_id = #{userId} AND store_id = #{storeId} AND shop_id = #{shopId} AND goods_id = #{goodsId} FOR UPDATE
+    </select>
+    <select id="lockGoods" resultMap="recordResult" flushCache="true" useCache="false">
+        SELECT * FROM dodo_restock_subscription
+        WHERE store_id = #{storeId} AND shop_id = #{shopId} AND goods_id = #{goodsId} ORDER BY id FOR UPDATE
+    </select>
+    <select id="dueIds" resultType="string" flushCache="true" useCache="false">
+        SELECT id FROM dodo_restock_subscription WHERE state = 'WAITING'
+        <if test="!force">AND next_check_at &lt;= CURRENT_TIMESTAMP(3)</if>
+        <if test="storeId != null">AND store_id = #{storeId}</if>
+        <if test="goodsId != null">AND goods_id = #{goodsId}</if>
+        ORDER BY next_check_at, id LIMIT #{limit}
+    </select>
+    <update id="deferCheck">
+        UPDATE dodo_restock_subscription SET next_check_at = #{nextCheckAt} WHERE id = #{id}
+    </update>
+    <update id="scheduleGoods">
+        UPDATE dodo_restock_subscription SET next_check_at = #{nextCheckAt}
+        WHERE store_id = #{storeId} AND shop_id = #{shopId} AND goods_id = #{goodsId} AND state = 'WAITING'
+    </update>
+    <resultMap id="mineResult" type="java.util.LinkedHashMap">
+        <id column="id" property="id"/>
+        <result column="user_id" property="userId"/>
+        <result column="store_id" property="storeId"/>
+        <result column="shop_id" property="shopId"/>
+        <result column="scheme_id" property="schemeId"/>
+        <result column="goods_id" property="goodsId"/>
+        <result column="goods_name" property="goodsName"/>
+        <result column="goods_img" property="goodsImg"/>
+        <result column="state" property="state"/>
+        <result column="generation" property="generation"/>
+        <result column="version" property="version"/>
+        <result column="subscribed_at" property="subscribedAt" javaType="java.sql.Timestamp"/>
+        <result column="expires_at" property="expiresAt" javaType="java.sql.Timestamp"/>
+        <result column="next_check_at" property="nextCheckAt" javaType="java.sql.Timestamp"/>
+        <result column="updated_at" property="updatedAt" javaType="java.sql.Timestamp"/>
+        <result column="notification_id" property="notificationId"/>
+        <result column="content" property="content"/>
+        <result column="delivery_state" property="deliveryState"/>
+        <result column="read_at" property="readAt" javaType="java.sql.Timestamp"/>
+        <result column="clicked_at" property="clickedAt" javaType="java.sql.Timestamp"/>
+    </resultMap>
+    <select id="mine" resultMap="mineResult" flushCache="true" useCache="false">
+        SELECT s.*, n.id AS notification_id, n.content, n.delivery_state, n.read_at, n.clicked_at
+        FROM dodo_restock_subscription s LEFT JOIN dodo_restock_notice n ON n.subscription_id = s.id AND n.generation = s.generation
+        WHERE s.user_id = #{userId} AND s.store_id = #{storeId} AND s.shop_id = #{shopId}
+        ORDER BY s.updated_at DESC, s.id LIMIT #{limit} OFFSET #{start}
+    </select>
+    <resultMap id="demandResult" type="java.util.LinkedHashMap">
+        <result column="store_id" property="storeId"/>
+        <result column="shop_id" property="shopId"/>
+        <result column="goods_id" property="goodsId"/>
+        <result column="goods_name" property="goodsName"/>
+        <result column="waiting_count" property="waitingCount"/>
+        <result column="first_subscribed_at" property="firstSubscribedAt" javaType="java.sql.Timestamp"/>
+        <result column="supply_state" property="supplyState"/>
+        <result column="owner_name" property="ownerName"/>
+        <result column="reason" property="reason"/>
+        <result column="expected_at" property="expectedAt" javaType="java.sql.Timestamp"/>
+        <result column="version" property="version"/>
+    </resultMap>
+    <sql id="demandGroup">
+        FROM dodo_restock_subscription s LEFT JOIN dodo_restock_supply p
+        ON p.store_id = s.store_id AND p.shop_id = s.shop_id AND p.goods_id = s.goods_id
+        WHERE s.store_id = #{storeId} GROUP BY s.store_id, s.shop_id, s.goods_id
+    </sql>
+    <select id="demands" resultMap="demandResult" flushCache="true" useCache="false">
+        SELECT s.store_id, s.shop_id, s.goods_id, MAX(s.goods_name) AS goods_name,
+        SUM(CASE WHEN s.state = 'WAITING' AND s.expires_at &gt; CURRENT_TIMESTAMP(3) THEN 1 ELSE 0 END) AS waiting_count,
+        MIN(s.subscribed_at) AS first_subscribed_at, MAX(p.state) AS supply_state, MAX(p.owner_name) AS owner_name,
+        MAX(p.reason) AS reason, MAX(p.expected_at) AS expected_at, MAX(p.version) AS version
+        <include refid="demandGroup"/>
+        ORDER BY waiting_count DESC, first_subscribed_at LIMIT #{limit} OFFSET #{start}
+    </select>
+    <select id="demandCount" resultType="long" flushCache="true" useCache="false">
+        SELECT COUNT(*) FROM (SELECT s.goods_id <include refid="demandGroup"/>) x
+    </select>
+    <select id="activeGoods" resultType="long" flushCache="true" useCache="false">
+        SELECT goods_id FROM dodo_restock_subscription
+        WHERE user_id = #{userId} AND store_id = #{storeId} AND shop_id = #{shopId}
+        AND state = 'WAITING' AND expires_at &gt; CURRENT_TIMESTAMP(3)
+    </select>
+</mapper>

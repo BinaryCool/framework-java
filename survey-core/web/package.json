@@ -1,0 +1,8 @@
+{
+  "name": "dudu-survey-assets",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Pinned MIT SurveyJS assets packaged into the existing Java services",
+  "scripts": { "build": "node build.cjs" },
+  "dependencies": { "survey-core": "3.2.1", "survey-js-ui": "3.2.1" }
+}

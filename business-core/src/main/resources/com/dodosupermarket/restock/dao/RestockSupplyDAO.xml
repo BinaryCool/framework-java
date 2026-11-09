@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.dodosupermarket.restock.dao.RestockSupplyDAO">
+    <resultMap id="recordResult" type="com.dodosupermarket.restock.bean.po.RestockSupply">
+        <result column="store_id" property="storeId"/>
+        <result column="shop_id" property="shopId"/>
+        <result column="goods_id" property="goodsId"/>
+        <result column="state" property="state"/>
+        <result column="owner_id" property="ownerId"/>
+        <result column="owner_name" property="ownerName"/>
+        <result column="reason" property="reason"/>
+        <result column="expected_at" property="expectedAt" javaType="java.sql.Timestamp"/>
+        <result column="version" property="version"/>
+        <result column="updated_at" property="updatedAt" javaType="java.sql.Timestamp"/>
+    </resultMap>
+    <!-- 所有读取禁用一级/二级缓存，行锁等待后必须读取最新提交的状态。 -->
+    <insert id="create" parameterType="com.dodosupermarket.restock.bean.po.RestockSupply">
+        INSERT INTO dodo_restock_supply (store_id, shop_id, goods_id, state, owner_id, owner_name, reason, expected_at, version, updated_at)
+        VALUES (#{storeId,jdbcType=BIGINT}, #{shopId,jdbcType=BIGINT}, #{goodsId,jdbcType=BIGINT}, #{state,jdbcType=VARCHAR},
+            #{ownerId,jdbcType=BIGINT}, #{ownerName,jdbcType=VARCHAR}, #{reason,jdbcType=VARCHAR}, #{expectedAt,jdbcType=TIMESTAMP},
+            #{version,jdbcType=INTEGER}, #{updatedAt,jdbcType=TIMESTAMP})
+        ON DUPLICATE KEY UPDATE goods_id = goods_id
+    </insert>
+    <sql id="whereClause">
+        <where>
+            <if test="id != null">
+                AND store_id = #{id.storeId} AND shop_id = #{id.shopId} AND goods_id = #{id.goodsId}
+            </if>
+            <if test="storeId != null">AND store_id = #{storeId}</if>
+            <if test="shopId != null">AND shop_id = #{shopId}</if>
+            <if test="goodsId != null">AND goods_id = #{goodsId}</if>
+            <if test="state != null">AND state = #{state}</if>
+        </where>
+    </sql>
+    <select id="queryByArgs" parameterType="map" resultMap="recordResult" flushCache="true" useCache="false">
+        SELECT store_id, shop_id, goods_id, state, owner_id, owner_name, reason, expected_at, version, updated_at FROM dodo_restock_supply
+        <include refid="whereClause"/>
+        <if test="limit != null">
+            LIMIT #{limit}
+            <if test="start != null">OFFSET #{start}</if>
+        </if>
+    </select>
+    <select id="countByArgs" parameterType="map" resultType="long" flushCache="true" useCache="false">
+        SELECT COUNT(*) FROM dodo_restock_supply
+        <include refid="whereClause"/>
+    </select>
+    <select id="lockByKey" resultMap="recordResult" flushCache="true" useCache="false">
+        SELECT * FROM dodo_restock_supply
+        WHERE store_id = #{id.storeId} AND shop_id = #{id.shopId} AND goods_id = #{id.goodsId} FOR UPDATE
+    </select>
+    <update id="updateVersioned">
+        UPDATE dodo_restock_supply SET state = #{record.state}, owner_id = #{record.ownerId},
+        owner_name = #{record.ownerName}, reason = #{record.reason}, expected_at = #{record.expectedAt,jdbcType=TIMESTAMP},
+        version = version + 1, updated_at = #{record.updatedAt}
+        WHERE store_id = #{record.storeId} AND shop_id = #{record.shopId} AND goods_id = #{record.goodsId} AND version = #{record.version}
+    </update>
+</mapper>

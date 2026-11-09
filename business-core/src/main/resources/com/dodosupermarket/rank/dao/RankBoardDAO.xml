@@ -1,0 +1,118 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.dodosupermarket.rank.dao.RankBoardDAO">
+    <resultMap id="record" type="com.dodosupermarket.rank.bean.po.RankBoard">
+        <result column="id" property="id"/>
+        <result column="store_id" property="storeId"/>
+        <result column="title" property="title"/>
+        <result column="sort_order" property="sortOrder"/>
+        <result column="is_prod" property="isProd"/>
+        <result column="association_priority" property="associationPriority"/>
+        <result column="recommend_position" property="recommendPosition"/>
+        <result column="top_url" property="topUrl"/>
+        <result column="background_image" property="backgroundImage"/>
+        <result column="background_color" property="backgroundColor"/>
+        <result column="goods_count" property="goodsCount"/>
+    </resultMap>
+    <sql id="whereClause">
+        <where>
+            <if test="id != null">AND id = #{id}</if>
+            <if test="storeId != null">AND store_id = #{storeId}</if>
+            <if test="idIn != null and idIn != ''">
+                AND id IN <foreach collection="idIn.split(',')" item="value" open="(" close=")" separator=",">#{value}</foreach>
+            </if>
+            <if test="status != null">AND status = #{status}</if>
+            <if test="isProd != null">AND is_prod = #{isProd}</if>
+
+
+        </where>
+    </sql>
+    <insert id="create" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO dodo_theme_top_list (store_id, title, sort_order, is_prod, association_priority, recommend_position, top_url, background_image, background_color, goods_count, status)
+        VALUES (#{storeId}, #{title}, #{sortOrder}, #{isProd}, #{associationPriority}, #{recommendPosition}, #{topUrl}, #{backgroundImage}, #{backgroundColor}, #{goodsCount}, 1)
+    </insert>
+    <update id="update">
+        UPDATE dodo_theme_top_list
+        SET title = #{title}, sort_order = #{sortOrder}, is_prod = #{isProd}, association_priority = #{associationPriority}, recommend_position = #{recommendPosition}, top_url = #{topUrl}, background_image = #{backgroundImage}, background_color = #{backgroundColor}, goods_count = #{goodsCount}
+        WHERE id = #{id} AND store_id = #{storeId}
+    </update>
+    <select id="queryByArgs" resultMap="record" flushCache="true" useCache="false">
+        SELECT * FROM dodo_theme_top_list
+        <include refid="whereClause"/>
+        ORDER BY sort_order, id DESC
+        <if test="limit != null">LIMIT #{limit}<if test="start != null"> OFFSET #{start}</if></if>
+    </select>
+    <select id="countByArgs" resultType="long" flushCache="true" useCache="false">
+        SELECT COUNT(*) FROM dodo_theme_top_list<include refid="whereClause"/>
+    </select>
+    <delete id="deleteByArgs">
+        DELETE FROM dodo_theme_top_list<include refid="whereClause"/>
+    </delete>
+    <select id="getById" resultMap="record" flushCache="true" useCache="false">
+        SELECT * FROM dodo_theme_top_list WHERE id = #{id}
+    </select>
+    <select id="queryByField" resultMap="record" flushCache="true" useCache="false">
+        SELECT * FROM dodo_theme_top_list<include refid="whereClause"/> ORDER BY sort_order, id DESC
+    </select>
+    <select id="pageByArgs" resultMap="record" flushCache="true" useCache="false">
+        SELECT * FROM dodo_theme_top_list<include refid="whereClause"/> ORDER BY sort_order, id DESC
+        <if test="limit != null">LIMIT #{limit}<if test="start != null"> OFFSET #{start}</if></if>
+    </select>
+    <delete id="deleteById">DELETE FROM dodo_theme_top_list WHERE id = #{id}</delete>
+    <delete id="deleteByIds">
+        DELETE FROM dodo_theme_top_list WHERE id IN
+        <foreach collection="_parameter.split(',')" item="value" open="(" close=")" separator=",">#{value}</foreach>
+    </delete>
+    <insert id="createBatch" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO dodo_theme_top_list (store_id, title, sort_order, is_prod, association_priority, recommend_position, top_url, background_image, background_color, goods_count, status) VALUES
+        <foreach collection="list" item="item" separator=",">
+            (#{item.storeId}, #{item.title}, #{item.sortOrder}, #{item.isProd}, #{item.associationPriority}, #{item.recommendPosition}, #{item.topUrl}, #{item.backgroundImage}, #{item.backgroundColor}, #{item.goodsCount}, 1)
+        </foreach>
+    </insert>
+    <update id="updateNotNull">
+        UPDATE dodo_theme_top_list
+        <set>
+            <if test="title != null">title = #{title},</if>
+            <if test="sortOrder != null">sort_order = #{sortOrder},</if>
+            <if test="isProd != null">is_prod = #{isProd},</if>
+            <if test="associationPriority != null">association_priority = #{associationPriority},</if>
+            <if test="recommendPosition != null">recommend_position = #{recommendPosition},</if>
+            <if test="topUrl != null">top_url = #{topUrl},</if>
+            <if test="backgroundImage != null">background_image = #{backgroundImage},</if>
+            <if test="backgroundColor != null">background_color = #{backgroundColor},</if>
+            <if test="goodsCount != null">goods_count = #{goodsCount},</if>
+        </set>
+        WHERE id = #{id} AND store_id = #{storeId}
+    </update>
+    <update id="updateBatch">
+        UPDATE dodo_theme_top_list SET
+        title = CASE
+            <foreach collection="list" item="item">WHEN id = #{item.id} AND store_id = #{item.storeId} THEN #{item.title}</foreach>
+            ELSE title END,
+        sort_order = CASE
+            <foreach collection="list" item="item">WHEN id = #{item.id} AND store_id = #{item.storeId} THEN #{item.sortOrder}</foreach>
+            ELSE sort_order END,
+        is_prod = CASE
+            <foreach collection="list" item="item">WHEN id = #{item.id} AND store_id = #{item.storeId} THEN #{item.isProd}</foreach>
+            ELSE is_prod END,
+        association_priority = CASE
+            <foreach collection="list" item="item">WHEN id = #{item.id} AND store_id = #{item.storeId} THEN #{item.associationPriority}</foreach>
+            ELSE association_priority END,
+        recommend_position = CASE
+            <foreach collection="list" item="item">WHEN id = #{item.id} AND store_id = #{item.storeId} THEN #{item.recommendPosition}</foreach>
+            ELSE recommend_position END,
+        top_url = CASE
+            <foreach collection="list" item="item">WHEN id = #{item.id} AND store_id = #{item.storeId} THEN #{item.topUrl}</foreach>
+            ELSE top_url END,
+        background_image = CASE
+            <foreach collection="list" item="item">WHEN id = #{item.id} AND store_id = #{item.storeId} THEN #{item.backgroundImage}</foreach>
+            ELSE background_image END,
+        background_color = CASE
+            <foreach collection="list" item="item">WHEN id = #{item.id} AND store_id = #{item.storeId} THEN #{item.backgroundColor}</foreach>
+            ELSE background_color END,
+        goods_count = CASE
+            <foreach collection="list" item="item">WHEN id = #{item.id} AND store_id = #{item.storeId} THEN #{item.goodsCount}</foreach>
+            ELSE goods_count END
+        WHERE <foreach collection="list" item="item" separator=" OR ">(id = #{item.id} AND store_id = #{item.storeId})</foreach>
+    </update>
+</mapper>

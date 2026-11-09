@@ -1,0 +1,11 @@
+{
+  "version": "3.2.1",
+  "license": "MIT",
+  "source": "https://github.com/surveyjs/survey-library",
+  "sha256": {
+    "survey.core.min.js": "2ca0093157a0b63a0e81bd059b11442d1fb446e00bdb7f8b4dffd2c7010b84fd",
+    "survey-js-ui.min.js": "54771b8567c644684fb25c8e66c798014bf3545a72ae323b953900335f72b66d",
+    "survey.i18n.min.js": "3d592ea8bdb7472878d9e7b8e25a22fc5e94485fa1ae0a3c43ad9333e4d41387",
+    "survey-core.min.css": "15cff69a99f4061c1e1150a525a42be3c8b4d0af7a0d758ba69b7d5eb36af375"
+  }
+}

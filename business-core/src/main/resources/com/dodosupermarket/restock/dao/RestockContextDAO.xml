@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.dodosupermarket.restock.dao.RestockContextDAO">
+    <select id="currentTime" resultType="java.sql.Timestamp" flushCache="true" useCache="false">
+        SELECT CURRENT_TIMESTAMP(3)
+    </select>
+    <resultMap id="goodsResult" type="java.util.LinkedHashMap">
+        <result column="goods_id" property="goodsId"/>
+        <result column="goods_name" property="goodsName"/>
+        <result column="goods_img" property="goodsImg"/>
+        <result column="goods_number" property="goodsNumber"/>
+        <result column="is_on_sale" property="isOnSale"/>
+        <result column="status" property="status"/>
+        <result column="is_delete" property="isDelete"/>
+        <result column="is_virtual" property="isVirtual"/>
+        <result column="min_sales_num" property="minSalesNum"/>
+        <result column="sales_step_width" property="salesStepWidth"/>
+        <result column="share_stock_id" property="shareStockId"/>
+        <result column="shared_stock" property="sharedStock"/>
+        <result column="shared_on_sale" property="sharedOnSale"/>
+        <result column="arrival_time" property="arrivalTime" javaType="java.sql.Timestamp"/>
+        <result column="in_shop" property="inShop"/>
+    </resultMap>
+    <select id="goods" resultMap="goodsResult" flushCache="true" useCache="false">
+        SELECT g.goods_id, g.goods_name, g.goods_img, g.goods_number, g.is_on_sale, g.status, g.is_delete,
+        g.is_virtual, g.min_sales_num, g.sales_step_width, g.share_stock_id, s.goods_number AS shared_stock,
+        s.is_on_sale AS shared_on_sale, d.arrival_time,
+        (SELECT COUNT(*) FROM dodo_shop_goods sg WHERE sg.goods_id = g.goods_id AND sg.shop_id = #{shopId} AND sg.status = 1) AS in_shop
+        FROM dodo_goods g LEFT JOIN dodo_goods_share_stock s ON s.id = g.share_stock_id AND s.status = 1
+        LEFT JOIN dodo_goods_delay d ON d.id = g.delay_id AND d.store_id = g.store_id AND d.status = 1 AND d.delay_status = 1
+        WHERE g.store_id = #{storeId} AND g.goods_id IN
+        <foreach collection="goodsIds" item="goodsId" open="(" separator="," close=")">#{goodsId}</foreach>
+    </select>
+    <select id="dispatchDays" resultType="string" flushCache="true" useCache="false">
+        SELECT dict_value FROM dodo_dict WHERE store_id = #{storeId}
+        AND dict_type = 'dispatch_time' AND dict_key = 'days' AND status = 1 ORDER BY id LIMIT 1
+    </select>
+    <select id="purchased" resultType="long" flushCache="true" useCache="false">
+        SELECT COUNT(*) FROM dodo_order_info o JOIN dodo_order_goods g ON g.order_id = o.order_id
+        WHERE o.user_id = #{userId} AND o.store_id = #{storeId} AND o.shop_id = #{shopId} AND o.status = 1 AND o.pay_status = 3
+        AND o.order_status &lt;&gt; 5 AND o.create_time &gt;= #{subscribedAt} AND g.goods_id = #{goodsId} AND g.status = 1 AND g.goods_number &gt; 0
+    </select>
+    <resultMap id="userResult" type="java.util.LinkedHashMap">
+        <result column="client_id" property="clientId"/>
+        <result column="is_subscribe_msg" property="isSubscribeMsg"/>
+        <result column="is_open_push" property="isOpenPush"/>
+    </resultMap>
+    <select id="user" resultMap="userResult" flushCache="true" useCache="false">
+        SELECT client_id, is_subscribe_msg, is_open_push FROM dodo_users WHERE user_id = #{userId} AND status = 1
+    </select>
+    <!-- 使用业务主库连接，审计失败与状态迁移整体回滚。 -->
+    <insert id="audit">
+        INSERT INTO dodo_operate_log (store_id, operate_user_id, operate_user_name, operate_type, operate_content, create_time)
+        VALUES (#{storeId}, #{actorId}, (SELECT name FROM dodo_admin_user WHERE user_id = #{actorId}), '补货提醒', #{content}, #{createdAt})
+    </insert>
+</mapper>

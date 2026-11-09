@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.dodosupermarket.show.dao.ShowActivityLogDAO">
+    <resultMap id="recordResult" type="com.dodosupermarket.show.bean.po.ShowActivityLog">
+        <id column="id" property="id"/>
+        <result column="activity_id" property="activityId"/>
+        <result column="submission_id" property="submissionId"/>
+        <result column="actor_id" property="actorId"/>
+        <result column="actor_name" property="actorName"/>
+        <result column="action" property="action"/>
+        <result column="detail" property="detail"/>
+        <result column="create_time" property="createMillis"/>
+    </resultMap>
+    <sql id="whereClause">
+        <where>
+            <if test="id != null">AND l.id = #{id}</if>
+            <if test="activityId != null">AND l.activity_id = #{activityId}</if>
+            <if test="submissionId != null">AND l.submission_id = #{submissionId}</if>
+        </where>
+    </sql>
+    <insert id="create" parameterType="com.dodosupermarket.show.bean.po.ShowActivityLog" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO dodo_show_activity_log (activity_id, submission_id, actor_id, action, detail, create_time)
+        VALUES (#{activityId}, #{submissionId}, #{actorId}, #{action}, #{detail}, #{createMillis})
+    </insert>
+    <update id="update" parameterType="com.dodosupermarket.show.bean.po.ShowActivityLog">
+        UPDATE dodo_show_activity_log
+        SET activity_id = #{activityId},
+        submission_id = #{submissionId},
+        actor_id = #{actorId},
+        action = #{action},
+        detail = #{detail}
+        WHERE id = #{id}
+    </update>
+    <select id="queryByArgs" parameterType="map" resultMap="recordResult" flushCache="true" useCache="false">
+        SELECT l.id, l.activity_id, l.submission_id, l.actor_id, l.action, l.detail, l.create_time,
+        CASE WHEN l.action IN ('SUBMIT', 'RESUBMIT')
+        THEN COALESCE(NULLIF(TRIM(u.nick_name), ''), NULLIF(TRIM(s.nick_name), ''), NULLIF(TRIM(u.user_name), ''))
+        ELSE COALESCE(NULLIF(TRIM(a.name), ''), NULLIF(TRIM(a.nick_name), ''), NULLIF(TRIM(a.user_name), ''))
+        END AS actor_name
+        FROM dodo_show_activity_log l
+        LEFT JOIN dodo_users u ON l.action IN ('SUBMIT', 'RESUBMIT') AND u.user_id = l.actor_id
+        LEFT JOIN dodo_admin_user a ON l.action NOT IN ('SUBMIT', 'RESUBMIT') AND a.user_id = l.actor_id
+        LEFT JOIN dodo_show_submission s ON s.id = l.submission_id
+        <include refid="whereClause"/>
+        ORDER BY l.id DESC
+        <if test="limit != null">LIMIT #{limit}
+            <if test="start != null">OFFSET #{start}</if>
+        </if>
+    </select>
+    <select id="countByArgs" parameterType="map" resultType="long" flushCache="true" useCache="false">
+        SELECT COUNT(*) FROM dodo_show_activity_log l
+        <include refid="whereClause"/>
+    </select>
+</mapper>

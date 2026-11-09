@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.dodosupermarket.rank.dao.RankGoodsRefDAO">
+    <resultMap id="record" type="com.dodosupermarket.rank.bean.po.RankGoodsRef">
+        <result column="id" property="id"/>
+        <result column="store_id" property="storeId"/>
+        <result column="parent_id" property="parentId"/>
+        <result column="goods_id" property="goodsId"/>
+        <result column="goods_sn" property="goodsSn"/>
+        <result column="sort_order" property="sortOrder"/>
+        <result column="promote_price" property="promotePrice"/>
+        <result column="limit_per_order" property="limitPerOrder"/>
+    </resultMap>
+    <sql id="whereClause">
+        <where>
+            <if test="id != null">AND id = #{id}</if>
+            <if test="storeId != null">AND store_id = #{storeId}</if>
+            <if test="idIn != null and idIn != ''">
+                AND id IN <foreach collection="idIn.split(',')" item="value" open="(" close=")" separator=",">#{value}</foreach>
+            </if>
+            <if test="status != null">AND status = #{status}</if>
+
+
+            <if test="parentId != null">AND parent_id = #{parentId}</if>
+        </where>
+    </sql>
+    <insert id="create" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO dodo_theme_top_goods_ref (store_id, parent_id, goods_id, goods_sn, sort_order, promote_price, limit_per_order, status)
+        VALUES (#{storeId}, #{parentId}, #{goodsId}, #{goodsSn}, #{sortOrder}, #{promotePrice}, #{limitPerOrder}, 1)
+    </insert>
+    <update id="update">
+        UPDATE dodo_theme_top_goods_ref
+        SET parent_id = #{parentId}, goods_id = #{goodsId}, goods_sn = #{goodsSn}, sort_order = #{sortOrder}, promote_price = #{promotePrice}, limit_per_order = #{limitPerOrder}
+        WHERE id = #{id} AND store_id = #{storeId}
+    </update>
+    <select id="queryByArgs" resultMap="record" flushCache="true" useCache="false">
+        SELECT * FROM dodo_theme_top_goods_ref
+        <include refid="whereClause"/>
+        ORDER BY sort_order, id DESC
+        <if test="limit != null">LIMIT #{limit}<if test="start != null"> OFFSET #{start}</if></if>
+    </select>
+    <select id="countByArgs" resultType="long" flushCache="true" useCache="false">
+        SELECT COUNT(*) FROM dodo_theme_top_goods_ref<include refid="whereClause"/>
+    </select>
+    <delete id="deleteByArgs">
+        DELETE FROM dodo_theme_top_goods_ref<include refid="whereClause"/>
+    </delete>
+    <select id="getById" resultMap="record" flushCache="true" useCache="false">
+        SELECT * FROM dodo_theme_top_goods_ref WHERE id = #{id}
+    </select>
+    <select id="queryByField" resultMap="record" flushCache="true" useCache="false">
+        SELECT * FROM dodo_theme_top_goods_ref<include refid="whereClause"/> ORDER BY sort_order, id DESC
+    </select>
+    <select id="pageByArgs" resultMap="record" flushCache="true" useCache="false">
+        SELECT * FROM dodo_theme_top_goods_ref<include refid="whereClause"/> ORDER BY sort_order, id DESC
+        <if test="limit != null">LIMIT #{limit}<if test="start != null"> OFFSET #{start}</if></if>
+    </select>
+    <delete id="deleteById">DELETE FROM dodo_theme_top_goods_ref WHERE id = #{id}</delete>
+    <delete id="deleteByIds">
+        DELETE FROM dodo_theme_top_goods_ref WHERE id IN
+        <foreach collection="_parameter.split(',')" item="value" open="(" close=")" separator=",">#{value}</foreach>
+    </delete>
+    <insert id="createBatch" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO dodo_theme_top_goods_ref (store_id, parent_id, goods_id, goods_sn, sort_order, promote_price, limit_per_order, status) VALUES
+        <foreach collection="list" item="item" separator=",">
+            (#{item.storeId}, #{item.parentId}, #{item.goodsId}, #{item.goodsSn}, #{item.sortOrder}, #{item.promotePrice}, #{item.limitPerOrder}, 1)
+        </foreach>
+    </insert>
+    <update id="updateNotNull">
+        UPDATE dodo_theme_top_goods_ref
+        <set>
+            <if test="parentId != null">parent_id = #{parentId},</if>
+            <if test="goodsId != null">goods_id = #{goodsId},</if>
+            <if test="goodsSn != null">goods_sn = #{goodsSn},</if>
+            <if test="sortOrder != null">sort_order = #{sortOrder},</if>
+            <if test="promotePrice != null">promote_price = #{promotePrice},</if>
+            <if test="limitPerOrder != null">limit_per_order = #{limitPerOrder},</if>
+        </set>
+        WHERE id = #{id} AND store_id = #{storeId}
+    </update>
+    <update id="updateBatch">
+        UPDATE dodo_theme_top_goods_ref SET
+        parent_id = CASE
+            <foreach collection="list" item="item">WHEN id = #{item.id} AND store_id = #{item.storeId} THEN #{item.parentId}</foreach>
+            ELSE parent_id END,
+        goods_id = CASE
+            <foreach collection="list" item="item">WHEN id = #{item.id} AND store_id = #{item.storeId} THEN #{item.goodsId}</foreach>
+            ELSE goods_id END,
+        goods_sn = CASE
+            <foreach collection="list" item="item">WHEN id = #{item.id} AND store_id = #{item.storeId} THEN #{item.goodsSn}</foreach>
+            ELSE goods_sn END,
+        sort_order = CASE
+            <foreach collection="list" item="item">WHEN id = #{item.id} AND store_id = #{item.storeId} THEN #{item.sortOrder}</foreach>
+            ELSE sort_order END,
+        promote_price = CASE
+            <foreach collection="list" item="item">WHEN id = #{item.id} AND store_id = #{item.storeId} THEN #{item.promotePrice}</foreach>
+            ELSE promote_price END,
+        limit_per_order = CASE
+            <foreach collection="list" item="item">WHEN id = #{item.id} AND store_id = #{item.storeId} THEN #{item.limitPerOrder}</foreach>
+            ELSE limit_per_order END
+        WHERE <foreach collection="list" item="item" separator=" OR ">(id = #{item.id} AND store_id = #{item.storeId})</foreach>
+    </update>
+</mapper>

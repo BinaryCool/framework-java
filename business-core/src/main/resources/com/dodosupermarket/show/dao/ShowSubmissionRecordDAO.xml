@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.dodosupermarket.show.dao.ShowSubmissionRecordDAO">
+    <resultMap id="recordResult" type="com.dodosupermarket.show.bean.po.ShowSubmissionRecord">
+        <id column="id" property="id"/>
+        <result column="activity_id" property="activityId"/>
+        <result column="store_id" property="storeId"/>
+        <result column="user_id" property="userId"/>
+        <result column="nick_name" property="nickName"/>
+        <result column="avatar_url" property="avatarUrl"/>
+        <result column="order_sn" property="orderSn"/>
+        <result column="order_snapshot" property="orderSnapshot"/>
+        <result column="images" property="images"/>
+        <result column="audit_status" property="auditStatus"/>
+        <result column="note" property="note"/>
+        <result column="coupon_id" property="couponId"/>
+        <result column="reward_price" property="rewardPrice"/>
+        <result column="reward_version" property="rewardVersion"/>
+        <result column="request_key" property="requestKey"/>
+        <result column="attempts" property="attempts"/>
+        <result column="version" property="version"/>
+        <result column="create_time" property="createMillis"/>
+        <result column="update_time" property="updateMillis"/>
+    </resultMap>
+    <sql id="whereClause">
+        <where>
+            <if test="id != null">AND id = #{id}</if>
+            <if test="storeId != null">AND store_id = #{storeId}</if>
+            <if test="userId != null">AND user_id = #{userId}</if>
+            <if test="activityId != null">AND activity_id = #{activityId}</if>
+            <if test="auditStatus != null">AND audit_status = #{auditStatus}</if>
+            <if test="orderSn != null">AND order_sn = #{orderSn}</if>
+            <if test="orderSns != null">
+                AND order_sn IN
+                <foreach collection="orderSns" item="sn" open="(" separator="," close=")">#{sn}</foreach>
+            </if>
+            <if test="requestKey != null">AND request_key = #{requestKey}</if>
+            <if test="nickName != null and nickName != ''">AND INSTR(nick_name, #{nickName}) &gt; 0</if>
+        </where>
+    </sql>
+    <insert id="create" parameterType="com.dodosupermarket.show.bean.po.ShowSubmissionRecord" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO dodo_show_submission (activity_id, store_id, user_id, nick_name, avatar_url, order_sn, order_snapshot, images,
+        audit_status, note, coupon_id, reward_price, reward_version, request_key, attempts, version, create_time, update_time)
+        VALUES (#{activityId}, #{storeId}, #{userId}, #{nickName}, #{avatarUrl}, #{orderSn}, #{orderSnapshot}, #{images}, #{auditStatus},
+        #{note}, #{couponId}, #{rewardPrice}, #{rewardVersion}, #{requestKey}, #{attempts}, #{version}, #{createMillis}, #{updateMillis})
+    </insert>
+    <update id="update" parameterType="com.dodosupermarket.show.bean.po.ShowSubmissionRecord">
+        UPDATE dodo_show_submission
+        SET activity_id = #{activityId},
+        user_id = #{userId},
+        nick_name = #{nickName},
+        avatar_url = #{avatarUrl},
+        order_sn = #{orderSn},
+        order_snapshot = #{orderSnapshot},
+        images = #{images},
+        audit_status = #{auditStatus},
+        note = #{note},
+        coupon_id = #{couponId},
+        reward_price = #{rewardPrice},
+        reward_version = #{rewardVersion},
+        request_key = #{requestKey},
+        attempts = #{attempts},
+        version = #{version},
+        update_time = #{updateMillis}
+        WHERE id = #{id} AND store_id = #{storeId}
+    </update>
+    <select id="queryByArgs" parameterType="map" resultMap="recordResult" flushCache="true" useCache="false">
+        SELECT id, activity_id, store_id, user_id, nick_name, avatar_url, order_sn, order_snapshot, images, audit_status, note, coupon_id,
+        reward_price, reward_version, request_key, attempts, version, create_time, update_time FROM dodo_show_submission
+        <include refid="whereClause"/>
+        ORDER BY update_time DESC, id DESC
+        <if test="limit != null">LIMIT #{limit}
+            <if test="start != null">OFFSET #{start}</if>
+        </if>
+    </select>
+    <select id="countByArgs" parameterType="map" resultType="long" flushCache="true" useCache="false">
+        SELECT COUNT(*) FROM dodo_show_submission
+        <include refid="whereClause"/>
+    </select>
+    <!-- 行锁查询禁用缓存，审核必须读取等待锁之后的真实状态。 -->
+    <select id="lockById" resultMap="recordResult" flushCache="true" useCache="false">
+        SELECT id, activity_id, store_id, user_id, nick_name, avatar_url, order_sn, order_snapshot, images, audit_status, note, coupon_id,
+        reward_price, reward_version, request_key, attempts, version, create_time, update_time FROM dodo_show_submission
+        WHERE id = #{id} AND store_id = #{storeId} FOR UPDATE
+    </select>
+    <resultMap id="summaryResult" type="map">
+        <result column="submission_count" property="submissionCount" javaType="java.lang.Long"/>
+        <result column="reward_amount" property="rewardAmount"/>
+    </resultMap>
+    <select id="summary" resultMap="summaryResult">
+        SELECT COUNT(*) AS submission_count, COALESCE(SUM(reward_price), 0) AS reward_amount
+        FROM dodo_show_submission WHERE user_id = #{userId} AND store_id = #{storeId}
+    </select>
+</mapper>

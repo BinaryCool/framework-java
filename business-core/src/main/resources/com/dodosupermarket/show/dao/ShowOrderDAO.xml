@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.dodosupermarket.show.dao.ShowOrderDAO">
+    <resultMap id="orderResult" type="map">
+        <id column="order_id" property="orderId"/>
+        <result column="order_sn" property="orderSn"/>
+        <result column="order_status" property="orderStatus"/>
+        <result column="pay_status" property="payStatus"/>
+        <result column="order_amount" property="orderAmount"/>
+        <result column="money_paid" property="moneyPaid"/>
+        <result column="create_time" property="createTime"/>
+    </resultMap>
+    <resultMap id="goodsResult" type="map">
+        <id column="rec_id" property="id"/>
+        <result column="goods_name" property="name"/>
+        <result column="goods_img" property="image"/>
+        <result column="goods_number" property="quantity"/>
+        <result column="goods_price" property="price"/>
+        <result column="volume_msg" property="specification"/>
+    </resultMap>
+    <resultMap id="reasonResult" type="map">
+        <id column="id" property="id"/>
+        <result column="dict_value" property="value"/>
+        <result column="dict_name" property="label"/>
+    </resultMap>
+    <sql id="eligibleWhere">
+        user_id = #{userId} AND store_id = #{storeId} AND status = 1
+        AND order_status IN (3, 4) AND pay_status NOT IN (4, 5, 6)
+    </sql>
+    <select id="findOwned" resultMap="orderResult" flushCache="true" useCache="false">
+        SELECT order_id, order_sn, order_status, pay_status, order_amount, money_paid, create_time
+        FROM dodo_order_info
+        WHERE order_sn = #{orderSn} AND user_id = #{userId} AND store_id = #{storeId} AND status = 1
+        <if test="lock">FOR UPDATE</if>
+    </select>
+    <select id="goods" resultMap="goodsResult">
+        SELECT rec_id, goods_name, goods_img, goods_number, goods_price, volume_msg
+        FROM dodo_order_goods WHERE order_id = #{orderId} AND status = 1 ORDER BY rec_id
+    </select>
+    <select id="countEligible" resultType="long">
+        SELECT COUNT(*) FROM dodo_order_info WHERE
+        <include refid="eligibleWhere"/>
+    </select>
+    <select id="eligibleOrders" resultType="string">
+        SELECT order_sn FROM dodo_order_info WHERE
+        <include refid="eligibleWhere"/>
+        ORDER BY create_time DESC, order_id DESC LIMIT #{limit} OFFSET #{start}
+    </select>
+    <select id="reasons" resultMap="reasonResult">
+        SELECT id, dict_value, dict_name FROM dodo_dict
+        WHERE dict_type = 'show_reject_reason' AND status = 1
+        AND (store_id = #{storeId} OR store_id IS NULL OR store_id = 0) ORDER BY id
+    </select>
+</mapper>

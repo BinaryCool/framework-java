@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.dodosupermarket.rank.dao.RankTagDAO">
+    <resultMap id="record" type="com.dodosupermarket.rank.bean.po.RankTag">
+        <result column="id" property="id"/>
+        <result column="store_id" property="storeId"/>
+        <result column="name" property="name"/>
+        <result column="sort_order" property="sortOrder"/>
+        <result column="enabled" property="enabled"/>
+    </resultMap>
+    <sql id="whereClause">
+        <where>
+            <if test="id != null">AND id = #{id}</if>
+            <if test="storeId != null">AND store_id = #{storeId}</if>
+            <if test="idIn != null and idIn != ''">
+                AND id IN <foreach collection="idIn.split(',')" item="value" open="(" close=")" separator=",">#{value}</foreach>
+            </if>
+
+
+            <if test="enabled != null">AND enabled = #{enabled}</if>
+
+        </where>
+    </sql>
+    <insert id="create" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO dodo_rank_tag (store_id, name, sort_order, enabled)
+        VALUES (#{storeId}, #{name}, #{sortOrder}, #{enabled})
+    </insert>
+    <update id="update">
+        UPDATE dodo_rank_tag
+        SET name = #{name}, sort_order = #{sortOrder}, enabled = #{enabled}
+        WHERE id = #{id} AND store_id = #{storeId}
+    </update>
+    <select id="queryByArgs" resultMap="record" flushCache="true" useCache="false">
+        SELECT * FROM dodo_rank_tag
+        <include refid="whereClause"/>
+        ORDER BY sort_order, id DESC
+        <if test="limit != null">LIMIT #{limit}<if test="start != null"> OFFSET #{start}</if></if>
+    </select>
+    <select id="countByArgs" resultType="long" flushCache="true" useCache="false">
+        SELECT COUNT(*) FROM dodo_rank_tag<include refid="whereClause"/>
+    </select>
+    <delete id="deleteByArgs">
+        DELETE FROM dodo_rank_tag<include refid="whereClause"/>
+    </delete>
+    <select id="getById" resultMap="record" flushCache="true" useCache="false">
+        SELECT * FROM dodo_rank_tag WHERE id = #{id}
+    </select>
+    <select id="queryByField" resultMap="record" flushCache="true" useCache="false">
+        SELECT * FROM dodo_rank_tag<include refid="whereClause"/> ORDER BY sort_order, id DESC
+    </select>
+    <select id="pageByArgs" resultMap="record" flushCache="true" useCache="false">
+        SELECT * FROM dodo_rank_tag<include refid="whereClause"/> ORDER BY sort_order, id DESC
+        <if test="limit != null">LIMIT #{limit}<if test="start != null"> OFFSET #{start}</if></if>
+    </select>
+    <delete id="deleteById">DELETE FROM dodo_rank_tag WHERE id = #{id}</delete>
+    <delete id="deleteByIds">
+        DELETE FROM dodo_rank_tag WHERE id IN
+        <foreach collection="_parameter.split(',')" item="value" open="(" close=")" separator=",">#{value}</foreach>
+    </delete>
+    <insert id="createBatch" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO dodo_rank_tag (store_id, name, sort_order, enabled) VALUES
+        <foreach collection="list" item="item" separator=",">
+            (#{item.storeId}, #{item.name}, #{item.sortOrder}, #{item.enabled})
+        </foreach>
+    </insert>
+    <update id="updateNotNull">
+        UPDATE dodo_rank_tag
+        <set>
+            <if test="name != null">name = #{name},</if>
+            <if test="sortOrder != null">sort_order = #{sortOrder},</if>
+            <if test="enabled != null">enabled = #{enabled},</if>
+        </set>
+        WHERE id = #{id} AND store_id = #{storeId}
+    </update>
+    <update id="updateBatch">
+        UPDATE dodo_rank_tag SET
+        name = CASE
+            <foreach collection="list" item="item">WHEN id = #{item.id} AND store_id = #{item.storeId} THEN #{item.name}</foreach>
+            ELSE name END,
+        sort_order = CASE
+            <foreach collection="list" item="item">WHEN id = #{item.id} AND store_id = #{item.storeId} THEN #{item.sortOrder}</foreach>
+            ELSE sort_order END,
+        enabled = CASE
+            <foreach collection="list" item="item">WHEN id = #{item.id} AND store_id = #{item.storeId} THEN #{item.enabled}</foreach>
+            ELSE enabled END
+        WHERE <foreach collection="list" item="item" separator=" OR ">(id = #{item.id} AND store_id = #{item.storeId})</foreach>
+    </update>
+</mapper>

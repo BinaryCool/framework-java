@@ -1,0 +1,133 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.dodosupermarket.rank.dao.RankDAO">
+    <resultMap id="config" type="com.dodosupermarket.rank.bean.dto.RankSettings">
+        <result column="version" property="version"/>
+        <result column="homepage_background_image" property="homepageBackgroundImage"/>
+    </resultMap>
+    <resultMap id="board" extends="com.dodosupermarket.rank.dao.RankBoardDAO.record" type="com.dodosupermarket.rank.bean.po.RankBoard"/>
+    <resultMap id="tag" extends="com.dodosupermarket.rank.dao.RankTagDAO.record" type="com.dodosupermarket.rank.bean.po.RankTag">
+        <id column="id" property="id"/>
+        <collection property="boardIds" ofType="java.lang.Long" notNullColumn="board_id">
+            <id column="board_id"/>
+        </collection>
+    </resultMap>
+    <resultMap id="goods" extends="com.dodosupermarket.rank.dao.RankGoodsRefDAO.record" type="com.dodosupermarket.rank.bean.po.RankGoodsRef">
+        <result column="board_rank" property="boardRank"/>
+    </resultMap>
+    <insert id="ensureConfig">
+        INSERT INTO dodo_rank_config (store_id, version)
+        SELECT id, 0 FROM store WHERE id = #{storeId}
+        ON DUPLICATE KEY UPDATE store_id = VALUES(store_id)
+    </insert>
+    <select id="config" resultMap="config" flushCache="true" useCache="false">
+        SELECT * FROM dodo_rank_config WHERE store_id = #{storeId}
+    </select>
+    <select id="lockConfig" resultMap="config" flushCache="true" useCache="false">
+        SELECT * FROM dodo_rank_config WHERE store_id = #{storeId} FOR UPDATE
+    </select>
+    <update id="bump">
+        UPDATE dodo_rank_config SET version = version + 1 WHERE store_id = #{storeId} AND version = #{version}
+    </update>
+    <update id="background">
+        UPDATE dodo_rank_config SET homepage_background_image = #{image,jdbcType=VARCHAR} WHERE store_id = #{storeId}
+    </update>
+    <select id="boards" resultMap="board" flushCache="true" useCache="false">
+        SELECT * FROM dodo_theme_top_list WHERE store_id = #{storeId} AND status = 1
+        <if test="publishedOnly">AND is_prod = 1</if>
+        ORDER BY sort_order, id DESC
+    </select>
+    <select id="tags" resultMap="tag" flushCache="true" useCache="false">
+        SELECT t.*, b.id AS board_id FROM dodo_rank_tag t
+        LEFT JOIN dodo_rank_tag_board r ON r.tag_id = t.id AND r.store_id = t.store_id
+        LEFT JOIN dodo_theme_top_list b ON b.id = r.board_id AND b.store_id = t.store_id AND b.status = 1
+        WHERE t.store_id = #{storeId}
+        <if test="enabledOnly">AND t.enabled = 1</if>
+        ORDER BY t.sort_order, t.id DESC, b.sort_order, b.id DESC
+    </select>
+    <select id="tagBoards" resultType="long" flushCache="true" useCache="false">
+        SELECT r.board_id FROM dodo_rank_tag_board r
+        JOIN dodo_theme_top_list b ON b.id = r.board_id AND b.store_id = r.store_id AND b.status = 1
+        WHERE r.store_id = #{storeId} AND r.tag_id = #{tagId} ORDER BY b.sort_order, b.id DESC
+    </select>
+    <!-- 门店和有效关系先过滤，再计算真实名次；不能按请求商品或库存先过滤。 -->
+    <sql id="ranked">
+        SELECT r.*, ROW_NUMBER() OVER (PARTITION BY parent_id ORDER BY sort_order, id DESC) AS board_rank
+        FROM dodo_theme_top_goods_ref r WHERE r.store_id = #{storeId} AND r.status = 1
+    </sql>
+    <select id="rankedGoods" resultMap="goods" flushCache="true" useCache="false">
+        SELECT r.*, ROW_NUMBER() OVER (PARTITION BY parent_id ORDER BY sort_order, id DESC) AS board_rank
+        FROM dodo_theme_top_goods_ref r
+        WHERE r.store_id = #{storeId} AND r.status = 1 AND r.parent_id = #{boardId}
+        ORDER BY board_rank
+    </select>
+    <!-- 榜单条件可先缩小窗口分区；前三名条件只能在计算名次之后执行。 -->
+    <select id="previewGoods" resultMap="goods" flushCache="true" useCache="false">
+        SELECT ranked.* FROM (
+            SELECT r.*, ROW_NUMBER() OVER (PARTITION BY parent_id ORDER BY sort_order, id DESC) AS board_rank
+            FROM dodo_theme_top_goods_ref r
+            WHERE r.store_id = #{storeId} AND r.status = 1 AND r.parent_id IN
+            <foreach collection="boardIds" item="boardId" open="(" separator="," close=")">#{boardId}</foreach>
+        ) ranked
+        JOIN dodo_theme_top_list b ON b.id = ranked.parent_id AND b.store_id = #{storeId}
+        WHERE b.status = 1 AND b.is_prod = 1 AND ranked.board_rank &lt;= 3
+        ORDER BY ranked.parent_id, ranked.board_rank
+    </select>
+    <select id="associations" resultMap="goods" flushCache="true" useCache="false">
+        SELECT ranked.* FROM (<include refid="ranked"/>) ranked
+        JOIN dodo_theme_top_list b ON b.id = ranked.parent_id AND b.store_id = #{storeId}
+        WHERE b.status = 1 AND b.is_prod = 1 AND b.association_priority &gt; 0
+        AND EXISTS (SELECT 1 FROM dodo_goods g WHERE g.goods_id = ranked.goods_id
+            AND g.store_id = #{storeId} AND g.status = 1 AND g.is_delete = 0 AND g.goods_sn = ranked.goods_sn)
+        AND ranked.goods_id IN
+        <foreach collection="goodsIds" item="goodsId" open="(" separator="," close=")">#{goodsId}</foreach>
+        ORDER BY b.association_priority, b.id DESC, ranked.board_rank
+    </select>
+    <select id="validGoods" resultType="int" flushCache="true" useCache="false">
+        SELECT COUNT(*) FROM dodo_goods WHERE store_id = #{storeId} AND goods_id = #{goodsId}
+            AND goods_sn = #{goodsSn} AND status = 1 AND is_delete = 0
+    </select>
+    <!-- 库存与销售上下架状态不参与有效性判断，缺货商品继续保留榜单名次。 -->
+    <select id="goodsIssues" resultType="com.dodosupermarket.rank.bean.dto.RankGoodsIssue" flushCache="true" useCache="false">
+        SELECT r.id AS refId, b.id AS boardId, b.title AS boardTitle, r.goods_id AS goodsId, r.goods_sn AS goodsSn,
+            CASE WHEN g.goods_id IS NULL THEN '商品不存在或不属于当前门店'
+                WHEN g.status IS NULL OR g.status != 1 THEN '商品已停用'
+                WHEN g.is_delete IS NULL OR g.is_delete != 0 THEN '商品已删除'
+                ELSE 'SKU为空或与商品不匹配' END AS reason
+        FROM dodo_theme_top_goods_ref r
+        JOIN dodo_theme_top_list b ON b.id = r.parent_id AND b.store_id = r.store_id AND b.status = 1
+        LEFT JOIN dodo_goods g ON g.goods_id = r.goods_id AND g.store_id = r.store_id
+        WHERE r.store_id = #{storeId} AND r.status = 1
+            AND NOT EXISTS (SELECT 1 FROM dodo_goods valid WHERE valid.goods_id = r.goods_id
+                AND valid.store_id = r.store_id AND valid.goods_sn = r.goods_sn AND valid.status = 1 AND valid.is_delete = 0)
+        ORDER BY b.sort_order, b.id DESC, r.sort_order, r.id DESC
+    </select>
+    <update id="removeInvalidGoods">
+        UPDATE dodo_theme_top_goods_ref SET status = 0
+        WHERE store_id = #{storeId} AND id = #{refId} AND status = 1
+            AND EXISTS (SELECT 1 FROM dodo_theme_top_list b WHERE b.id = parent_id AND b.store_id = #{storeId} AND b.status = 1)
+            AND NOT EXISTS (SELECT 1 FROM dodo_goods g WHERE g.goods_id = dodo_theme_top_goods_ref.goods_id
+                AND g.store_id = #{storeId} AND g.goods_sn = dodo_theme_top_goods_ref.goods_sn AND g.status = 1 AND g.is_delete = 0)
+    </update>
+    <update id="refreshGoodsCount">
+        UPDATE dodo_theme_top_list SET goods_count = (SELECT COUNT(*) FROM dodo_theme_top_goods_ref r
+            WHERE r.store_id = #{storeId} AND r.parent_id = #{boardId} AND r.status = 1)
+        WHERE store_id = #{storeId} AND id = #{boardId} AND status = 1
+    </update>
+    <update id="boardConfig">
+        UPDATE dodo_theme_top_list SET sort_order = #{board.sortOrder}, association_priority = #{board.associationPriority},
+            recommend_position = #{board.recommendPosition,jdbcType=INTEGER}
+        WHERE store_id = #{storeId} AND id = #{board.id} AND status = 1
+    </update>
+    <update id="offlineEmptyBoard">
+        UPDATE dodo_theme_top_list SET is_prod = 0, recommend_position = NULL
+        WHERE store_id = #{storeId} AND id = #{boardId} AND status = 1
+            AND NOT EXISTS (SELECT 1 FROM dodo_theme_top_goods_ref r
+                WHERE r.store_id = #{storeId} AND r.parent_id = #{boardId} AND r.status = 1)
+    </update>
+    <delete id="clearTagBoards">DELETE FROM dodo_rank_tag_board WHERE store_id = #{storeId}</delete>
+    <delete id="deleteTag">DELETE FROM dodo_rank_tag WHERE store_id = #{storeId} AND id = #{id}</delete>
+    <insert id="link">
+        INSERT INTO dodo_rank_tag_board (store_id, tag_id, board_id) VALUES (#{storeId}, #{tagId}, #{boardId})
+    </insert>
+</mapper>

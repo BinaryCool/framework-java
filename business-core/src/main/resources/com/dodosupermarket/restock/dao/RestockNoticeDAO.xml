@@ -1,0 +1,127 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.dodosupermarket.restock.dao.RestockNoticeDAO">
+    <resultMap id="recordResult" type="com.dodosupermarket.restock.bean.po.RestockNotice">
+        <id column="id" property="id"/>
+        <result column="subscription_id" property="subscriptionId"/>
+        <result column="generation" property="generation"/>
+        <result column="kind" property="kind"/>
+        <result column="user_id" property="userId"/>
+        <result column="store_id" property="storeId"/>
+        <result column="shop_id" property="shopId"/>
+        <result column="goods_id" property="goodsId"/>
+        <result column="title" property="title"/>
+        <result column="content" property="content"/>
+        <result column="delivery_state" property="deliveryState"/>
+        <result column="request_id" property="requestId"/>
+        <result column="target_client_id" property="targetClientId"/>
+        <result column="attempts" property="attempts"/>
+        <result column="version" property="version"/>
+        <result column="next_attempt_at" property="nextAttemptAt" javaType="java.sql.Timestamp"/>
+        <result column="expires_at" property="expiresAt" javaType="java.sql.Timestamp"/>
+        <result column="created_at" property="createdAt" javaType="java.sql.Timestamp"/>
+        <result column="updated_at" property="updatedAt" javaType="java.sql.Timestamp"/>
+        <result column="read_at" property="readAt" javaType="java.sql.Timestamp"/>
+        <result column="clicked_at" property="clickedAt" javaType="java.sql.Timestamp"/>
+        <result column="last_error" property="lastError"/>
+    </resultMap>
+    <!-- 所有读取禁用一级/二级缓存，行锁等待后必须读取最新提交的状态。 -->
+    <insert id="create" parameterType="com.dodosupermarket.restock.bean.po.RestockNotice">
+        INSERT INTO dodo_restock_notice (id, subscription_id, generation, kind, user_id, store_id, shop_id, goods_id, title, content,
+            delivery_state, request_id, target_client_id, attempts, version, next_attempt_at, expires_at, created_at, updated_at,
+            read_at, clicked_at, last_error)
+        VALUES (#{id,jdbcType=VARCHAR}, #{subscriptionId,jdbcType=VARCHAR}, #{generation,jdbcType=INTEGER}, #{kind,jdbcType=VARCHAR},
+            #{userId,jdbcType=BIGINT}, #{storeId,jdbcType=BIGINT}, #{shopId,jdbcType=BIGINT}, #{goodsId,jdbcType=BIGINT},
+            #{title,jdbcType=VARCHAR}, #{content,jdbcType=VARCHAR}, #{deliveryState,jdbcType=VARCHAR}, #{requestId,jdbcType=VARCHAR},
+            #{targetClientId,jdbcType=VARCHAR}, #{attempts,jdbcType=INTEGER}, #{version,jdbcType=INTEGER},
+            #{nextAttemptAt,jdbcType=TIMESTAMP}, #{expiresAt,jdbcType=TIMESTAMP}, #{createdAt,jdbcType=TIMESTAMP},
+            #{updatedAt,jdbcType=TIMESTAMP}, #{readAt,jdbcType=TIMESTAMP}, #{clickedAt,jdbcType=TIMESTAMP},
+            #{lastError,jdbcType=VARCHAR})
+        ON DUPLICATE KEY UPDATE id = id
+    </insert>
+    <sql id="whereClause">
+        <where>
+            <if test="id != null">AND id = #{id}</if>
+            <if test="userId != null">AND user_id = #{userId}</if>
+            <if test="storeId != null">AND store_id = #{storeId}</if>
+            <if test="shopId != null">AND shop_id = #{shopId}</if>
+            <if test="goodsId != null">AND goods_id = #{goodsId}</if>
+        </where>
+    </sql>
+    <select id="queryByArgs" parameterType="map" resultMap="recordResult" flushCache="true" useCache="false">
+        SELECT id, subscription_id, generation, kind, user_id, store_id, shop_id, goods_id, title, content, delivery_state, request_id,
+            target_client_id, attempts, version, next_attempt_at, expires_at, created_at, updated_at, read_at, clicked_at,
+            last_error FROM dodo_restock_notice
+        <include refid="whereClause"/>
+        <if test="limit != null">
+            LIMIT #{limit}
+            <if test="start != null">OFFSET #{start}</if>
+        </if>
+    </select>
+    <select id="countByArgs" parameterType="map" resultType="long" flushCache="true" useCache="false">
+        SELECT COUNT(*) FROM dodo_restock_notice
+        <include refid="whereClause"/>
+    </select>
+    <update id="update">
+        UPDATE dodo_restock_notice
+        SET delivery_state = #{deliveryState}, target_client_id = #{targetClientId,jdbcType=VARCHAR}, attempts = #{attempts},
+            version = #{version}, next_attempt_at = #{nextAttemptAt}, updated_at = #{updatedAt}, last_error = #{lastError,jdbcType=VARCHAR}
+        WHERE id = #{id} AND user_id = #{userId} AND store_id = #{storeId} AND shop_id = #{shopId}
+    </update>
+    <select id="lockById" resultMap="recordResult" flushCache="true" useCache="false">
+        SELECT * FROM dodo_restock_notice WHERE id = #{id}
+        <if test="storeId != null">AND store_id = #{storeId}</if>
+        FOR UPDATE
+    </select>
+    <update id="cancelPending">
+        UPDATE dodo_restock_notice SET delivery_state = 'CANCELLED', version = version + 1, updated_at = #{updatedAt}
+        WHERE subscription_id = #{subscriptionId} AND delivery_state IN ('PENDING', 'REJECTED')
+    </update>
+    <update id="markRead">
+        UPDATE dodo_restock_notice SET read_at = COALESCE(read_at, #{readAt}),
+        clicked_at = CASE WHEN #{clicked} THEN COALESCE(clicked_at, #{readAt}) ELSE clicked_at END
+        WHERE id = #{id} AND user_id = #{userId} AND store_id = #{storeId} AND shop_id = #{shopId}
+    </update>
+    <resultMap id="idResult" type="java.util.LinkedHashMap">
+        <id column="id" property="id"/>
+    </resultMap>
+    <select id="pending" resultMap="idResult" flushCache="true" useCache="false">
+        SELECT id FROM dodo_restock_notice WHERE delivery_state = 'PENDING' AND next_attempt_at &lt;= CURRENT_TIMESTAMP(3)
+        <if test="storeId != null">AND store_id = #{storeId}</if>
+        ORDER BY next_attempt_at, id LIMIT #{limit}
+    </select>
+    <update id="finishAttempt">
+        UPDATE dodo_restock_notice SET delivery_state = #{state}, version = version + 1,
+        updated_at = #{updatedAt}, last_error = #{error,jdbcType=VARCHAR}
+        WHERE id = #{id} AND delivery_state = 'SENDING' AND attempts = #{attempts}
+    </update>
+    <update id="recoverUnknown">
+        UPDATE dodo_restock_notice SET delivery_state = 'UNKNOWN', version = version + 1,
+        last_error = 'WORKER_INTERRUPTED', updated_at = #{updatedAt}
+        WHERE delivery_state = 'SENDING' AND updated_at &lt; #{interruptedBefore}
+    </update>
+    <update id="reconcile">
+        UPDATE dodo_restock_notice SET delivery_state = #{outcome}, version = version + 1,
+        last_error = 'MANUALLY_RECONCILED', updated_at = #{updatedAt}
+        WHERE id = #{id} AND store_id = #{storeId} AND version = #{version} AND delivery_state = 'UNKNOWN'
+    </update>
+    <resultMap id="deliveryResult" type="java.util.LinkedHashMap">
+        <id column="id" property="id"/>
+        <result column="subscription_id" property="subscriptionId"/>
+        <result column="generation" property="generation"/>
+        <result column="goods_id" property="goodsId"/>
+        <result column="shop_id" property="shopId"/>
+        <result column="kind" property="kind"/>
+        <result column="delivery_state" property="deliveryState"/>
+        <result column="attempts" property="attempts"/>
+        <result column="version" property="version"/>
+        <result column="request_id" property="requestId"/>
+        <result column="last_error" property="lastError"/>
+        <result column="created_at" property="createdAt" javaType="java.sql.Timestamp"/>
+        <result column="read_at" property="readAt" javaType="java.sql.Timestamp"/>
+        <result column="clicked_at" property="clickedAt" javaType="java.sql.Timestamp"/>
+    </resultMap>
+    <select id="deliveries" resultMap="deliveryResult" flushCache="true" useCache="false">
+        SELECT id,subscription_id,generation,goods_id,shop_id,kind,delivery_state,attempts,version,request_id,last_error,created_at,read_at,clicked_at FROM dodo_restock_notice WHERE store_id = #{storeId} ORDER BY created_at DESC LIMIT #{limit}
+    </select>
+</mapper>
