@@ -2,6 +2,7 @@ package com.dodosupermarket.show.core;
 
 /** 晒单业务异常，status 同时作为接口响应的 HTTP 状态码。 */
 public class ShowException extends RuntimeException {
+    /** 接口响应的 HTTP 状态码 */
     public final int status;
 
     public ShowException(int status, String message) {

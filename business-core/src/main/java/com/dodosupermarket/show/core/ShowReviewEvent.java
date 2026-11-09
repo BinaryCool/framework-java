@@ -9,10 +9,15 @@ import lombok.Getter;
 @Getter
 @AllArgsConstructor
 public class ShowReviewEvent {
+    /** 晒单记录编号 */
     private final long submissionId;
+    /** 接收通知的用户编号 */
     private final long userId;
+    /** 所属门店编号 */
     private final long storeId;
+    /** 审核后的记录版本号，用于消息去重 */
     private final int version;
+    /** 通知文案 */
     private final String message;
 
     public String messageKey() {

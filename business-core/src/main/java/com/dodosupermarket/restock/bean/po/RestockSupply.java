@@ -37,6 +37,7 @@ public class RestockSupply extends PO<RestockSupplyKey> {
         return new RestockSupplyKey(storeId, shopId, goodsId);
     }
 
+    /** 根据联合主键回填门店、店铺和商品列。 */
     @Override
     public void setId(RestockSupplyKey id) {
         storeId = id == null ? null : id.getStoreId();
