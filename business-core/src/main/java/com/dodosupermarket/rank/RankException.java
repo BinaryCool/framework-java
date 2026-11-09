@@ -1,5 +1,6 @@
 package com.dodosupermarket.rank;
 
+/** 榜单业务异常，code 供接口层映射稳定的错误码。 */
 public class RankException extends RuntimeException {
     public final String code;
 

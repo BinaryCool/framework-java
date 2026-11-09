@@ -6,6 +6,7 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 import java.util.Map;
 
+/** 将晒单业务异常转换为统一的 JSON 错误响应。 */
 @RestControllerAdvice
 public class ShowExceptionHandler {
     @ExceptionHandler(ShowException.class)

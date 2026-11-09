@@ -43,6 +43,10 @@ public class RankService {
         this.transactions.setIsolationLevel(TransactionDefinition.ISOLATION_READ_COMMITTED);
     }
 
+    /**
+     * 读取门店完整设置快照，包含全部榜单、标签及当前配置版本。
+     * 未初始化门店先补齐初始配置；读取加行锁，避免读到保存过程中的混合状态。
+     */
     public RankSettings settings(long storeId) {
         // 同一事务内取得配置与成员，防止读取到保存过程中的混合快照。
         return primary(() -> transactions.execute(status -> {
@@ -58,6 +62,7 @@ public class RankService {
         }));
     }
 
+    /** 读取配置版本号，供客户端判断缓存是否失效；未初始化门店返回 0。 */
     public long revision(long storeId) {
         RankSettings result = primary(() -> dao.config(storeId));
         // 旧接口共用此缓存版本：尚未初始化配置的门店使用初始版本，数据库异常仍直接抛出。
@@ -117,14 +122,17 @@ public class RankService {
         return result;
     }
 
+    /** 查询门店榜单；publishedOnly 为 true 时仅返回已发布榜单。 */
     public List<RankBoard> boards(long storeId, boolean publishedOnly) {
         return primary(() -> dao.boards(storeId, publishedOnly));
     }
 
+    /** 查询门店标签及其榜单关系；enabledOnly 为 true 时仅返回启用标签。 */
     public List<RankTag> tags(long storeId, boolean enabledOnly) {
         return primary(() -> dao.tags(storeId, enabledOnly));
     }
 
+    /** 读取指定榜单的商品排名；先校验榜单归属当前门店，返回顺序即展示顺序。 */
     public List<RankGoodsRef> rankedGoods(long storeId, long boardId) {
         requireBoard(storeId, boardId);
         return primary(() -> dao.rankedGoods(storeId, boardId));
@@ -138,6 +146,7 @@ public class RankService {
         return primary(() -> dao.previewGoods(storeId, boardIds));
     }
 
+    /** 批量查询商品已关联的榜单关系，用于商品列表回显榜单入口。 */
     public List<RankGoodsRef> associations(long storeId, List<Long> goodsIds) {
         if (goodsIds == null || goodsIds.isEmpty()) {
             return Collections.emptyList();
@@ -148,6 +157,7 @@ public class RankService {
         return primary(() -> dao.associations(storeId, goodsIds));
     }
 
+    /** 校验榜单属于当前门店，不存在或跨门店时抛出业务异常。 */
     public RankBoard requireBoard(long storeId, long id) {
         return boards(storeId, false).stream().filter(board -> Objects.equals(board.getId(), id))
                 .findFirst().orElseThrow(() -> error("NOT_FOUND", "榜单不存在或不属于当前门店"));

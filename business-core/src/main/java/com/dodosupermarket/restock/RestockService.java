@@ -148,6 +148,7 @@ public class RestockService {
         return RestockAvailability.evaluate(goods(store, shop, goodsId), now(), dispatchDays(store));
     }
 
+    /** 查询单个商品当前能否购买及不可购买原因，供商品详情页展示。 */
     public Map<String, Object> availabilityFor(long store, long shop, long goodsId) {
         require(store > 0 && shop > 0 && goodsId > 0, "INVALID_SCOPE", "门店或商品无效");
         return primary(() -> availability(store, shop, goodsId));
@@ -234,6 +235,7 @@ public class RestockService {
         });
     }
 
+    /** 查询用户对指定商品的订阅状态并附带实时可售信息；从未订阅时 state 为 NONE。 */
     public Map<String, Object> status(long user, long store, long shop, long goodsId) {
         scope(user, store, shop);
         return primary(() -> {
@@ -263,6 +265,7 @@ public class RestockService {
         });
     }
 
+    /** 分页查询我的到货提醒，并为每条记录补充商品当前可售状态。 */
     public Map<String, Object> mine(long user, long store, long shop, int page, int size) {
         scope(user, store, shop);
         require(page > 0 && page <= 100000 && size > 0 && size <= 100, "INVALID_PAGE", "分页参数无效");
@@ -278,6 +281,7 @@ public class RestockService {
         });
     }
 
+    /** 标记通知已读或已点击；重复标记保持幂等，不影响投递状态。 */
     public void read(long user, long store, long shop, String notificationId, boolean clicked) {
         scope(user, store, shop);
         transaction(() -> {
@@ -323,6 +327,10 @@ public class RestockService {
         return value;
     }
 
+    /**
+     * 核查单条订阅：过期、已购买、不可供货或已可售时进入终态，否则延后两分钟再查。
+     * dryRun 只返回将要进入的状态，不写库。
+     */
     private String inspect(String subscriptionId, boolean dryRun) {
         RestockSubscription sub = subscriptions.lockById(subscriptionId, null, null, null);
         if (sub == null || !"WAITING".equals(sub.getState())) {
@@ -362,6 +370,7 @@ public class RestockService {
         return context.purchased(sub.getUserId(), sub.getStoreId(), sub.getShopId(), sub.getGoodsId(), since) > 0;
     }
 
+    /** 按订阅轮次生成站内通知；到货通知进入待投递队列，不可供货通知只留档。 */
     private void createNotice(RestockSubscription sub, String kind, String reason) {
         LocalDateTime current = now();
         String title = "ARRIVAL".equals(kind) ? "您关注的商品到货了" : "商品供货状态更新";
@@ -394,6 +403,7 @@ public class RestockService {
         notices.add(notice);
     }
 
+    /** 查询到期待投递的通知，供发送调度器分批领取；store 为空时跨门店读取。 */
     public List<Map<String, Object>> pending(Long store, int limit) {
         require(limit > 0 && limit <= 100, "INVALID_LIMIT", "投递批次无效");
         return primary(() -> notices.pending(store == null ? null : positive(store), limit));
@@ -420,6 +430,10 @@ public class RestockService {
         return state;
     }
 
+    /**
+     * 投递前领取并复核通知：先锁订阅再锁通知，重新校验状态、有效期、购买及供货情况。
+     * 返回 null 表示本轮跳过；再次售罄只延后同一通知，不改变版本。
+     */
     private Map<String, Object> claim(String noticeId) {
         RestockNotice initial = notices.queryById(noticeId);
         if (initial == null) {
@@ -476,6 +490,7 @@ public class RestockService {
         return transaction(() -> notices.recoverUnknown(timestamp(), Timestamp.valueOf(now().minusMinutes(5))));
     }
 
+    /** 人工重试被渠道明确拒绝的通知，沿用原请求标识；未知结果必须先核对渠道。 */
     public Map<String, Object> retry(long store, long actor, String noticeId, int version) {
         return transaction(() -> {
             RestockNotice notice = notices.lockById(noticeId, store);
@@ -493,6 +508,7 @@ public class RestockService {
         });
     }
 
+    /** 管理端按商品汇总待补货需求，并补充商品当前可售状态。 */
     public Map<String, Object> demands(long store, int page, int size) {
         require(store > 0 && page > 0 && page <= 100000 && size > 0 && size <= 100, "INVALID_PAGE", "分页或门店无效");
         return primary(() -> {
@@ -507,6 +523,10 @@ public class RestockService {
         });
     }
 
+    /**
+     * 更新商品供货处理状态；停供时同步结束等待中的订阅并生成不可供货通知。
+     * 先锁供货记录再锁订阅，与新增订阅的加锁顺序保持一致。
+     */
     public void supply(long store, long shop, long goodsId, long actor, String owner, String state, String reason, LocalDateTime expected, int version) {
         require(Arrays.asList("PENDING", "PROCESSING", "RESTORED", "PAUSED", "STOPPED").contains(state), "INVALID_STATE", "供货状态无效");
         require(owner != null && owner.length() <= 100 && reason != null && reason.length() <= 500, "INVALID_INPUT", "负责人或原因长度无效");
@@ -538,11 +558,13 @@ public class RestockService {
         });
     }
 
+    /** 查询门店最近的投递台账，供管理端核对渠道处理结果。 */
     public List<Map<String, Object>> deliveries(long store, int limit) {
         require(store > 0 && limit > 0 && limit <= 100, "INVALID_SCOPE", "门店或条数无效");
         return primary(() -> notices.deliveries(store, limit));
     }
 
+    /** 查询用户当前等待中的商品编号，供商品列表标记已订阅状态。 */
     public List<Long> activeGoods(long user, long store, long shop) {
         scope(user, store, shop);
         return primary(() -> subscriptions.activeGoods(user, store, shop));

@@ -11,6 +11,7 @@ final class RestockViews {
     private RestockViews() {
     }
 
+    /** 订阅记录的接口视图，仅暴露客户端需要的字段。 */
     static Map<String, Object> subscription(RestockSubscription record) {
         Map<String, Object> result = new LinkedHashMap<>();
         result.put("id", record.getId());
@@ -31,6 +32,7 @@ final class RestockViews {
         return result;
     }
 
+    /** 通知记录的接口视图，包含投递状态、目标设备和渠道结果。 */
     static Map<String, Object> notice(RestockNotice record) {
         Map<String, Object> result = new LinkedHashMap<>();
         result.put("id", record.getId());

@@ -12,5 +12,8 @@ public interface ShowActivityRecordDAO extends GenericDAO<ShowActivityRecord, Lo
      */
     ShowActivityRecord lockById(@Param("id") long id, @Param("storeId") long storeId);
 
+    /**
+     * 统计活动晒单各审核状态数量、发放金额及核销数量；核销口径沿用优惠券 status=2。
+     */
     Map<String, Object> statistics(@Param("activityId") long activityId, @Param("storeId") long storeId);
 }

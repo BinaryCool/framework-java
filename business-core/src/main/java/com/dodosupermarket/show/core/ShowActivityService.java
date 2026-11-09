@@ -116,10 +116,12 @@ public class ShowActivityService {
         }
     }
 
+    /** 将数据库数值列转换为 long，供分页结果组装使用。 */
     public static long number(Object value) {
         return ((Number) value).longValue();
     }
 
+    /** 解析活动配置并补充主键、门店、版本及实时活动状态。 */
     private ShowActivity unpack(ShowActivityRecord record) {
         ShowActivity activity = decode(record.getPayload(), ShowActivity.class);
         activity.id = record.getId();
@@ -145,6 +147,7 @@ public class ShowActivityService {
         return unpack(activityRecord(id, store, lock));
     }
 
+    /** 客户端读取单个活动详情，并实时计算活动状态。 */
     public ShowActivity activity(long id, long store) {
         return onPrimary(() -> activity(id, store, false));
     }
@@ -162,6 +165,7 @@ public class ShowActivityService {
         return storage == null ? value : storage.persist(value);
     }
 
+    /** 写入操作日志，detail 统一序列化为 JSON 快照保留当时内容。 */
     private void log(long activityId, Long submissionId, long actor, String action, Object detail) {
         ShowActivityLog record = new ShowActivityLog();
         record.setActivityId(activityId);
@@ -246,11 +250,13 @@ public class ShowActivityService {
         return Math.max(1, Math.min(100, size));
     }
 
+    /** 校验页码并换算框架查询需要的偏移量，每页最多 100 条。 */
     private Map<String, Object> paging(int page, int size) {
         ShowException.require(page > 0 && page <= 100000, "页码不正确");
         return new HashMap<>(Map.of("start", (page - 1) * size(size), "limit", size(size)));
     }
 
+    /** 统一分页响应结构。 */
     private Map<String, Object> page(List<?> records, long total, int page, int size) {
         return Map.of("results", records, "total", total, "page", page, "size", size(size));
     }
@@ -279,6 +285,7 @@ public class ShowActivityService {
         });
     }
 
+    /** 分页读取活动操作日志，活动必须属于当前门店。 */
     public List<Map<String, Object>> logs(long id, long store, int page, int size) {
         return onPrimary(() -> {
             activityRecord(id, store, false);
@@ -370,6 +377,7 @@ public class ShowActivityService {
         return "";
     }
 
+    /** 组装订单选项，并标记该订单在当前活动中是否还能提交。 */
     private Map<String, Object> selectableOrder(ShowActivity activity, String sn, long user, long store) {
         Map<String, Object> order = order(sn, user, store, false);
         String reason = participationBlockReason(activity, user, sn);
@@ -378,6 +386,7 @@ public class ShowActivityService {
         return order;
     }
 
+    /** 分页列出用户可用于本活动的已完成订单，并标注是否已参与或已占用名额。 */
     public Map<String, Object> orders(long activityId, long user, long store, int page, int size) {
         return onPrimary(() -> {
             ShowActivity activity = activity(activityId, store, false);
@@ -402,6 +411,7 @@ public class ShowActivityService {
         });
     }
 
+    /** 按门店读取晒单记录；写入路径传 lock=true 加行锁。 */
     private ShowSubmissionRecord submission(long id, long store, boolean lock) {
         ShowSubmissionRecord record = lock ? submissions.lockById(id, store)
                 : first(submissions.queryByArgs("id", id, "storeId", store));
@@ -440,10 +450,12 @@ public class ShowActivityService {
         return view;
     }
 
+    /** 读取晒单详情；user 非空时同时校验记录归属于该用户。 */
     public Map<String, Object> detail(long id, Long user, long store) {
         return onPrimary(() -> detail(submission(id, store, false), user, store));
     }
 
+    /** 分页查询晒单记录：管理端可按活动、审核状态和昵称筛选，客户端只能看到本人数据。 */
     public Map<String, Object> submissions(Long user, long store, Long activityId, String status, String nickName, int page, int size) {
         return onPrimary(() -> {
             Map<String, Object> params = paging(page, size);
@@ -462,6 +474,7 @@ public class ShowActivityService {
         });
     }
 
+    /** 汇总当前用户在本门店的晒单数量及累计奖励金额等入口数据。 */
     public Map<String, Object> summary(long user, long store) {
         return onPrimary(() -> submissions.summary(user, store));
     }
@@ -490,6 +503,10 @@ public class ShowActivityService {
         return write(() -> submitInternal(id, activityId, orderSn, images, key, user, nick, avatar, store));
     }
 
+    /**
+     * 新建或重提晒单：先锁活动再锁原记录，在锁内校验名额及有效期。
+     * 相同 requestKey 的重复请求直接返回原回执，不产生新写入。
+     */
     private Map<String, Object> submitInternal(Long id, long activityId, String sn, List<String> images, String key, long user,
                                                String nick, String avatar, long store) {
         // 先锁活动，再锁原晒单和订单，与审核保持相同顺序，并在锁内串行检查参与名额。
@@ -568,6 +585,7 @@ public class ShowActivityService {
         });
     }
 
+    /** 在活动锁和晒单锁内完成审核、发券及日志记录，重复通过只返回原发券结果。 */
     private Map<String, Object> reviewInternal(long id, long activityId, int version, boolean approve, String note, long store,
                                                long actor) {
         ShowActivity activity = activity(activityId, store, true);
@@ -613,6 +631,7 @@ public class ShowActivityService {
         return detail(record, null, store);
     }
 
+    /** 读取本门店配置的驳回原因字典。 */
     public List<Map<String, Object>> reasons(long store) {
         return onPrimary(() -> orders.reasons(store));
     }

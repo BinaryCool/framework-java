@@ -10,6 +10,11 @@ public final class RestockAvailability {
     private RestockAvailability() {
     }
 
+    /**
+     * 根据商品主库记录评估当前是否可售。
+     * 共享库存商品以 sharedStock/sharedOnSale 为准，其余使用 goodsNumber/isOnSale；
+     * 返回页面需要的可售标记、不可售原因、生效库存及下次可售时间。
+     */
     public static Map<String, Object> evaluate(Map<String, Object> goods, LocalDateTime now, String dispatchDays) {
         Map<String, Object> result = new LinkedHashMap<>();
         String reason = "AVAILABLE";
@@ -52,6 +57,7 @@ public final class RestockAvailability {
         return result;
     }
 
+    /** 将数据库数值或布尔列统一转换为 double，null 按 0 处理。 */
     public static double number(Object value) {
         if (value instanceof Boolean) {
             return Boolean.TRUE.equals(value) ? 1 : 0;
