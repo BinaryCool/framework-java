@@ -141,8 +141,11 @@ public class ImController {
     @GetMapping("/conversations/{id}/attachments/{attachment}")
     public ResponseEntity<byte[]> image(HttpServletRequest r, @PathVariable String id, @PathVariable String attachment) {
         ImImageService.Download image = images.download(r.getSession(false), id, attachment);
+        // Web 下载器需要读取文件名，仅暴露此响应头，沿用现有跨域来源和鉴权限制。
         return ResponseEntity.ok().header("Cache-Control", "private, no-store").header("X-Content-Type-Options", "nosniff")
-                .header("Content-Disposition", "inline; filename=\"image\"").contentType(org.springframework.http.MediaType.parseMediaType(image.mime())).body(image.bytes());
+                .header("Access-Control-Expose-Headers", "Content-Disposition")
+                .header("Content-Disposition", "inline; filename=\"image\"")
+                .contentType(org.springframework.http.MediaType.parseMediaType(image.mime())).body(image.bytes());
     }
 
     /**
