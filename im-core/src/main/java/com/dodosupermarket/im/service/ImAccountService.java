@@ -86,14 +86,23 @@ public class ImAccountService {
     }
 
     private boolean valid(ImStore.Lease l) {
+        return valid(l, new HashMap<>());
+    }
+
+    /** 仅在本次行锁操作内复用 Redis 会话，避免同一登录的多个设备租约反复读取；不跨请求缓存权限。 */
+    private boolean valid(ImStore.Lease l, Map<String, Session> checkedSessions) {
         if (l.getState() != 1 || l.getExpiresAt() <= System.currentTimeMillis()) return false;
         // 每个宿主核验自己的 Redis Session；不可因另一身份域没有该 Session 而撤销其连接。
         if (!realm.equals(realm(l))) return true;
-        Session s = sessions.findById(l.getSessionId());
+        if (!checkedSessions.containsKey(l.getSessionId())) {
+            checkedSessions.put(l.getSessionId(), sessions.findById(l.getSessionId()));
+        }
+        Session s = checkedSessions.get(l.getSessionId());
         Object principal = s == null || s.isExpired() ? null : s.getAttribute(identity.sessionAttribute());
-        return Objects.equals(identity.accountId(principal), l.getUserId()) &&
-                identity.canAccess(principal, store.find(l.getConversationId()).getUserId()) &&
-                l.getSenderRole().equals(role(l.getUserId(), store.find(l.getConversationId())));
+        if (!Objects.equals(identity.accountId(principal), l.getUserId())) return false;
+        ImStore.Conversation conversation = store.find(l.getConversationId());
+        return identity.canAccess(principal, conversation.getUserId()) &&
+                l.getSenderRole().equals(role(l.getUserId(), conversation));
     }
 
     private String role(long account, ImStore.Conversation c) {
@@ -109,8 +118,12 @@ public class ImAccountService {
     }
 
     private void sync(String conversation, boolean force) {
+        sync(conversation, force, new HashMap<>());
+    }
+
+    private void sync(String conversation, boolean force, Map<String, Session> checkedSessions) {
         List<ImStore.Lease> leases = store.leases(conversation);
-        for (ImStore.Lease l : leases) if (l.getState() == 1 && !valid(l)) store.revoke(l);
+        for (ImStore.Lease l : leases) if (l.getState() == 1 && !valid(l, checkedSessions)) store.revoke(l);
         if (!force && !store.needsSync(conversation) && leases.stream().noneMatch(l -> l.getState() == 2)) return;
         im.close(conversation);
         im.remove(conversation, leases.stream().filter(l -> l.getState() != 1).map(ImStore.Lease::getUid).collect(Collectors.toList()));
@@ -183,12 +196,13 @@ public class ImAccountService {
         final ImStore.Lease[] attempted = {null};
         try {
             return locked(c.getId(), () -> {
+                Map<String, Session> checkedSessions = new HashMap<>();
                 String hash = hash(deviceId);
                 for (ImStore.Lease old : store.leases(c.getId()))
                     if (old.getState() == 1 && old.getSessionId().equals(session.getId()) && old.getPlatform().equals(
                             platform) && old.getDeviceHash().equals(hash))
                         store.revoke(old);
-                if (store.leases(c.getId()).stream().filter(l -> l.getUserId() == user && valid(l)).count() >= 8)
+                if (store.leases(c.getId()).stream().filter(l -> l.getUserId() == user && valid(l, checkedSessions)).count() >= 8)
                     throw new ImException(429, "IM_DEVICE_LIMIT");
                 ImStore.Lease l = new ImStore.Lease();
                 l.setId(ImStore.randomId());
@@ -206,7 +220,7 @@ public class ImAccountService {
                 attempted[0] = l;
                 String token = ImStore.randomId() + ImStore.randomId();
                 im.token(l, token);
-                sync(c.getId(), true);
+                sync(c.getId(), true, checkedSessions);
                 Map<String, Object> result = new HashMap<>(
                         Map.of("uid", l.getUid(), "token", token, "serverUrl", config.getServerUrl(), "authGeneration", l.getId(),
                                 "leaseId", l.getId(), "expiresAt", Instant.ofEpochMilli(l.getExpiresAt()).toString(),

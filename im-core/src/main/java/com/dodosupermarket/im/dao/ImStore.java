@@ -2,12 +2,12 @@ package com.dodosupermarket.im.dao;
 
 import com.dodosupermarket.im.config.ImProperties;
 import com.dodosupermarket.im.exception.ImException;
+import com.zaxxer.hikari.HikariDataSource;
 
 import lombok.Getter;
 import lombok.Setter;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.datasource.DataSourceTransactionManager;
-import org.springframework.jdbc.datasource.DriverManagerDataSource;
 import org.springframework.transaction.support.TransactionTemplate;
 
 import java.util.List;
@@ -19,7 +19,8 @@ import java.util.function.Supplier;
  * 使用独立的 IM 专用主库连接：SELECT FOR UPDATE 绝不能被读写分离路由到只读副本。
  * Dedicated primary connection: SELECT FOR UPDATE must never be routed to a replica.
  */
-public class ImStore {
+public class ImStore implements AutoCloseable {
+    private final HikariDataSource source;
     private final JdbcTemplate jdbc;
     private final TransactionTemplate transaction;
 
@@ -203,17 +204,28 @@ public class ImStore {
     }
 
     /**
-     * 构造数据访问层：要求独立的 IM JDBC 配置，事务超时 30 秒
+     * 使用独立主库连接池，复用物理连接；不能复用业务读写路由数据源，否则行锁可能落到只读副本。
      */
     public ImStore(ImProperties config) {
         if (config.getJdbcUrl().isEmpty() || config.getJdbcUsername().isEmpty())
             throw new IllegalArgumentException("IM dedicated JDBC configuration required");
-        DriverManagerDataSource source = new DriverManagerDataSource(config.getJdbcUrl(), config.getJdbcUsername(),
-                config.getJdbcPassword());
-        source.setDriverClassName("com.mysql.cj.jdbc.Driver");
+        source = new HikariDataSource();
+        source.setJdbcUrl(config.getJdbcUrl());
+        source.setUsername(config.getJdbcUsername());
+        source.setPassword(config.getJdbcPassword());
+        source.setMaximumPoolSize(config.getJdbcPoolSize());
+        source.setMinimumIdle(1);
+        source.setConnectionTimeout(5000);
+        // 首次查询再初始化，不因创建 Bean 就访问数据库；连接池由 Spring 随服务关闭。
+        source.setInitializationFailTimeout(-1);
         jdbc = new JdbcTemplate(source);
         transaction = new TransactionTemplate(new DataSourceTransactionManager(source));
         transaction.setTimeout(30);
+    }
+
+    @Override
+    public void close() {
+        source.close();
     }
 
     /**

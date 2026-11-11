@@ -17,6 +17,8 @@ public class ImProperties {
     private String jdbcUrl = "";
     private String jdbcUsername = "";
     private String jdbcPassword = "";
+    // 每个应用实例独立限流，避免连接准备和租约巡检反复建立数据库物理连接。
+    private int jdbcPoolSize = 8;
     private String productUrl = "http://127.0.0.1:5001";
     private String serverUrl = "ws://127.0.0.1:5200";
     private long leaseSeconds = 900;
