@@ -51,7 +51,8 @@ public class ImAccountService {
         realm = config.getSessionRealm();
         if (!Arrays.asList("app", "admin").contains(realm))
             throw new IllegalArgumentException("Invalid IM session realm");
-        if (config.getLeaseSeconds() < 5 || config.getLeaseSeconds() > 3600 || config.getSweepMs() < 100 || config.getSweepMs() > 10000)
+        // 凭证最长有效一天；不能绕过登录会话与客服权限的持续校验。
+        if (config.getLeaseSeconds() < 5 || config.getLeaseSeconds() > 86400 || config.getSweepMs() < 100 || config.getSweepMs() > 10000)
             throw new IllegalArgumentException("Invalid IM lease/sweep bounds");
     }
 

@@ -37,6 +37,8 @@ Token TTL 依赖 Java 任务检查 Session / 截止时间、移除群成员及�
 
 配置前缀 `dudu.im`：`enabled`、`jdbc-url`、`jdbc-username`、`jdbc-password`、`product-url`、`server-url`、`lease-seconds`、`sweep-ms`、`attachment-directory`、`cards-enabled`。密码用环境占位，不能提交明文。独立数据源的目标由 `dudu.im.jdbc-url` 明确指定，不改原业务与日志路由。前后台的 local 配置均默认引用 `spring.datasource.dynamic.log.writeDataSource.url`，可由 `DUDU_IM_JDBC_URL` 覆盖；仓库内其他环境未配置或启用此 IM 连接，部署启用时须明确指定同一个可写数据库。五张 IM 表共用这一连接；卡片引用的商品、订单等仍通过原业务 DAO 查询。悟空服务自身消息存储和附件文件不属于这五张 MySQL 表。
 
+`dudu.im.lease-seconds` 默认 `86400`（24 小时），允许范围为 5～86400 秒；前后台共用这一默认值，外部显式配置仍优先生效。管理工作台在到期前约 1 分钟换证。延长凭证有效期不会延长业务登录会话；登录失效或客服权限撤销后，原有请求校验和租约巡检仍会撤销访问。更新共享构件并重启应用后，新申请的凭证使用新有效期，已有凭证的到期时间保持原值。
+
 ## 建表与部署
 
 启用前需要显式应用 `db/test/02-im.sql`（已合并 `im_send`、`im_attachment` 及巡检索引，生产首次建表只需执行这一个文件）。早期结构由该文件按需补齐 `sync_required`、`sender_role` 及巡检索引；启动不执行 DDL。专用 JDBC 为主库连接，不经业务框架读写分离；会话行锁序列化成员更新。HTTP 上游失败记录修复意图，后台重放期望成员；HTTP 与数据库不属于同一事务。
