@@ -21,7 +21,8 @@ public class ImProperties {
     private int jdbcPoolSize = 8;
     private String productUrl = "http://127.0.0.1:5001";
     private String serverUrl = "ws://127.0.0.1:5200";
-    private long leaseSeconds = 900;
+    // 默认保留一天的连接凭证，减少在线期间换证重连；登录和权限失效仍由巡检及时撤销。
+    private long leaseSeconds = 86400;
     private long sweepMs = 5000;
     // Private persistent volume. Blank keeps images disabled; never expose this directory as static files.
     private String attachmentDirectory = "";
