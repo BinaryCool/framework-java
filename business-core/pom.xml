@@ -8,7 +8,7 @@
     </parent>
     <groupId>com.dodosupermarket</groupId>
     <artifactId>dodo-business-core</artifactId>
-    <version>1.0.0</version>
+    <version>1.0.1</version>
     <name>嘟嘟共享业务核心</name>
     <properties>
         <maven.test.skip>false</maven.test.skip>
