@@ -6,6 +6,7 @@ import com.dodosupermarket.im.exception.ImException;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.*;
 import org.springframework.http.client.SimpleClientHttpRequestFactory;
 import org.springframework.web.client.RestTemplate;
@@ -17,6 +18,7 @@ import java.util.*;
  * 仅允许服务端调用，上游响应与凭证绝不下发给客户端。
  * Only the server calls Product HTTP. Never expose this upstream response or its credentials.
  */
+@Slf4j
 public class WuKongProductClient {
     private final RestTemplate http;
     private final String base;
@@ -27,6 +29,7 @@ public class WuKongProductClient {
      */
     public WuKongProductClient(ImProperties config) {
         base = config.getProductUrl().replaceAll("/$", "");
+        log.info("WuKongProductBaseUrl ==> {}", base);
         SimpleClientHttpRequestFactory factory = new SimpleClientHttpRequestFactory();
         factory.setConnectTimeout(2000);
         factory.setReadTimeout(3000);
