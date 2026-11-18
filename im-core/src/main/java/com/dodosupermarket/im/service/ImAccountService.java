@@ -431,7 +431,7 @@ public class ImAccountService {
                     return null;
                 });
             } catch (RuntimeException e) {
-                LOG.warn("IM lease reconciliation failed; will retry");
+                LOG.error("IM lease reconciliation failed; will retry", e);
             }
         }
     }
